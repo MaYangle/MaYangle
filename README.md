@@ -3,6 +3,8 @@
 
 <p align="left"> <img src="https://komarev.com/ghpvc/?username=mayangle&label=Profile%20views&color=0e75b6&style=flat" alt="mayangle" /> </p>
 
+<p align="left"> <a href="https://github.com/ryo-ma/github-profile-trophy"><img src="https://github-profile-trophy.vercel.app/?username=mayangle" alt="mayangle" /></a> </p>
+
 - 🌱 I’m currently learning **Machine Learning / Full stack**
 
 - 🤝 I’m looking for help with **Research work/ Internship**
