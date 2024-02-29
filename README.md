@@ -1,7 +1,7 @@
 <h1 align="center">Hi 👋, I'm Yangle Ma</h1>
 <h3 align="center">A passionate student focus on programming and machine learning</h3>
 
-<p align="left"> <img src="https://komarev.com/ghpvc/?username=mayangle&label=Profile%20views&color=0e75b6&style=flat" alt="mayangle" /> </p>
+<p align="left"> <img src="https://komarev.com/ghpvc/?username=mayangle&label=Profile%20views&color=0e75b6&style=flat" alt="MaYangle" /> </p>
 
 - 🌱 I’m currently learning **Machine Learning / Full stack**
 
