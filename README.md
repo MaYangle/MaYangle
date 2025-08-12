@@ -3,7 +3,7 @@
 
 <p align="left"> <img src="https://komarev.com/ghpvc/?username=mayangle&label=Profile%20views&color=0e75b6&style=flat" alt="MaYangle" /> </p>
 
-- 🌱 I’m currently learning **Machine Learning / Full stack**
+- 🌱 I’m currently learning **Machine Learning / Deep Learning**
 
 - 👯 I’m looking to collaborate on **Deep learning / Control and Automation**
 
