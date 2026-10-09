@@ -1,8 +1,8 @@
 {
   "username": "MaYangle",
   "name": "Yangle Ma",
-  "tagline": "AI engineering · multimodal learning",
-  "bio": "I turn multimodal research into reproducible systems, with a background in autonomous systems and control.",
+  "tagline": "AI engineering",
+  "bio": "",
   "stack": ["Python", "PyTorch", "Whisper", "BERT"],
   "links": {
     "LinkedIn": "https://www.linkedin.com/in/yangle-ma-84877a294/",
@@ -20,6 +20,7 @@
         "role": "Team project · working fork",
         "stack": ["Python", "PyTorch", "Whisper", "BERT"],
         "inputs": ["Text", "Audio", "Vision"],
+        "encoders": ["Whisper / BERT", "MFCC", "MediaPipe"],
         "output": "Sentiment"
       }
     ]

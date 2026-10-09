@@ -1,5 +1,5 @@
 {
-  "schemaVersion": 1,
+  "schemaVersion": 2,
   "username": "MaYangle",
   "mergedPullRequests": 6,
   "openPullRequests": 1,
@@ -7,8 +7,8 @@
     "repo": "rohitg00/ai-engineering-from-scratch",
     "repoName": "AI Engineering from Scratch",
     "repoUrl": "https://github.com/rohitg00/ai-engineering-from-scratch",
-    "stars": 66081,
-    "forks": 11467,
+    "stars": 66087,
+    "forks": 11469,
     "number": 527,
     "title": "Research links for seven lessons",
     "url": "https://github.com/rohitg00/ai-engineering-from-scratch/pull/527",
@@ -34,6 +34,11 @@
         "Text",
         "Audio",
         "Vision"
+      ],
+      "encoders": [
+        "Whisper / BERT",
+        "MFCC",
+        "MediaPipe"
       ],
       "output": "Sentiment"
     }
@@ -63,5 +68,40 @@
       ]
     }
   ],
-  "updatedAt": "2026-10-09T14:01:21.442Z"
+  "impact": {
+    "sampleSize": 6,
+    "additions": 1518,
+    "deletions": 660,
+    "fileChanges": 26
+  },
+  "activity": [
+    {
+      "repo": "rohitg00/ai-engineering-from-scratch",
+      "repoName": "AI Engineering from Scratch",
+      "number": 527,
+      "url": "https://github.com/rohitg00/ai-engineering-from-scratch/pull/527",
+      "status": "open",
+      "title": "Research links for seven lessons",
+      "date": "2026-10-03T12:16:31Z"
+    },
+    {
+      "repo": "19376357/Bilingual-Multimodal-Sentiment-Analysis",
+      "repoName": "Bilingual Multimodal Sentiment Analysis",
+      "number": 7,
+      "url": "https://github.com/19376357/Bilingual-Multimodal-Sentiment-Analysis/pull/7",
+      "status": "merged",
+      "title": "Training and inference reliability",
+      "date": "2025-08-31T09:29:55Z"
+    },
+    {
+      "repo": "19376357/Bilingual-Multimodal-Sentiment-Analysis",
+      "repoName": "Bilingual Multimodal Sentiment Analysis",
+      "number": 5,
+      "url": "https://github.com/19376357/Bilingual-Multimodal-Sentiment-Analysis/pull/5",
+      "status": "merged",
+      "title": "English and Chinese documentation",
+      "date": "2025-08-27T07:32:59Z"
+    }
+  ],
+  "updatedAt": "2026-10-09T14:19:46.334Z"
 }

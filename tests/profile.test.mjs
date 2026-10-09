@@ -9,7 +9,7 @@ import { updateProfile } from '../scripts/update-profile.mjs';
 
 const config={username:'MaYangle',name:'Yangle Ma',tagline:'AI engineering',bio:'Building reproducible AI systems.',links:{GitHub:'https://github.com/MaYangle'},projects:{discover:true,maxVisible:3,exclude:[],include:[{repo:'MaYangle/team-ml',name:'Team ML',description:'Team project, working fork'}]}};
 const repository=(name,more={})=>({full_name:`MaYangle/${name}`,name,private:false,archived:false,disabled:false,fork:false,size:20,stargazers_count:2,forks_count:1,language:'Python',pushed_at:'2026-10-01T00:00:00Z',...more});
-const issue=(number,status='open',repo='upstream/ai')=>({number,title:`Contribution ${number}`,html_url:`https://github.com/${repo}/pull/${number}`,repository_url:`https://api.github.com/repos/${repo}`,state:status==='open'?'open':'closed',updated_at:'2026-10-09T00:00:00Z',pull_request:{merged_at:status==='merged'?'2026-10-08T00:00:00Z':null}});
+const issue=(number,status='open',repo='upstream/ai')=>({number,title:`Contribution ${number}`,html_url:`https://github.com/${repo}/pull/${number}`,repository_url:`https://api.github.com/repos/${repo}`,state:status==='open'?'open':'closed',updated_at:'2026-10-09T00:00:00Z',created_at:'2026-10-01T00:00:00Z',pull_request:{merged_at:status==='merged'?'2026-10-08T00:00:00Z':null}});
 const response=items=>({items,total_count:items.length,incomplete_results:false});
 const mockApi=({repos=[repository('team-ml',{fork:true})],merged=[issue(7,'merged')],open=[issue(527)],stars=66000}={})=>async endpoint=>{
   if(endpoint.startsWith('users/')) return repos;
@@ -17,7 +17,7 @@ const mockApi=({repos=[repository('team-ml',{fork:true})],merged=[issue(7,'merge
   if(endpoint.includes('/pulls/')) {
     const number=Number(endpoint.split('/').at(-1));
     const item=[...merged,...open].find(item=>item.number===number);
-    return {state:item.state,merged:Boolean(item.pull_request.merged_at)};
+    return {state:item.state,merged:Boolean(item.pull_request.merged_at),additions:100,deletions:10,changed_files:2};
   }
   if(endpoint.startsWith('repos/')) return {name:endpoint.split('/').at(-1),stargazers_count:stars,forks_count:11000,private:false};
   throw new Error(`Unexpected fixture endpoint ${endpoint}`);
@@ -59,7 +59,7 @@ test('a newly discovered project appears in the rendered homepage and the instru
 test('the compact layout limits visible projects while keeping the total and index link',async()=>{
   const data=await collectProfile(config,mockApi({repos:Array.from({length:7},(_,i)=>repository(`build-${i}`))}));
   const md=renderReadme(data,config);
-  assert.equal((md.match(/\*\*Project\*\*/g)||[]).length,3);
+  assert.equal((md.match(/https:\/\/github.com\/MaYangle\/build-\d+\)/g)||[]).length,3);
   assert.match(md,/All 7 projects/);
   assert.match(renderHero(data,config),/>07<\/text>/);
 });
@@ -140,4 +140,27 @@ test('the full-page canvas expands when another project is added',async()=>{
   const height=svg=>Number(/viewBox="0 0 1200 ([\d.]+)"/.exec(svg)[1]);
   assert.ok(height(renderHero(next,config))>height(renderHero(first,config)));
   assert.ok(renderHero(next,config).includes('second project'));
+});
+
+
+test('merged impact sums real diff fields and reports its sample size',async()=>{
+  const data=await collectProfile(config,mockApi({merged:[issue(7,'merged'),issue(5,'merged')]}));
+  assert.deepEqual(data.impact,{sampleSize:2,additions:200,deletions:20,fileChanges:4});
+  assert.match(renderHero(data,config),/MERGED IMPACT/);
+  assert.match(renderHero(data,config),/RECENT WORK/);
+  assert.equal(data.activity[0].status,'merged');
+});
+
+test('missing diff metrics abort the update instead of displaying zero',async()=>{
+  const api=mockApi();
+  await assert.rejects(collectProfile(config,async endpoint=>endpoint.includes('/pulls/7')?{state:'closed',merged:true}:api(endpoint)),/diff metrics/);
+});
+
+test('the concise profile has only the chosen subtitle and no expandable text copy',async()=>{
+  const data=await collectProfile(config,mockApi());
+  const minimal={...config,bio:'',tagline:'AI engineering'};
+  const svg=renderHero(data,minimal),md=renderReadme(data,minimal);
+  assert.ok(svg.includes('>AI engineering</text>'));
+  assert.ok(!svg.includes(config.bio));
+  assert.ok(!md.includes('<details>') && !md.includes('Text version'));
 });

@@ -2,7 +2,7 @@ import { execFileSync } from 'node:child_process';
 
 export function validateConfig(config) {
   if (!/^[a-z\d-]+$/i.test(config.username ?? '')) throw new Error('Invalid GitHub username');
-  if (!config.name || !config.tagline || !config.bio) throw new Error('Name, tagline and bio are required');
+  if (!config.name || !config.tagline) throw new Error('Name and tagline are required');
   if (!Number.isInteger(config.projects?.maxVisible) || config.projects.maxVisible < 1 || config.projects.maxVisible > 8) throw new Error('maxVisible must be between 1 and 8');
   for (const item of config.projects.include ?? []) {
     if (!/^[\w.-]+\/[\w.-]+$/.test(item.repo) || item.repo.split('/')[0].toLowerCase() !== config.username.toLowerCase()) throw new Error('Included projects must belong to the configured user');
@@ -55,6 +55,7 @@ export function selectProjects(repos, config) {
       role:custom?.role || (repo.fork ? 'Working fork' : 'Independent project'),
       stack:custom?.stack || (repo.language ? [repo.language] : []),
       inputs:custom?.inputs || [],
+      encoders:custom?.encoders || [],
       output:custom?.output || ''
     };
   });
@@ -74,7 +75,8 @@ export function normalizePullRequests(merged, open) {
       if (actualStatus === 'open' && item.state !== 'open') continue;
       byUrl.set(item.html_url, {
         repo:issueRepo(item), number:item.number, title:item.title,
-        url:item.html_url, status:actualStatus, updatedAt:item.updated_at
+        url:item.html_url, status:actualStatus, updatedAt:item.updated_at,
+        createdAt:item.created_at, mergedAt:item.pull_request?.merged_at || null
       });
     }
   }
@@ -126,11 +128,17 @@ export async function collectProfile(config, api) {
     });
   }
   const publicPulls = pulls.filter(pr => !repositoryMap.get(pr.repo).private);
+  const detailCache = new Map();
+  const loadPull = pr => {
+    const key = `${pr.repo}#${pr.number}`;
+    if (!detailCache.has(key)) detailCache.set(key, api(`repos/${pr.repo}/pulls/${pr.number}`));
+    return detailCache.get(key);
+  };
   let spotlight = null;
   const pending = [...publicPulls];
   for (let attempt = 0; pending.length && attempt < 20; attempt++) {
     const candidate = selectSpotlight(pending, repositoryMap, config);
-    const current = await api(`repos/${candidate.repo}/pulls/${candidate.number}`);
+    const current = await loadPull(candidate);
     if (!['open','closed'].includes(current.state) || typeof current.merged !== 'boolean') throw new Error('Missing current pull request status');
     if (current.merged || current.state === 'open') {
       spotlight = {...candidate, status:current.merged ? 'merged' : 'open'};
@@ -151,10 +159,25 @@ export async function collectProfile(config, api) {
       pulls:result.items.slice(0,3).map(pr=>({number:pr.number,url:pr.html_url,title:config.pullRequestLabels?.[`${repo}#${pr.number}`] || pr.title}))
     };
   }));
+  const sampled = publicPulls.filter(pr => pr.status === 'merged').sort((a,b) => String(b.mergedAt).localeCompare(String(a.mergedAt))).slice(0,30);
+  const impact = {sampleSize:sampled.length, additions:0, deletions:0, fileChanges:0};
+  for (let i=0;i<sampled.length;i+=4) {
+    const batch=await Promise.all(sampled.slice(i,i+4).map(loadPull));
+    for (const pr of batch) {
+      if (!pr.merged || !['additions','deletions','changed_files'].every(key=>Number.isInteger(pr[key]) && pr[key]>=0)) throw new Error('Missing merged contribution diff metrics');
+      impact.additions+=pr.additions;impact.deletions+=pr.deletions;impact.fileChanges+=pr.changed_files;
+    }
+  }
+  const activity=publicPulls.map(pr=>({
+    repo:pr.repo,repoName:config.repositoryLabels?.[pr.repo] || repositoryMap.get(pr.repo).name.replaceAll('-',' '),
+    number:pr.number,url:pr.url,status:pr.status,
+    title:config.pullRequestLabels?.[`${pr.repo}#${pr.number}`] || pr.title,
+    date:pr.status==='merged'?pr.mergedAt:pr.createdAt
+  })).filter(pr=>pr.date && Number.isFinite(Date.parse(pr.date))).sort((a,b)=>b.date.localeCompare(a.date)).slice(0,3);
   return {
-    schemaVersion:1, username:config.username,
+    schemaVersion:2, username:config.username,
     mergedPullRequests:merged.total_count, openPullRequests:open.total_count,
     spotlight,
-    projects:selectProjects(repos, config), contributions
+    projects:selectProjects(repos, config), contributions, impact, activity
   };
 }
