@@ -1,0 +1,18 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="360" viewBox="0 0 1200 360" role="img" aria-labelledby="title desc">
+<title id="title">Yangle Ma — AI systems engineer</title><desc id="desc">A minimal black and white technical banner with fine grid lines and a warm signal accent.</desc>
+<defs><linearGradient id="bg" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#07090B"/><stop offset="1" stop-color="#14191D"/></linearGradient><pattern id="grid" width="40" height="40" patternUnits="userSpaceOnUse"><path d="M40 0H0V40" fill="none" stroke="#77818A" stroke-opacity=".075" stroke-width="1"/></pattern><linearGradient id="fade" x1="0" y1="0" x2="1" y2="0"><stop stop-color="#F3F5F4"/><stop offset="1" stop-color="#9AA4A9"/></linearGradient></defs>
+<rect width="1200" height="360" fill="url(#bg)"/><rect width="1200" height="360" fill="url(#grid)"/>
+<path d="M0 0H1200M0 359H1200" stroke="#747D84" stroke-opacity=".36"/><path d="M48 44H1152M48 300H1152" stroke="#7F8991" stroke-opacity=".34"/>
+<rect x="48" y="43" width="70" height="3" fill="#EF6B4A"/>
+<text x="48" y="80" font-family="Arial,Helvetica,sans-serif" font-size="12" letter-spacing="3.2" fill="#ACB5B9">PROFILE / 001</text>
+<text x="48" y="184" font-family="Arial,Helvetica,sans-serif" font-size="75" font-weight="700" letter-spacing="-3" fill="url(#fade)">YANGLE MA</text>
+<text x="51" y="226" font-family="Arial,Helvetica,sans-serif" font-size="18" letter-spacing="2" fill="#CDD4D4">AI SYSTEMS  /  MULTIMODAL LEARNING  /  OPEN SOURCE</text>
+<text x="50" y="331" font-family="Arial,Helvetica,sans-serif" font-size="11" letter-spacing="2" fill="#889297">RESEARCH → REPRODUCIBLE SYSTEMS</text>
+<text x="1003" y="331" font-family="Arial,Helvetica,sans-serif" font-size="11" letter-spacing="2" fill="#889297">BUILD / TEST / SHIP</text>
+<g opacity=".9"><path d="M832 92H1150M832 270H1150M832 92V270M1150 92V270" stroke="#5C6870" stroke-opacity=".55"/>
+<path d="M850 250L916 113H934L868 250ZM905 250L971 113H989L923 250ZM960 250L1026 113H1044L978 250ZM1015 250L1081 113H1099L1033 250Z" fill="#DCE1E0" fill-opacity=".12"/>
+<path d="M850 250H1128M850 113H1128" stroke="#C6CECE" stroke-opacity=".42"/>
+<circle cx="1108" cy="129" r="4" fill="#EF6B4A"/><path d="M1108 129H1148" stroke="#EF6B4A" stroke-opacity=".65"/>
+<text x="850" y="105" font-family="Arial,Helvetica,sans-serif" font-size="10" letter-spacing="2" fill="#BBC3C5">SYSTEM / VECTOR 01</text>
+<text x="1068" y="264" font-family="Arial,Helvetica,sans-serif" font-size="10" letter-spacing="2" fill="#9AA5A8">40° 00′</text></g>
+</svg>
