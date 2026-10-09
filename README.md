@@ -28,9 +28,9 @@ I’m **Yangle Ma**. My background is in autonomous systems and control, and I�
 
 | Work | What I contributed |
 | :--- | :--- |
-| [README localization across 12 languages](https://github.com/rohitg00/ai-engineering-from-scratch/pull/531) | Completed and audited localized documentation for the AI Engineering from Scratch curriculum. |
-| [Primary papers for seven lessons](https://github.com/rohitg00/ai-engineering-from-scratch/pull/527) | Connected existing lessons to their research sources and added short comparison exercises. |
-| [Multimodal training reliability](https://github.com/19376357/Bilingual-Multimodal-Sentiment-Analysis/pull/7) | Fixed feature-shape and single-sample edge cases, and made result visualization more portable. |
+| [Multimodal training reliability](https://github.com/19376357/Bilingual-Multimodal-Sentiment-Analysis/pull/7) | **Merged** · Fixed feature-shape and single-sample edge cases, and made result visualization more portable. |
+| [Bilingual project documentation](https://github.com/19376357/Bilingual-Multimodal-Sentiment-Analysis/pull/5) | **Merged** · Made the team project easier to explore in English and Chinese. |
+| [Primary papers for seven lessons](https://github.com/rohitg00/ai-engineering-from-scratch/pull/527) | **Open PR** · Connected existing lessons to their research sources and added short comparison exercises. |
 
 [Explore all my pull requests →](https://github.com/search?q=author%3AMaYangle+is%3Apr&type=pullrequests)
 
@@ -38,7 +38,7 @@ I’m **Yangle Ma**. My background is in autonomous systems and control, and I�
 
 | Codebase | Focus |
 | :--- | :--- |
-| [AI Engineering from Scratch](https://github.com/rohitg00/ai-engineering-from-scratch) | Making a large AI curriculum easier to navigate, verify, and learn from. |
+| [AI Engineering from Scratch](https://github.com/rohitg00/ai-engineering-from-scratch) | Proposing primary-source links that help readers connect seven lessons to the research behind them. |
 | [Bilingual Multimodal Sentiment Analysis](https://github.com/19376357/Bilingual-Multimodal-Sentiment-Analysis) | Improving a team research pipeline, its documentation, and its ability to run reliably. |
 
 ## Featured project
