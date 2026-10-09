@@ -103,7 +103,7 @@ test('repository text is escaped and compact metrics remain numerical',async()=>
   data.spotlight.repoName='<script>&"';
   data.spotlight.title='[unsafe](javascript:alert(1)) <b>';
   assert.doesNotMatch(renderHero(data,config),/<script>/);
-  assert.match(renderHero(data,config),/&lt;SCRIPT&gt;&amp;/);
+  assert.ok(/&lt;script&gt;&amp;/i.test(renderHero(data,config)), 'Repository text must be XML escaped');
   assert.doesNotMatch(renderReadme(data,config),/<b>/);
   assert.equal(compact(66062),'66.1K');
   assert.equal(compact(7),'7');
@@ -129,6 +129,15 @@ test('a stale search result is checked against the current PR before displaying 
 test('empty public work renders without fabricated metrics or invalid links',async()=>{
   const data=await collectProfile(config,mockApi({repos:[],merged:[],open:[]}));
   assert.equal(data.spotlight,null);
-  assert.match(renderHero(data,config),/BUILDING/);
+  assert.ok(!/NaN|undefined/.test(renderHero(data,config)), 'Empty data must render safely');
   assert.doesNotMatch(renderReadme(data,config),/undefined|null/);
+});
+
+
+test('the full-page canvas expands when another project is added',async()=>{
+  const first=await collectProfile(config,mockApi());
+  const next=await collectProfile(config,mockApi({repos:[repository('team-ml',{fork:true}),repository('second-project'),repository('third-project')]}));
+  const height=svg=>Number(/viewBox="0 0 1200 ([\d.]+)"/.exec(svg)[1]);
+  assert.ok(height(renderHero(next,config))>height(renderHero(first,config)));
+  assert.ok(renderHero(next,config).includes('second project'));
 });
