@@ -1,9 +1,14 @@
 {
   "username": "MaYangle",
   "name": "Yangle Ma",
-  "tagline": "AI engineering",
+  "tagline": "AI engineer",
   "bio": "",
-  "stack": ["Python", "PyTorch", "Whisper", "BERT"],
+  "stack": [
+    "Python",
+    "PyTorch",
+    "Whisper",
+    "BERT"
+  ],
   "links": {
     "LinkedIn": "https://www.linkedin.com/in/yangle-ma-84877a294/",
     "Email": "mailto:yanglema44@gmail.com"
@@ -18,9 +23,22 @@
         "name": "Multimodal Sentiment Analysis",
         "description": "Chinese–English video-to-sentiment pipeline with cross-attention.",
         "role": "Team project · working fork",
-        "stack": ["Python", "PyTorch", "Whisper", "BERT"],
-        "inputs": ["Text", "Audio", "Vision"],
-        "encoders": ["Whisper / BERT", "MFCC", "MediaPipe"],
+        "stack": [
+          "Python",
+          "PyTorch",
+          "Whisper",
+          "BERT"
+        ],
+        "inputs": [
+          "Text",
+          "Audio",
+          "Vision"
+        ],
+        "encoders": [
+          "Whisper / BERT",
+          "MFCC",
+          "MediaPipe"
+        ],
         "output": "Sentiment"
       }
     ]

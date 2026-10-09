@@ -52,15 +52,15 @@ test('a PR merge changes both the displayed status and the data, with no hardcod
 test('a newly discovered project appears in the rendered homepage and the instrument count',async()=>{
   const data=await collectProfile(config,mockApi({repos:[repository('team-ml',{fork:true}),repository('next-build')]}));
   const md=renderReadme(data,config);
-  assert.match(md,/https:\/\/github.com\/MaYangle\/next-build/);
+  assert.ok(renderHero(data,config).includes('next build'));
   assert.match(renderHero(data,config),/>02<\/text>/);
 });
 
 test('the compact layout limits visible projects while keeping the total and index link',async()=>{
   const data=await collectProfile(config,mockApi({repos:Array.from({length:7},(_,i)=>repository(`build-${i}`))}));
   const md=renderReadme(data,config);
-  assert.equal((md.match(/https:\/\/github.com\/MaYangle\/build-\d+\)/g)||[]).length,3);
-  assert.match(md,/All 7 projects/);
+  assert.equal((renderHero(data,config).match(/>build \d+<\/text>/g)||[]).length,3);
+  assert.equal(data.projects.length,7);
   assert.match(renderHero(data,config),/>07<\/text>/);
 });
 
@@ -158,9 +158,11 @@ test('missing diff metrics abort the update instead of displaying zero',async()=
 
 test('the concise profile has only the chosen subtitle and no expandable text copy',async()=>{
   const data=await collectProfile(config,mockApi());
-  const minimal={...config,bio:'',tagline:'AI engineering'};
+  const minimal={...config,bio:'',tagline:'AI engineer'};
   const svg=renderHero(data,minimal),md=renderReadme(data,minimal);
-  assert.ok(svg.includes('>AI engineering</text>'));
+  assert.ok(svg.includes('>AI engineer</text>'));
   assert.ok(!svg.includes(config.bio));
   assert.ok(!md.includes('<details>') && !md.includes('Text version'));
+  assert.ok(!md.includes('[PR #') && !md.includes('All projects') && !md.includes('Merged contributions'));
+  assert.ok(md.includes('[GitHub](https://github.com/MaYangle)'));
 });
