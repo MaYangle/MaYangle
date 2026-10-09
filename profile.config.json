@@ -1,0 +1,39 @@
+{
+  "username": "MaYangle",
+  "name": "Yangle Ma",
+  "tagline": "AI engineering · multimodal learning",
+  "bio": "I turn multimodal research into reproducible systems, with a background in autonomous systems and control.",
+  "stack": ["Python", "PyTorch", "Whisper", "BERT"],
+  "links": {
+    "LinkedIn": "https://www.linkedin.com/in/yangle-ma-84877a294/",
+    "Email": "mailto:yanglema44@gmail.com"
+  },
+  "projects": {
+    "discover": true,
+    "maxVisible": 3,
+    "exclude": [],
+    "include": [
+      {
+        "repo": "MaYangle/Multimodal-Sentiment-Analysis",
+        "name": "Multimodal Sentiment Analysis",
+        "description": "Chinese–English video-to-sentiment pipeline with cross-attention.",
+        "role": "Team project · working fork",
+        "stack": ["Python", "PyTorch", "Whisper", "BERT"],
+        "inputs": ["Text", "Audio", "Vision"],
+        "output": "Sentiment"
+      }
+    ]
+  },
+  "pullRequestLabels": {
+    "rohitg00/ai-engineering-from-scratch#527": "Research links for seven lessons",
+    "19376357/Bilingual-Multimodal-Sentiment-Analysis#7": "Training and inference reliability",
+    "19376357/Bilingual-Multimodal-Sentiment-Analysis#5": "English and Chinese documentation",
+    "19376357/Bilingual-Multimodal-Sentiment-Analysis#4": "Open-source licensing"
+  },
+  "repositoryLabels": {
+    "rohitg00/ai-engineering-from-scratch": "AI Engineering from Scratch"
+  },
+  "contributionSummaries": {
+    "19376357/Bilingual-Multimodal-Sentiment-Analysis": "Training reliability and bilingual documentation"
+  }
+}

@@ -1,0 +1,67 @@
+{
+  "schemaVersion": 1,
+  "username": "MaYangle",
+  "mergedPullRequests": 6,
+  "openPullRequests": 1,
+  "spotlight": {
+    "repo": "rohitg00/ai-engineering-from-scratch",
+    "repoName": "AI Engineering from Scratch",
+    "repoUrl": "https://github.com/rohitg00/ai-engineering-from-scratch",
+    "stars": 66079,
+    "forks": 11467,
+    "number": 527,
+    "title": "Research links for seven lessons",
+    "url": "https://github.com/rohitg00/ai-engineering-from-scratch/pull/527",
+    "status": "open"
+  },
+  "projects": [
+    {
+      "repo": "MaYangle/Multimodal-Sentiment-Analysis",
+      "name": "Multimodal Sentiment Analysis",
+      "description": "Chinese–English video-to-sentiment pipeline with cross-attention.",
+      "url": "https://github.com/MaYangle/Multimodal-Sentiment-Analysis",
+      "stars": 4,
+      "language": "Python",
+      "fork": true,
+      "role": "Team project · working fork",
+      "stack": [
+        "Python",
+        "PyTorch",
+        "Whisper",
+        "BERT"
+      ],
+      "inputs": [
+        "Text",
+        "Audio",
+        "Vision"
+      ],
+      "output": "Sentiment"
+    }
+  ],
+  "contributions": [
+    {
+      "repo": "19376357/Bilingual-Multimodal-Sentiment-Analysis",
+      "name": "Bilingual Multimodal Sentiment Analysis",
+      "count": 6,
+      "summary": "Training reliability and bilingual documentation",
+      "pulls": [
+        {
+          "number": 7,
+          "url": "https://github.com/19376357/Bilingual-Multimodal-Sentiment-Analysis/pull/7",
+          "title": "Training and inference reliability"
+        },
+        {
+          "number": 5,
+          "url": "https://github.com/19376357/Bilingual-Multimodal-Sentiment-Analysis/pull/5",
+          "title": "English and Chinese documentation"
+        },
+        {
+          "number": 4,
+          "url": "https://github.com/19376357/Bilingual-Multimodal-Sentiment-Analysis/pull/4",
+          "title": "Open-source licensing"
+        }
+      ]
+    }
+  ],
+  "updatedAt": "2026-10-09T13:49:39.870Z"
+}

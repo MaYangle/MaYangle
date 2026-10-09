@@ -1,0 +1,10 @@
+{
+  "name": "mayangle-profile",
+  "private": true,
+  "type": "module",
+  "engines": { "node": ">=22" },
+  "scripts": {
+    "update": "node scripts/update-profile.mjs",
+    "test": "node --test"
+  }
+}
