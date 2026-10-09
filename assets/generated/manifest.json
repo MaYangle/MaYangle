@@ -1,14 +1,14 @@
 {
   "current": [
+    "assets/generated/profile.9a580f740dd2.svg",
+    "assets/generated/profile-mobile.d04132574c25.svg",
+    "assets/generated/profile-still.853231d5c133.svg",
+    "assets/generated/profile-mobile-still.f48fdbf80537.svg"
+  ],
+  "previous": [
     "assets/generated/profile.f775210bb6fd.svg",
     "assets/generated/profile-mobile.3dd1afccb5d9.svg",
     "assets/generated/profile-still.fe011cd02ce8.svg",
     "assets/generated/profile-mobile-still.7499be64bf83.svg"
-  ],
-  "previous": [
-    "assets/generated/profile.7e85d1b807a6.svg",
-    "assets/generated/profile-mobile.2c7890bd99fd.svg",
-    "assets/generated/profile-still.3410c9fd1fce.svg",
-    "assets/generated/profile-mobile-still.5eb34c9257ba.svg"
   ]
 }
