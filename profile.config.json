@@ -43,6 +43,39 @@
       }
     ]
   },
+  "showcase": {
+    "title": "RESEARCH & OUTPUTS",
+    "maxVisible": 2,
+    "sections": [
+      {
+        "id": "research",
+        "title": "Research & experiments",
+        "description": "Paper reproductions, ablations and evaluations.",
+        "autoTopics": ["research", "paper-reproduction", "benchmark"],
+        "items": []
+      },
+      {
+        "id": "models",
+        "title": "Models & datasets",
+        "description": "Model releases, datasets and reusable artifacts.",
+        "autoTopics": ["dataset", "datasets", "model-release", "model-weights", "pretrained-model"],
+        "items": []
+      },
+      {
+        "id": "writing",
+        "title": "Writing & talks",
+        "description": "Technical notes, tutorials and presentations.",
+        "items": []
+      },
+      {
+        "id": "releases",
+        "title": "Demos & releases",
+        "description": "Interactive demos, applications and packages.",
+        "autoReleases": true,
+        "items": []
+      }
+    ]
+  },
   "pullRequestLabels": {
     "rohitg00/ai-engineering-from-scratch#527": "Research links for seven lessons",
     "19376357/Bilingual-Multimodal-Sentiment-Analysis#7": "Training and inference reliability",

@@ -1,5 +1,6 @@
 import {xml,compact,wrap} from './format.mjs';
 import {renderImpact,renderActivity} from './sections.mjs';
+import {renderShowcase} from './showcase.mjs';
 
 const ink='#17232f', muted='#667583', blue='#4264e8', rule='#e1e7ed';
 const t=(x,y,value,size=18,color=ink,extra='')=>`<text x="${x}" y="${y}" font-size="${size}" fill="${color}" ${extra}>${xml(value)}</text>`;
@@ -139,7 +140,8 @@ export function renderHero(data,config,{mobile=false,animated=true}={}){
     if(!contributions.length){svg+=t(right,cy,'Open-source work in progress.',18,muted);cy+=80;}
     bottom=Math.max(py,cy);
   }
-  const impact=renderImpact(data,margin,bottom+20,inner,mobile);svg+=impact.svg;
+  const showcase=renderShowcase(data.showcase,margin,bottom+20,inner,mobile);svg+=showcase.svg;
+  const impact=renderImpact(data,margin,showcase.bottom+20,inner,mobile);svg+=impact.svg;
   const activity=renderActivity(data,margin,impact.bottom+24,inner,mobile);svg+=activity.svg;
   const footer=activity.bottom+22,height=footer+57;
   svg+=line(margin,footer-16,width-margin,footer-16)+t(margin,footer+14,'PUBLIC GITHUB DATA',10,muted,'letter-spacing="1"')+t(width-margin,footer+14,updated?`UPDATED ${updated}`:'AUTOMATIC UPDATES',10,muted,'text-anchor="end" letter-spacing=".5"');

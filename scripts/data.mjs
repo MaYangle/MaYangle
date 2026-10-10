@@ -1,4 +1,5 @@
 import { execFileSync } from 'node:child_process';
+import { validateShowcase, collectShowcase } from './showcase.mjs';
 
 export function validateConfig(config) {
   if (!/^[a-z\d-]+$/i.test(config.username ?? '')) throw new Error('Invalid GitHub username');
@@ -10,6 +11,7 @@ export function validateConfig(config) {
   for (const url of Object.values(config.links ?? {})) {
     if (!/^(https:\/\/|mailto:)/.test(url)) throw new Error('Contact links must use HTTPS or mailto');
   }
+  validateShowcase(config.showcase);
 }
 
 export function createApi({ token = process.env.GITHUB_TOKEN, useGh = false } = {}) {
@@ -51,6 +53,7 @@ export function selectProjects(repos, config) {
       url:`https://github.com/${repo.full_name}`,
       stars:repo.stargazers_count,
       language:repo.language || null,
+      topics:Array.isArray(repo.topics)?repo.topics.filter(topic=>typeof topic==='string'):[],
       fork:repo.fork,
       role:custom?.role || (repo.fork ? 'Working fork' : 'Independent project'),
       stack:custom?.stack || (repo.language ? [repo.language] : []),
@@ -183,10 +186,12 @@ export async function collectProfile(config, api) {
     title:config.pullRequestLabels?.[`${pr.repo}#${pr.number}`] || pr.title,
     date:pr.status==='merged'?pr.mergedAt:pr.createdAt
   })).filter(pr=>pr.date && Number.isFinite(Date.parse(pr.date))).sort((a,b)=>b.date.localeCompare(a.date)).slice(0,3);
+  const projects=selectProjects(repos,config);
+  const showcase=await collectShowcase(config,projects,api);
   return {
-    schemaVersion:3, username:config.username,
+    schemaVersion:4, username:config.username,
     mergedPullRequests:merged.total_count, openPullRequests:open.total_count,
     spotlight, openSpotlight,
-    projects:selectProjects(repos, config), contributions, impact, activity
+    projects, contributions, impact, activity, showcase
   };
 }

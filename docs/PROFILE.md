@@ -28,6 +28,7 @@ Edit `profile.config.json` to:
 - Hide a repository with `projects.exclude`.
 - Change the number of visible projects with `projects.maxVisible` (default: three). Additional projects remain included in the gauge count.
 - Give a specific PR a shorter display title through `pullRequestLabels`.
+- Add published research, models/data, writing/talks, or demos to `showcase.sections[].items`. Empty areas are deliberately marked **No public entry yet**.
 
 Do not edit generated assets or README content directly. They will be regenerated. The only public data saved to `data/profile.json` is the normalized data used by the profile. Generated asset filenames contain a hash of their contents, so a data or design change gives GitHub a new image URL. The previous generation is retained for readers with cached README markup; older generated files are removed.
 
@@ -52,7 +53,7 @@ Otherwise the generator uses `GITHUB_TOKEN` when it is set, or GitHub's anonymou
 
 The full-page illustration uses a twelve-second loop of a light particle wave and moving signals in the project pipeline. The instrument values come from GitHub data and do not animate into invented values. A separate mobile layout stacks the modules and avoids shrinking desktop labels into unreadable text. The README's `<picture>` element selects static versions for readers who request reduced motion.
 
-The canvas uses a white background, dark typography, restrained blue accents, a circular contribution readout, and a curved baseline. Identity, repository scale, project detail, and merged contributions share one layout. The generated canvas grows with the visible project and contribution modules. Direct project, PR, and contact links remain below the illustration. The introduction is intentionally limited to “AI engineering”.
+The canvas uses a white background, dark typography, restrained blue accents, a circular contribution readout, and a curved baseline. Identity, repository scale, project detail, and merged contributions share one layout. The generated canvas grows with the visible project and contribution modules. Contact links remain below the illustration. The introduction is intentionally limited to “AI engineer”.
 
 ## Research and design references
 
@@ -72,6 +73,19 @@ These projects informed the architecture; their source code and visual assets we
 - [SpaceX webcast UI by Shane Mielke](https://www.shanemielke.com/work/spacex/webcast/): restrained telemetry overlays. The user's Starship webcast reference guided the circular readouts, whitespace, and bottom arc.
 
 GitHub README images are the presentation surface; this project does not rely on scripts running in the README. The animation is local to the SVG, and data freshness depends on the latest successful workflow run.
+
+## Research and public-output areas
+
+The four showcase areas broaden the profile beyond PR statistics while preserving the white visual system. They begin as empty, explicitly labeled areas, not claims of completed work. Add a real public item using `title`, `url` (HTTPS), and optionally `kind`, `date`, and `summary`. A populated area replaces its empty state automatically and grows to fit its content; up to `showcase.maxVisible` entries are shown per area.
+
+The artwork displays entry titles and metadata. Public URLs remain in `data/profile.json` for provenance; the removed work-navigation row is not reintroduced.
+
+- **Research & experiments:** explicitly tagged project repositories are included when their topics match `autoTopics`, such as `paper-reproduction`, `research`, or `benchmark`. They are labeled as repositories, not as accepted publications.
+- **Models & datasets:** explicitly tagged repositories such as `dataset`, `model-release`, or `model-weights` are included. Generic `machine-learning` tags alone do not qualify.
+- **Writing & talks:** curated public links are maintained in configuration. No blog feed or publication record is assumed.
+- **Demos & releases:** add demo links in configuration; published GitHub releases from the currently displayed public projects are collected automatically. Drafts are excluded and pre-releases are labeled.
+
+The broader information structure was informed by [Sebastian Raschka's research and educational work](https://github.com/rasbt), [Chip Huyen's tools, writing and teaching](https://github.com/chiphuyen), and [Simon Willison's automatically updated releases, blog and TIL sections](https://github.com/simonw). These references inform categories only; their achievements are not attributed to this profile.
 
 ## Contribution impact and recent work
 
