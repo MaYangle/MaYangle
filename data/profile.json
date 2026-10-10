@@ -19,8 +19,8 @@
     "repo": "rohitg00/ai-engineering-from-scratch",
     "repoName": "AI Engineering from Scratch",
     "repoUrl": "https://github.com/rohitg00/ai-engineering-from-scratch",
-    "stars": 66478,
-    "forks": 11641,
+    "stars": 66491,
+    "forks": 11642,
     "number": 527,
     "title": "Research links for seven lessons",
     "url": "https://github.com/rohitg00/ai-engineering-from-scratch/pull/527",
@@ -135,7 +135,7 @@
   "showcase": {
     "title": "RESEARCH & OUTPUTS",
     "maxVisible": 2,
-    "emptyMode": "compact",
+    "emptyMode": "hidden",
     "sections": [
       {
         "id": "research",
@@ -163,5 +163,5 @@
       }
     ]
   },
-  "updatedAt": "2026-10-10T13:49:07.252Z"
+  "updatedAt": "2026-10-10T13:59:11.571Z"
 }
