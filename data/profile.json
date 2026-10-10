@@ -1,5 +1,5 @@
 {
-  "schemaVersion": 4,
+  "schemaVersion": 5,
   "username": "MaYangle",
   "mergedPullRequests": 6,
   "openPullRequests": 1,
@@ -19,13 +19,25 @@
     "repo": "rohitg00/ai-engineering-from-scratch",
     "repoName": "AI Engineering from Scratch",
     "repoUrl": "https://github.com/rohitg00/ai-engineering-from-scratch",
-    "stars": 66551,
-    "forks": 11655,
+    "stars": 66572,
+    "forks": 11662,
     "number": 527,
     "title": "Research links for seven lessons",
     "url": "https://github.com/rohitg00/ai-engineering-from-scratch/pull/527",
     "status": "open",
     "date": "2026-10-03T12:16:31Z"
+  },
+  "resolvedSpotlight": {
+    "repo": "rohitg00/ai-engineering-from-scratch",
+    "repoName": "AI Engineering from Scratch",
+    "repoUrl": "https://github.com/rohitg00/ai-engineering-from-scratch",
+    "stars": 66572,
+    "forks": 11662,
+    "number": 531,
+    "title": "docs(i18n): complete and audit 12 README translations",
+    "url": "https://github.com/rohitg00/ai-engineering-from-scratch/pull/531",
+    "status": "closed",
+    "date": "2026-10-09T05:36:00Z"
   },
   "projects": [
     {
@@ -34,6 +46,8 @@
       "description": "Chinese–English video-to-sentiment pipeline with cross-attention.",
       "url": "https://github.com/MaYangle/Multimodal-Sentiment-Analysis",
       "stars": 4,
+      "forks": 1,
+      "pushedAt": "2025-08-31T09:26:43Z",
       "language": "Python",
       "topics": [],
       "fork": true,
@@ -62,37 +76,76 @@
       "repo": "19376357/Bilingual-Multimodal-Sentiment-Analysis",
       "name": "Bilingual Multimodal Sentiment Analysis",
       "count": 6,
+      "closedCount": 1,
       "summary": "Training reliability and bilingual documentation",
       "pulls": [
         {
           "number": 7,
           "url": "https://github.com/19376357/Bilingual-Multimodal-Sentiment-Analysis/pull/7",
-          "title": "Training and inference reliability"
+          "title": "Training and inference reliability",
+          "status": "merged",
+          "date": "2025-08-31T09:29:55Z"
         },
         {
           "number": 5,
           "url": "https://github.com/19376357/Bilingual-Multimodal-Sentiment-Analysis/pull/5",
-          "title": "English and Chinese documentation"
+          "title": "English and Chinese documentation",
+          "status": "merged",
+          "date": "2025-08-27T07:32:59Z"
         },
         {
           "number": 4,
           "url": "https://github.com/19376357/Bilingual-Multimodal-Sentiment-Analysis/pull/4",
-          "title": "Open-source licensing"
+          "title": "Open-source licensing",
+          "status": "merged",
+          "date": "2025-08-27T00:43:47Z"
         },
         {
           "number": 3,
           "url": "https://github.com/19376357/Bilingual-Multimodal-Sentiment-Analysis/pull/3",
-          "title": "Project README updates"
+          "title": "Project README updates",
+          "status": "merged",
+          "date": "2025-08-26T14:51:59Z"
         },
         {
           "number": 2,
           "url": "https://github.com/19376357/Bilingual-Multimodal-Sentiment-Analysis/pull/2",
-          "title": "Project usability updates"
+          "title": "Project usability updates",
+          "status": "merged",
+          "date": "2025-08-26T14:42:37Z"
         },
         {
           "number": 1,
           "url": "https://github.com/19376357/Bilingual-Multimodal-Sentiment-Analysis/pull/1",
-          "title": "Initial project README"
+          "title": "Initial project README",
+          "status": "merged",
+          "date": "2025-08-20T15:45:52Z"
+        }
+      ],
+      "closed": [
+        {
+          "number": 6,
+          "url": "https://github.com/19376357/Bilingual-Multimodal-Sentiment-Analysis/pull/6",
+          "title": "Solve train and",
+          "status": "closed",
+          "date": "2025-08-31T09:28:04Z"
+        }
+      ]
+    },
+    {
+      "repo": "rohitg00/ai-engineering-from-scratch",
+      "name": "AI Engineering from Scratch",
+      "count": 0,
+      "closedCount": 1,
+      "summary": "ai engineering from scratch",
+      "pulls": [],
+      "closed": [
+        {
+          "number": 531,
+          "url": "https://github.com/rohitg00/ai-engineering-from-scratch/pull/531",
+          "title": "docs(i18n): complete and audit 12 README translations",
+          "status": "closed",
+          "date": "2026-10-09T05:36:00Z"
         }
       ]
     }
@@ -107,11 +160,24 @@
     {
       "repo": "rohitg00/ai-engineering-from-scratch",
       "repoName": "AI Engineering from Scratch",
+      "number": 531,
+      "url": "https://github.com/rohitg00/ai-engineering-from-scratch/pull/531",
+      "status": "closed",
+      "title": "docs(i18n): complete and audit 12 README translations",
+      "date": "2026-10-09T05:36:00Z",
+      "stars": 66572,
+      "forks": 11662
+    },
+    {
+      "repo": "rohitg00/ai-engineering-from-scratch",
+      "repoName": "AI Engineering from Scratch",
       "number": 527,
       "url": "https://github.com/rohitg00/ai-engineering-from-scratch/pull/527",
       "status": "open",
       "title": "Research links for seven lessons",
-      "date": "2026-10-03T12:16:31Z"
+      "date": "2026-10-03T12:16:31Z",
+      "stars": 66572,
+      "forks": 11662
     },
     {
       "repo": "19376357/Bilingual-Multimodal-Sentiment-Analysis",
@@ -120,16 +186,9 @@
       "url": "https://github.com/19376357/Bilingual-Multimodal-Sentiment-Analysis/pull/7",
       "status": "merged",
       "title": "Training and inference reliability",
-      "date": "2025-08-31T09:29:55Z"
-    },
-    {
-      "repo": "19376357/Bilingual-Multimodal-Sentiment-Analysis",
-      "repoName": "Bilingual Multimodal Sentiment Analysis",
-      "number": 5,
-      "url": "https://github.com/19376357/Bilingual-Multimodal-Sentiment-Analysis/pull/5",
-      "status": "merged",
-      "title": "English and Chinese documentation",
-      "date": "2025-08-27T07:32:59Z"
+      "date": "2025-08-31T09:29:55Z",
+      "stars": 7,
+      "forks": 3
     }
   ],
   "showcase": {
@@ -162,5 +221,5 @@
       }
     ]
   },
-  "updatedAt": "2026-10-10T15:03:50.188Z"
+  "updatedAt": "2026-10-10T15:34:30.713Z"
 }
