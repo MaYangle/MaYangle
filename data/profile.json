@@ -20,7 +20,7 @@
     "repoName": "AI Engineering from Scratch",
     "repoUrl": "https://github.com/rohitg00/ai-engineering-from-scratch",
     "stars": 66572,
-    "forks": 11662,
+    "forks": 11663,
     "number": 527,
     "title": "Research links for seven lessons",
     "url": "https://github.com/rohitg00/ai-engineering-from-scratch/pull/527",
@@ -32,7 +32,7 @@
     "repoName": "AI Engineering from Scratch",
     "repoUrl": "https://github.com/rohitg00/ai-engineering-from-scratch",
     "stars": 66572,
-    "forks": 11662,
+    "forks": 11663,
     "number": 531,
     "title": "docs(i18n): complete and audit 12 README translations",
     "url": "https://github.com/rohitg00/ai-engineering-from-scratch/pull/531",
@@ -166,18 +166,7 @@
       "title": "docs(i18n): complete and audit 12 README translations",
       "date": "2026-10-09T05:36:00Z",
       "stars": 66572,
-      "forks": 11662
-    },
-    {
-      "repo": "rohitg00/ai-engineering-from-scratch",
-      "repoName": "AI Engineering from Scratch",
-      "number": 527,
-      "url": "https://github.com/rohitg00/ai-engineering-from-scratch/pull/527",
-      "status": "open",
-      "title": "Research links for seven lessons",
-      "date": "2026-10-03T12:16:31Z",
-      "stars": 66572,
-      "forks": 11662
+      "forks": 11663
     },
     {
       "repo": "19376357/Bilingual-Multimodal-Sentiment-Analysis",
@@ -187,6 +176,17 @@
       "status": "merged",
       "title": "Training and inference reliability",
       "date": "2025-08-31T09:29:55Z",
+      "stars": 7,
+      "forks": 3
+    },
+    {
+      "repo": "19376357/Bilingual-Multimodal-Sentiment-Analysis",
+      "repoName": "Bilingual Multimodal Sentiment Analysis",
+      "number": 6,
+      "url": "https://github.com/19376357/Bilingual-Multimodal-Sentiment-Analysis/pull/6",
+      "status": "closed",
+      "title": "Solve train and",
+      "date": "2025-08-31T09:28:04Z",
       "stars": 7,
       "forks": 3
     }
@@ -221,5 +221,5 @@
       }
     ]
   },
-  "updatedAt": "2026-10-10T15:34:30.713Z"
+  "updatedAt": "2026-10-10T15:36:11.614Z"
 }
