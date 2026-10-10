@@ -201,7 +201,7 @@ export async function collectProfile(config, api) {
       impact.additions+=pr.additions;impact.deletions+=pr.deletions;impact.fileChanges+=pr.changed_files;
     }
   }
-  const activity=publicPulls.map(pr=>({
+  const activity=publicPulls.filter(pr=>pr.status==='merged'||pr.status==='closed').map(pr=>({
     repo:pr.repo,repoName:config.repositoryLabels?.[pr.repo] || repositoryMap.get(pr.repo).name.replaceAll('-',' '),
     number:pr.number,url:pr.url,status:pr.status,
     title:config.pullRequestLabels?.[`${pr.repo}#${pr.number}`] || pr.title,

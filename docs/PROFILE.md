@@ -92,5 +92,5 @@ The broader information structure was informed by [Sebastian Raschka's research 
 
 The impact module sums additions, deletions, and changed-file counts from the latest 30 merged public upstream PRs (or all of them when fewer are available). The displayed sample size makes that scope explicit. File changes are cumulative diff entries, not a count of unique files or original authorship. Missing API fields fail the refresh rather than being converted to zero.
 
-Recent work shows the latest three opened or merged public PRs. Dates use the original opening or merge timestamp, not the last edit time. Both modules refresh with the rest of the profile.
+Recent work shows the latest three resolved upstream PRs, including closed and merged work. Open PRs awaiting a response remain out of the resolved-work cards. Dates use the close or merge timestamp, not the last edit time. The records and their links refresh with the rest of the profile.
 
