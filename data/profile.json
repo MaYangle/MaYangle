@@ -156,41 +156,6 @@
     "deletions": 660,
     "fileChanges": 26
   },
-  "activity": [
-    {
-      "repo": "rohitg00/ai-engineering-from-scratch",
-      "repoName": "AI Engineering from Scratch",
-      "number": 531,
-      "url": "https://github.com/rohitg00/ai-engineering-from-scratch/pull/531",
-      "status": "closed",
-      "title": "docs(i18n): complete and audit 12 README translations",
-      "date": "2026-10-09T05:36:00Z",
-      "stars": 66585,
-      "forks": 11668
-    },
-    {
-      "repo": "19376357/Bilingual-Multimodal-Sentiment-Analysis",
-      "repoName": "Bilingual Multimodal Sentiment Analysis",
-      "number": 7,
-      "url": "https://github.com/19376357/Bilingual-Multimodal-Sentiment-Analysis/pull/7",
-      "status": "merged",
-      "title": "Training and inference reliability",
-      "date": "2025-08-31T09:29:55Z",
-      "stars": 7,
-      "forks": 3
-    },
-    {
-      "repo": "19376357/Bilingual-Multimodal-Sentiment-Analysis",
-      "repoName": "Bilingual Multimodal Sentiment Analysis",
-      "number": 6,
-      "url": "https://github.com/19376357/Bilingual-Multimodal-Sentiment-Analysis/pull/6",
-      "status": "closed",
-      "title": "Solve train and",
-      "date": "2025-08-31T09:28:04Z",
-      "stars": 7,
-      "forks": 3
-    }
-  ],
   "showcase": {
     "title": "RESEARCH & OUTPUTS",
     "maxVisible": 2,

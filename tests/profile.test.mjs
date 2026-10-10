@@ -194,8 +194,9 @@ test('merged impact sums real diff fields and reports its sample size',async()=>
   const data=await collectProfile(config,mockApi({merged:[issue(7,'merged'),issue(5,'merged')]}));
   assert.deepEqual(data.impact,{sampleSize:2,additions:200,deletions:20,fileChanges:4});
   assert.match(renderHero(data,config),/MERGED IMPACT/);
-  assert.match(renderHero(data,config),/RECENT WORK/);
-  assert.equal(data.activity[0].status,'merged');
+  assert.doesNotMatch(renderHero(data,config),/RECENT WORK/);
+  assert.equal('activity' in data,false);
+  assert.doesNotMatch(renderReadme(data,config),/RECENT WORK/);
 });
 
 test('missing diff metrics abort the update instead of displaying zero',async()=>{
@@ -213,4 +214,3 @@ test('the concise profile has only the chosen subtitle and no expandable text co
   assert.ok(!md.includes('[PR #') && !md.includes('All projects') && !md.includes('Merged contributions'));
   assert.ok(md.includes('[GitHub](https://github.com/MaYangle)'));
 });
-

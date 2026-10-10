@@ -201,21 +201,12 @@ export async function collectProfile(config, api) {
       impact.additions+=pr.additions;impact.deletions+=pr.deletions;impact.fileChanges+=pr.changed_files;
     }
   }
-  const activity=publicPulls.filter(pr=>pr.status==='merged'||pr.status==='closed').map(pr=>({
-    repo:pr.repo,repoName:config.repositoryLabels?.[pr.repo] || repositoryMap.get(pr.repo).name.replaceAll('-',' '),
-    number:pr.number,url:pr.url,status:pr.status,
-    title:config.pullRequestLabels?.[`${pr.repo}#${pr.number}`] || pr.title,
-    date:pr.status==='merged'?pr.mergedAt:pr.status==='closed'?pr.closedAt||pr.updatedAt:pr.createdAt,
-    stars:repositoryMap.get(pr.repo).stargazers_count,
-    forks:repositoryMap.get(pr.repo).forks_count
-  })).filter(pr=>pr.date && Number.isFinite(Date.parse(pr.date))).sort((a,b)=>b.date.localeCompare(a.date)).slice(0,3);
   const projects=selectProjects(repos,config);
   const showcase=await collectShowcase(config,projects,api);
   return {
     schemaVersion:5, username:config.username,
     mergedPullRequests:merged.total_count, openPullRequests:open.total_count,
     spotlight, openSpotlight, resolvedSpotlight,
-    projects, contributions, impact, activity, showcase
+    projects, contributions, impact, showcase
   };
 }
-

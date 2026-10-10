@@ -11,8 +11,8 @@ The generator updates each dashboard module independently:
 - The total number of merged public PRs to repositories outside this account.
 - The spotlight PR, its current status, and the upstream repository's stars and forks.
 - Public projects, their descriptions, and the project count.
-- The project, merged-contribution, showcase, impact, and activity modules.
-- Native README links for the profile, each PR spotlight, project, contribution group, showcase area, impact panel, and recent-work card.
+- The project, merged-contribution, showcase, and impact modules.
+- Native README links for the profile, each PR spotlight, project, contribution record, showcase area, and impact panel.
 
 The primary spotlight prefers merged upstream PRs, ordered by merge date; stars only break date ties. A separate **Recently resolved PR** panel selects a closed PR, or another merged PR when no closed PR exists. Open PRs awaiting a response are not used in that panel. Current PR status is checked against the pull-request endpoint before publication. The candidate pool is the latest 100 open, merged, and closed-unmerged public PRs. Repository stars always describe the upstream repository, not personal ownership.
 
@@ -54,7 +54,7 @@ Otherwise the generator uses `GITHUB_TOKEN` when it is set, or GitHub's anonymou
 
 The white dashboard is assembled from individually linked SVG modules in the README. The contribution instrument uses a twelve-second loop of a light particle wave; project pipelines animate their moving signal. Instrument values come from GitHub data and do not animate into invented values. Each image's `<picture>` element selects a static version for readers who request reduced motion. Image filenames include content hashes, so updates replace cached assets reliably.
 
-The dashboard keeps its white background, dark typography, restrained blue accents, and telemetry-style contribution network. Native anchors make each module a direct route to its related public page. The recently resolved PR panel gives upstream repository stars and forks a stronger readout and labels them as repository metrics. Project, contribution, showcase, and recent-work modules grow or change as the public GitHub data changes. Contact links remain below the dashboard. The introduction is intentionally limited to “AI engineer”.
+The dashboard keeps its white background, dark typography, restrained blue accents, and telemetry-style contribution network. Native anchors make each module a direct route to its related public page. The recently resolved PR panel gives upstream repository stars and forks a stronger readout and labels them as repository metrics. Project, contribution, showcase, and impact modules grow or change as the public GitHub data changes. Contact links remain below the dashboard. The introduction is intentionally limited to “AI engineer”.
 
 ## Research and design references
 
@@ -88,9 +88,8 @@ The artwork displays entry titles and metadata. Public URLs remain in `data/prof
 
 The broader information structure was informed by [Sebastian Raschka's research and educational work](https://github.com/rasbt), [Chip Huyen's tools, writing and teaching](https://github.com/chiphuyen), and [Simon Willison's automatically updated releases, blog and TIL sections](https://github.com/simonw). These references inform categories only; their achievements are not attributed to this profile.
 
-## Contribution impact and recent work
+## Contribution impact
 
 The impact module sums additions, deletions, and changed-file counts from the latest 30 merged public upstream PRs (or all of them when fewer are available). The displayed sample size makes that scope explicit. File changes are cumulative diff entries, not a count of unique files or original authorship. Missing API fields fail the refresh rather than being converted to zero.
 
-Recent work shows the latest three resolved upstream PRs, including closed and merged work. Open PRs awaiting a response remain out of the resolved-work cards. Dates use the close or merge timestamp, not the last edit time. The records and their links refresh with the rest of the profile.
-
+Open PRs awaiting a response remain out of the resolved PR panel and contribution records. Closed and merged records refresh with the rest of the profile. The former Recent Work timeline is removed from the generated profile and data collection.

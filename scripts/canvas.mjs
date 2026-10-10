@@ -1,11 +1,11 @@
 import {xml,compact,wrap} from './format.mjs';
-import {renderImpact,renderActivity} from './sections.mjs';
+import {renderImpact} from './sections.mjs';
 import {renderShowcase} from './showcase.mjs';
 
 const ink='#17232f', muted='#667583', blue='#4264e8', rule='#e1e7ed';
 const t=(x,y,value,size=18,color=ink,extra='')=>`<text x="${x}" y="${y}" font-size="${size}" fill="${color}" ${extra}>${xml(value)}</text>`;
 const line=(x,y,x2,y2,color=rule,extra='')=>`<path d="M${x} ${y}L${x2} ${y2}" fill="none" stroke="${color}" ${extra}/>`;
-const label=(x,y,value)=>t(x,y,value,13,muted,'font-weight="600" letter-spacing="1.3"');
+const label=(x,y,value)=>t(x,y,value,17,muted,'font-weight="600" letter-spacing="1.1"');
 function block(x,y,value,width,size=18,color=ink,maxLines=3,lineHeight=size*1.4,extra='') {
   const lines=wrap(value,width,size,maxLines);
   return {svg:lines.map((s,i)=>t(x,y+i*lineHeight,s,size,color,extra)).join(''),bottom:y+(lines.length-1)*lineHeight};
@@ -19,7 +19,7 @@ export function wave(x,y,width,animated){
   }
   return svg;
 }
-export function gauge(x,y,count,animated,labelSize=12){
+export function gauge(x,y,count,animated,labelSize=15){
   const value=count<100?String(count).padStart(2,'0'):compact(count);
   const size=value.length>3?83:value.length>2?104:126;
   return `<circle cx="${x}" cy="${y}" r="106" fill="#fbfcff" stroke="#e7edfa"/>
@@ -33,16 +33,16 @@ export function spotlight(data,x,y,width,mobile){
   if(!s)return {svg:svg+t(x,y+52,'Building in public',30),bottom:y+220};
   const title=block(x,y+43,s.repoName,width,mobile?27:26,ink,2,33,'font-weight="600" letter-spacing="-.4"');svg+=title.svg;
   const statusY=title.bottom+29;
-  svg+=`<circle cx="${x+4}" cy="${statusY-4}" r="3" fill="${blue}"/>`+t(x+17,statusY,`${s.status.toUpperCase()} PR #${s.number}`,13,blue,'font-weight="600" letter-spacing=".6"');
-  const desc=block(x,statusY+29,s.title,width,18,ink,2,25);svg+=desc.svg;
+  svg+=`<circle cx="${x+4}" cy="${statusY-4}" r="3" fill="${blue}"/>`+t(x+17,statusY,`${s.status.toUpperCase()} PR #${s.number}`,16,blue,'font-weight="600" letter-spacing=".5"');
+  const desc=block(x,statusY+29,s.title,width,19,ink,2,27);svg+=desc.svg;
   let bottom=desc.bottom+25;
-  svg+=t(x,bottom,`${compact(s.stars)} repository stars  ·  ${compact(s.forks)} forks`,13,muted);
+  svg+=t(x,bottom,`${compact(s.stars)} repository stars  ·  ${compact(s.forks)} forks`,16,muted);
   const open=data.openSpotlight;
   if(open){
     svg+=line(x,bottom+22,x+width,bottom+22)+label(x,bottom+47,'OPEN PROPOSAL');
     const name=block(x,bottom+77,open.repoName,width,mobile?23:22,ink,2,29,'font-weight="500"');svg+=name.svg;
     bottom=name.bottom+28;
-    svg+=t(x,bottom,`OPEN PR #${open.number}  ·  ${compact(open.stars)} stars / ${compact(open.forks)} forks`,13,blue);
+    svg+=t(x,bottom,`OPEN PR #${open.number}  ·  ${compact(open.stars)} stars / ${compact(open.forks)} forks`,16,blue);
   }
   return {svg,bottom:bottom+12};
 }
@@ -52,23 +52,23 @@ function pipeline(p,x,y,width,mobile,animated){
   let svg='';
   p.inputs.slice(0,3).forEach((name,i)=>{
     const py=y+i*40;
-    svg+=t(x,py,name.toUpperCase(),mobile?15:13,muted,'letter-spacing=".8"');
-    if(p.encoders?.[i])svg+=t(x+62,py,p.encoders[i],mobile?14:13,muted);
+    svg+=t(x,py,name.toUpperCase(),mobile?18:17,muted,'letter-spacing=".6"');
+    if(p.encoders?.[i])svg+=t(x+96,py,p.encoders[i],mobile?17:16,muted);
     svg+=`<path d="M${x+169} ${py-5}C${join-30} ${py-5} ${join-26} ${y+35} ${join} ${y+35}L${mid-12} ${y+35}" stroke="#ccd8f3" fill="none"/>`;
   });
-  svg+=`<circle cx="${mid}" cy="${y+35}" r="4" fill="${blue}"/>`+t(mid,y+64,'CROSS-ATTENTION',mobile?14:12,muted,'text-anchor="middle" letter-spacing=".2"');
+  svg+=`<circle cx="${mid}" cy="${y+35}" r="4" fill="${blue}"/>`+t(mid,y+64,'CROSS-ATTENTION',mobile?17:16,muted,'text-anchor="middle" letter-spacing=".2"');
   const path=`M${mid+8} ${y+35}H${end-12}`;
   svg+=`<path d="${path}" stroke="#ccd8f3" fill="none"/><path ${animated?'class="flow"':''} d="${path}" pathLength="100" stroke="${blue}" stroke-width="2" stroke-dasharray="3 97" fill="none"/>`;
-  svg+=t(end,y+14,(p.output||'OUTPUT').toUpperCase(),mobile?14:12,muted,'text-anchor="end" letter-spacing=".5"');
+  svg+=t(end,y+14,(p.output||'OUTPUT').toUpperCase(),mobile?17:16,muted,'text-anchor="end" letter-spacing=".4"');
   return {svg,bottom:y+104};
 }
 export function projectCard(p,x,y,width,mobile,animated){
   let svg='';const name=block(x,y,p.name,width,mobile?26:26,ink,2,34,'font-weight="600" letter-spacing="-.3"');svg+=name.svg;
-  const desc=block(x,name.bottom+35,p.description,width,mobile?20:18,muted,3,mobile?29:26);svg+=desc.svg;
-  svg+=t(x,desc.bottom+31,(p.role||(p.fork?'Working fork':'Independent project')).toUpperCase(),11,muted,'letter-spacing=".8"');
+  const desc=block(x,name.bottom+35,p.description,width,mobile?21:19,muted,3,mobile?30:28);svg+=desc.svg;
+  svg+=t(x,desc.bottom+31,(p.role||(p.fork?'Working fork':'Independent project')).toUpperCase(),16,muted,'letter-spacing=".6"');
   let bottom=desc.bottom+55;
   const flow=pipeline(p,x,bottom,width,mobile,animated);svg+=flow.svg;bottom=flow.bottom;
-  if(p.stack?.length){const stack=block(x,bottom+8,p.stack.join('  /  '),width,14,blue,2,21);svg+=stack.svg;bottom=stack.bottom+27;}
+  if(p.stack?.length){const stack=block(x,bottom+8,p.stack.join('  /  '),width,18,blue,2,25);svg+=stack.svg;bottom=stack.bottom+29;}
   else bottom+=18;
   return {svg,bottom};
 }
@@ -76,15 +76,15 @@ export function contributionCard(c,x,y,width,mobile){
   const groups=c.groups||[c];let svg='',py=y;
   groups.forEach((group,index)=>{
     if(index)svg+=line(x,py-12,x+width,py-12);
-    const headingSize=mobile?22:20;
+    const headingSize=mobile?26:24;
     const heading=group.name||group.repo?.split('/')[1]?.replaceAll('-',' ')||'Open-source work';
     const headingBlock=block(x,py,heading,width,headingSize,ink,2,headingSize*1.25,'font-weight="600" letter-spacing="-.2"');
     svg+=headingBlock.svg;py=headingBlock.bottom+(mobile?27:24);
     const summary=[];
     if(group.count)summary.push(`${String(group.count).padStart(2,'0')} MERGED`);
     if(group.closedCount)summary.push(`${String(group.closedCount).padStart(2,'0')} CLOSED`);
-    if(summary.length)svg+=t(x,py,summary.join('  /  ')+' PRs',mobile?15:14,blue,'letter-spacing=".5"');
-    py+=mobile?31:27;
+    if(summary.length)svg+=t(x,py,summary.join('  /  ')+' PRs',mobile?19:18,blue,'letter-spacing=".4"');
+    py+=mobile?33:29;
     const rows=[...(group.pulls||[]).map(pr=>({...pr,status:'merged'})),...(group.closed||[])].slice(0,10);
     const columns=mobile?1:2,gap=mobile?0:20,columnWidth=(width-gap*(columns-1))/columns,perColumn=Math.ceil(rows.length/columns);
     let groupBottom=py;
@@ -92,20 +92,20 @@ export function contributionCard(c,x,y,width,mobile){
       const cx=x+col*(columnWidth+gap),slice=rows.slice(col*perColumn,(col+1)*perColumn),trackX=cx+4;
       let rowY=py;
       for(const pr of slice){
-        const meta=`${pr.status==='closed'?'CLOSED':'MERGED'}  ·  ${pr.date?new Date(pr.date).toLocaleDateString('en-GB',{day:'2-digit',month:'short',year:'numeric',timeZone:'Asia/Shanghai'}).toUpperCase():''}`;
+        const meta=pr.status==='closed'?'CLOSED':'MERGED';
         svg+=`<circle cx="${trackX}" cy="${rowY-5}" r="3.5" fill="${pr.status==='merged'?blue:'#fff'}" stroke="${blue}"/>`;
-        svg+=t(cx+18,rowY,`#${pr.number}`,mobile?14:12,blue,'font-weight="600" letter-spacing=".5"');
-        svg+=t(cx+63,rowY,meta,mobile?14:12,pr.status==='merged'?blue:muted,'font-weight="600" letter-spacing=".5"');
-        const title=block(cx+18,rowY+18,pr.title,columnWidth-20,mobile?18:16,ink,2,mobile?21:18);
-        svg+=title.svg;rowY=title.bottom+(mobile?23:20);
+        svg+=t(cx+18,rowY,`#${pr.number}`,mobile?18:17,blue,'font-weight="600" letter-spacing=".4"');
+        svg+=t(cx+63,rowY,meta,mobile?18:17,pr.status==='merged'?blue:muted,'font-weight="600" letter-spacing=".3"');
+        const title=block(cx+18,rowY+21,pr.title,columnWidth-20,mobile?21:19,ink,2,mobile?26:23);
+        svg+=title.svg;rowY=title.bottom+(mobile?24:22);
       }
-      if(slice.length>1)svg+=line(trackX,py-5,trackX,rowY-(mobile?27:24),'#d8e2f7');
+      if(slice.length>1)svg+=line(trackX,py-5,trackX,rowY-(mobile?28:26),'#d8e2f7');
       groupBottom=Math.max(groupBottom,rowY);
     }
     py=groupBottom;
-    if(group.count>(group.pulls||[]).length){svg+=t(x,py,`+ ${group.count-group.pulls.length} merged PRs`,12,muted);py+=21;}
-    if(group.closedCount>(group.closed||[]).length){svg+=t(x,py,`+ ${group.closedCount-(group.closed||[]).length} closed PRs`,12,muted);py+=21;}
-    py+=index<groups.length-1?16:0;
+    if(group.count>(group.pulls||[]).length){svg+=t(x,py,`+ ${group.count-group.pulls.length} merged PRs`,14,muted);py+=23;}
+    if(group.closedCount>(group.closed||[]).length){svg+=t(x,py,`+ ${group.closedCount-(group.closed||[]).length} closed PRs`,14,muted);py+=23;}
+    py+=index<groups.length-1?18:0;
   });
   return {svg,bottom:py+2};
 }
@@ -113,14 +113,14 @@ export function contributionCard(c,x,y,width,mobile){
 export function renderHero(data,config,{mobile=false,animated=true}={}){
   const width=mobile?600:1200,margin=mobile?30:56,inner=width-margin*2;
   const updated=data.updatedAt?new Date(data.updatedAt).toLocaleDateString('en-GB',{day:'2-digit',month:'short',year:'numeric',timeZone:'Asia/Shanghai'}).toUpperCase():'';
-  let svg=label(margin,35,'PROFILE')+t(width-margin,35,`@${data.username||config.username}`,12,muted,'text-anchor="end"');
+  let svg=label(margin,35,'PROFILE')+t(width-margin,35,`@${data.username||config.username}`,16,muted,'text-anchor="end"');
   svg+=t(margin,mobile?103:116,config.name.toUpperCase(),mobile?49:66,ink,'font-weight="600" letter-spacing="-1.8"');
   svg+=t(margin,mobile?141:157,config.tagline,mobile?21:24,blue,'letter-spacing="-.2"');
   const intro=config.bio?block(margin,mobile?183:200,config.bio,inner,mobile?20:18,muted,mobile?3:2,mobile?29:27):{svg:'',bottom:mobile?141:157};svg+=intro.svg;
   const headerBottom=intro.bottom+32;
   svg+=line(margin,headerBottom,width-margin,headerBottom);
   const heroY=headerBottom+39;
-  svg+=label(margin,heroY,'CONTRIBUTION RECORD');
+  svg+=label(margin,heroY,'CONTRIBUTION RECORDS');
   let worksY;
   if(mobile){
     svg+=gauge(155,heroY+150,data.mergedPullRequests,animated);
@@ -164,12 +164,10 @@ export function renderHero(data,config,{mobile=false,animated=true}={}){
   }
   const showcase=renderShowcase(data.showcase,margin,bottom+20,inner,mobile);svg+=showcase.svg;
   const impact=renderImpact(data,margin,showcase.bottom+20,inner,mobile);svg+=impact.svg;
-  const activity=renderActivity(data,margin,impact.bottom+24,inner,mobile);svg+=activity.svg;
-  const footer=activity.bottom+22,height=footer+57;
-  svg+=line(margin,footer-16,width-margin,footer-16)+t(margin,footer+14,'PUBLIC GITHUB DATA',10,muted,'letter-spacing="1"')+t(width-margin,footer+14,updated?`UPDATED ${updated}`:'AUTOMATIC UPDATES',10,muted,'text-anchor="end" letter-spacing=".5"');
+  const footer=impact.bottom+22,height=footer+57;
+  svg+=line(margin,footer-16,width-margin,footer-16)+t(margin,footer+14,'PUBLIC GITHUB DATA',14,muted,'letter-spacing=".7"')+t(width-margin,footer+14,updated?`UPDATED ${updated}`:'AUTOMATIC UPDATES',14,muted,'text-anchor="end" letter-spacing=".4"');
   return `<svg xmlns="http://www.w3.org/2000/svg" width="${width}" height="${height}" viewBox="0 0 ${width} ${height}" role="img" aria-labelledby="title desc">
 <title id="title">${xml(config.name)} — public builder profile</title><desc id="desc">${data.mergedPullRequests} merged upstream pull requests, ${data.projects.length} public projects. ${data.spotlight?`${xml(data.spotlight.repo)}: ${data.spotlight.stars} repository stars; ${data.spotlight.status} PR ${data.spotlight.number}.`:''} Projects and contribution records update from GitHub.</desc>
 <style>text{font-family:Arial,Helvetica,sans-serif} ${animated?`.wave{animation:wave 12s ease-in-out infinite}.flow{animation:flow 12s linear infinite}@keyframes wave{0%,100%{transform:translateY(0)}50%{transform:translateY(-9px)}}@keyframes flow{to{stroke-dashoffset:-100}}@media(prefers-reduced-motion:reduce){.wave,.flow{animation:none!important}}`:''}</style>
 <rect width="${width}" height="${height}" fill="#fff"/>${svg}</svg>\n`;
 }
-

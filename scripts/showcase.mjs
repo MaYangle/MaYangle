@@ -71,26 +71,26 @@ function icon(id,x,y){
 function card(section,x,y,width,mobile,maxVisible){
   const left=x+48,bodyWidth=width-48;
   let svg=icon(section.id,x,y+3);
-  const heading=wrap(section.title,bodyWidth,mobile?26:23,2);
-  heading.forEach((s,i)=>svg+=text(left,y+26+i*31,s,mobile?26:23,ink,'font-weight="500" letter-spacing="-.2"'));
-  let py=y+26+(heading.length-1)*31+31;
-  const description=wrap(section.description,bodyWidth,mobile?19:17,2);
-  description.forEach((s,i)=>svg+=text(left,py+i*26,s,mobile?19:17,muted));
-  py+=(description.length-1)*26+31;
+  const heading=wrap(section.title,bodyWidth,mobile?27:24,2);
+  heading.forEach((s,i)=>svg+=text(left,y+27+i*33,s,mobile?27:24,ink,'font-weight="500" letter-spacing="-.2"'));
+  let py=y+27+(heading.length-1)*33+33;
+  const description=wrap(section.description,bodyWidth,mobile?22:20,2);
+  description.forEach((s,i)=>svg+=text(left,py+i*(mobile?30:29),s,mobile?22:20,muted));
+  py+=(description.length-1)*(mobile?30:29)+34;
   const visible=section.items.slice(0,maxVisible);
   if(!visible.length){
     svg+=`<path d="M${left} ${py}H${x+width}" stroke="#dbe2e9" stroke-dasharray="3 5" fill="none"/>`;
-    svg+=text(left,py+25,'No public entry yet',mobile?15:13,muted);
+    svg+=text(left,py+26,'No public entry yet',mobile?19:17,muted);
     return {svg,bottom:py+52};
   }
   for(const item of visible){
     let meta=item.kind.toUpperCase();
     if(item.date)meta+=' · '+new Date(item.date).toLocaleDateString('en-GB',{day:'2-digit',month:'short',year:'numeric',timeZone:'Asia/Shanghai'}).toUpperCase();
-    svg+=text(left,py,meta,12,blue,'letter-spacing=".5"');
-    const title=wrap(item.title,bodyWidth,mobile?21:19,2);py+=29;
-    title.forEach((s,i)=>svg+=text(left,py+i*27,s,mobile?21:19,ink));py+=(title.length-1)*27;
-    if(item.summary){const summary=wrap(item.summary,bodyWidth,mobile?18:16,2);py+=27;summary.forEach((s,i)=>svg+=text(left,py+i*24,s,mobile?18:16,muted));py+=(summary.length-1)*24;}
-    py+=35;
+    svg+=text(left,py,meta,17,blue,'letter-spacing=".4"');
+    const title=wrap(item.title,bodyWidth,mobile?24:22,2);py+=33;
+    title.forEach((s,i)=>svg+=text(left,py+i*(mobile?30:28),s,mobile?24:22,ink));py+=(title.length-1)*(mobile?30:28);
+    if(item.summary){const summary=wrap(item.summary,bodyWidth,mobile?21:19,2);py+=29;summary.forEach((s,i)=>svg+=text(left,py+i*(mobile?28:26),s,mobile?21:19,muted));py+=(summary.length-1)*(mobile?28:26);}
+    py+=40;
   }
   return {svg,bottom:py+4};
 }
@@ -98,7 +98,7 @@ function card(section,x,y,width,mobile,maxVisible){
 export function renderShowcaseModule(section,width,mobile,maxVisible,includeTitle=false){
   const x=mobile?30:48,inner=width-x*2,y=includeTitle?75:37;
   let svg='';
-  if(includeTitle)svg=line(0,1,width,1)+text(x,34,'RESEARCH & OUTPUTS',13,muted,'font-weight="600" letter-spacing="1.3"');
+  if(includeTitle)svg=line(0,1,width,1)+text(x,34,'RESEARCH & OUTPUTS',17,muted,'font-weight="600" letter-spacing="1.1"');
   const result=card(section,x,y,inner,mobile,maxVisible);
   svg+=result.svg;
   return {svg,bottom:Math.max(result.bottom+16,includeTitle?58:0)};
@@ -107,7 +107,7 @@ export function renderShowcaseModule(section,width,mobile,maxVisible,includeTitl
 export function renderShowcase(showcase,x,y,width,mobile){
   if(!showcase?.sections?.length)return {svg:'',bottom:y-20};
   const columns=mobile?1:2,gap=64,cw=(width-gap*(columns-1))/columns;
-  let svg=line(x,y,x+width,y)+text(x,y+36,showcase.title,13,muted,'font-weight="600" letter-spacing="1.3"');
+  let svg=line(x,y,x+width,y)+text(x,y+36,showcase.title,16,muted,'font-weight="600" letter-spacing="1.1"');
   let py=y+76;
   for(let i=0;i<showcase.sections.length;i+=columns){
     let rowBottom=py;
@@ -119,4 +119,3 @@ export function renderShowcase(showcase,x,y,width,mobile){
   }
   return {svg,bottom:py};
 }
-
