@@ -1,18 +1,31 @@
 {
-  "schemaVersion": 2,
+  "schemaVersion": 3,
   "username": "MaYangle",
   "mergedPullRequests": 6,
   "openPullRequests": 1,
   "spotlight": {
+    "repo": "19376357/Bilingual-Multimodal-Sentiment-Analysis",
+    "repoName": "Bilingual Multimodal Sentiment Analysis",
+    "repoUrl": "https://github.com/19376357/Bilingual-Multimodal-Sentiment-Analysis",
+    "stars": 7,
+    "forks": 3,
+    "number": 7,
+    "title": "Training and inference reliability",
+    "url": "https://github.com/19376357/Bilingual-Multimodal-Sentiment-Analysis/pull/7",
+    "status": "merged",
+    "date": "2025-08-31T09:29:55Z"
+  },
+  "openSpotlight": {
     "repo": "rohitg00/ai-engineering-from-scratch",
     "repoName": "AI Engineering from Scratch",
     "repoUrl": "https://github.com/rohitg00/ai-engineering-from-scratch",
-    "stars": 66407,
-    "forks": 11626,
+    "stars": 66447,
+    "forks": 11635,
     "number": 527,
     "title": "Research links for seven lessons",
     "url": "https://github.com/rohitg00/ai-engineering-from-scratch/pull/527",
-    "status": "open"
+    "status": "open",
+    "date": "2026-10-03T12:16:31Z"
   },
   "projects": [
     {
@@ -64,6 +77,21 @@
           "number": 4,
           "url": "https://github.com/19376357/Bilingual-Multimodal-Sentiment-Analysis/pull/4",
           "title": "Open-source licensing"
+        },
+        {
+          "number": 3,
+          "url": "https://github.com/19376357/Bilingual-Multimodal-Sentiment-Analysis/pull/3",
+          "title": "Project README updates"
+        },
+        {
+          "number": 2,
+          "url": "https://github.com/19376357/Bilingual-Multimodal-Sentiment-Analysis/pull/2",
+          "title": "Project usability updates"
+        },
+        {
+          "number": 1,
+          "url": "https://github.com/19376357/Bilingual-Multimodal-Sentiment-Analysis/pull/1",
+          "title": "Initial project README"
         }
       ]
     }
@@ -103,5 +131,5 @@
       "date": "2025-08-27T07:32:59Z"
     }
   ],
-  "updatedAt": "2026-10-10T12:31:07.229Z"
+  "updatedAt": "2026-10-10T13:08:25.947Z"
 }
