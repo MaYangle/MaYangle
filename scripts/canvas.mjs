@@ -10,7 +10,7 @@ function block(x,y,value,width,size=18,color=ink,maxLines=3,lineHeight=size*1.4,
   const lines=wrap(value,width,size,maxLines);
   return {svg:lines.map((s,i)=>t(x,y+i*lineHeight,s,size,color,extra)).join(''),bottom:y+(lines.length-1)*lineHeight};
 }
-function wave(x,y,width,animated){
+export function wave(x,y,width,animated){
   const path=`M${x} ${y+10}C${x+width*.24} ${y+31} ${x+width*.48} ${y-21} ${x+width*.7} ${y+5}S${x+width*.9} ${y+26} ${x+width} ${y+17}`;
   let svg=`<path d="${path}" fill="none" stroke="${blue}" stroke-opacity=".1"/><path ${animated?'class="flow"':''} d="${path}" pathLength="100" fill="none" stroke="${blue}" stroke-opacity=".75" stroke-width="3" stroke-linecap="round" stroke-dasharray=".4 99.6"/>`;
   for(let row=0;row<3;row++)for(let i=0;i<38;i++){
@@ -19,15 +19,15 @@ function wave(x,y,width,animated){
   }
   return svg;
 }
-function gauge(x,y,count,animated){
+export function gauge(x,y,count,animated,labelSize=12){
   const value=count<100?String(count).padStart(2,'0'):compact(count);
   const size=value.length>3?83:value.length>2?104:126;
   return `<circle cx="${x}" cy="${y}" r="106" fill="#fbfcff" stroke="#e7edfa"/>
   <circle cx="${x}" cy="${y}" r="106" fill="none" stroke="${blue}" stroke-opacity=".26" stroke-width="1.5" stroke-dasharray="510 156" transform="rotate(126 ${x} ${y})"/>
   ${t(x,y+27,value,size,blue,'text-anchor="middle" font-weight="400" letter-spacing="-5"')}
-  ${t(x,y+65,'MERGED UPSTREAM PRS',12,muted,'text-anchor="middle" letter-spacing=".8"')}`;
+  ${t(x,y+65,'MERGED UPSTREAM PRS',labelSize,muted,'text-anchor="middle" letter-spacing=".8"')}`;
 }
-function spotlight(data,x,y,width,mobile){
+export function spotlight(data,x,y,width,mobile){
   const s=data.spotlight;
   let svg=label(x,y,s?.status==='merged'?'LATEST MERGED PR':'RECENT OPEN PR');
   if(!s)return {svg:svg+t(x,y+52,'Building in public',30),bottom:y+220};
@@ -62,7 +62,7 @@ function pipeline(p,x,y,width,mobile,animated){
   svg+=t(end,y+14,(p.output||'OUTPUT').toUpperCase(),mobile?14:12,muted,'text-anchor="end" letter-spacing=".5"');
   return {svg,bottom:y+104};
 }
-function projectCard(p,x,y,width,mobile,animated){
+export function projectCard(p,x,y,width,mobile,animated){
   let svg='';const name=block(x,y,p.name,width,mobile?26:26,ink,2,34,'font-weight="600" letter-spacing="-.3"');svg+=name.svg;
   const desc=block(x,name.bottom+35,p.description,width,mobile?20:18,muted,3,mobile?29:26);svg+=desc.svg;
   svg+=t(x,desc.bottom+31,(p.role||(p.fork?'Working fork':'Independent project')).toUpperCase(),11,muted,'letter-spacing=".8"');
@@ -72,7 +72,7 @@ function projectCard(p,x,y,width,mobile,animated){
   else bottom+=18;
   return {svg,bottom};
 }
-function contributionCard(c,x,y,width,mobile){
+export function contributionCard(c,x,y,width,mobile){
   let svg='';const title=block(x,y,c.name||c.repo.split('/')[1].replaceAll('-',' '),width,mobile?26:25,ink,3,32,'font-weight="600" letter-spacing="-.3"');svg+=title.svg;
   svg+=t(x,title.bottom+36,`${c.count} merged pull requests`,20,blue);
   let py=title.bottom+80;
@@ -150,3 +150,4 @@ export function renderHero(data,config,{mobile=false,animated=true}={}){
 <style>text{font-family:Arial,Helvetica,sans-serif} ${animated?`.wave{animation:wave 12s ease-in-out infinite}.flow{animation:flow 12s linear infinite}@keyframes wave{0%,100%{transform:translateY(0)}50%{transform:translateY(-9px)}}@keyframes flow{to{stroke-dashoffset:-100}}@media(prefers-reduced-motion:reduce){.wave,.flow{animation:none!important}}`:''}</style>
 <rect width="${width}" height="${height}" fill="#fff"/>${svg}</svg>\n`;
 }
+

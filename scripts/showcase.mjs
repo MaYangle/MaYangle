@@ -95,6 +95,15 @@ function card(section,x,y,width,mobile,maxVisible){
   return {svg,bottom:py+4};
 }
 
+export function renderShowcaseModule(section,width,mobile,maxVisible,includeTitle=false){
+  const x=mobile?30:48,inner=width-x*2,y=includeTitle?75:37;
+  let svg='';
+  if(includeTitle)svg=line(0,1,width,1)+text(x,34,'RESEARCH & OUTPUTS',13,muted,'font-weight="600" letter-spacing="1.3"');
+  const result=card(section,x,y,inner,mobile,maxVisible);
+  svg+=result.svg;
+  return {svg,bottom:Math.max(result.bottom+16,includeTitle?58:0)};
+}
+
 export function renderShowcase(showcase,x,y,width,mobile){
   if(!showcase?.sections?.length)return {svg:'',bottom:y-20};
   const columns=mobile?1:2,gap=64,cw=(width-gap*(columns-1))/columns;
@@ -110,3 +119,4 @@ export function renderShowcase(showcase,x,y,width,mobile){
   }
   return {svg,bottom:py};
 }
+

@@ -6,12 +6,13 @@ The profile is a small data-driven project. Public GitHub data is fetched, norma
 
 The **Refresh profile** workflow runs every six hours, on changes to the configuration or generator, and through its **Run workflow** button. GitHub schedules are best effort and can be delayed. GitHub may disable scheduled workflows after 60 days without repository activity; the workflow can be re-enabled from the Actions page. No personal token or external image server is required: the workflow uses its repository-scoped `GITHUB_TOKEN`.
 
-The generator updates:
+The generator updates each dashboard module independently:
 
 - The total number of merged public PRs to repositories outside this account.
 - The spotlight PR, its current status, and the upstream repository's stars and forks.
 - Public projects, their descriptions, and the project count.
-- The project and merged-contribution details inside the artwork.
+- The project, merged-contribution, showcase, impact, and activity modules.
+- Native README links for the profile, each PR spotlight, project, contribution group, showcase area, impact panel, and recent-work card.
 
 The primary spotlight prefers merged upstream PRs, ordered by merge date; stars only break date ties. If no merged work exists, it uses the latest open PR. A separate, explicitly labeled open-proposal summary keeps current work visible. Current PR status is checked against the pull-request endpoint before publication. The candidate pool is the latest 100 open and 100 merged public PRs. Closed, unmerged proposals are excluded. Repository stars always describe the upstream repository, not personal ownership.
 
@@ -51,9 +52,9 @@ Otherwise the generator uses `GITHUB_TOKEN` when it is set, or GitHub's anonymou
 
 ## Motion and layout
 
-The full-page illustration uses a twelve-second loop of a light particle wave and moving signals in the project pipeline. The instrument values come from GitHub data and do not animate into invented values. A separate mobile layout stacks the modules and avoids shrinking desktop labels into unreadable text. The README's `<picture>` element selects static versions for readers who request reduced motion.
+The white dashboard is assembled from individually linked SVG modules in the README. The contribution instrument uses a twelve-second loop of a light particle wave; project pipelines animate their moving signal. Instrument values come from GitHub data and do not animate into invented values. Each image's `<picture>` element selects a static version for readers who request reduced motion. Image filenames include content hashes, so updates replace cached assets reliably.
 
-The canvas uses a white background, dark typography, restrained blue accents, a circular contribution readout, and a curved baseline. Identity, repository scale, project detail, and merged contributions share one layout. The generated canvas grows with the visible project and contribution modules. Contact links remain below the illustration. The introduction is intentionally limited to “AI engineer”.
+The dashboard keeps its white background, dark typography, restrained blue accents, circular contribution readout, and curved baseline. Native anchors make each module a direct route to its related public page. The open-proposal panel gives upstream repository stars and forks a stronger readout and labels them as repository metrics. Project, contribution, showcase, and recent-work modules grow or change as the public GitHub data changes. Contact links remain below the dashboard. The introduction is intentionally limited to “AI engineer”.
 
 ## Research and design references
 
@@ -92,3 +93,4 @@ The broader information structure was informed by [Sebastian Raschka's research 
 The impact module sums additions, deletions, and changed-file counts from the latest 30 merged public upstream PRs (or all of them when fewer are available). The displayed sample size makes that scope explicit. File changes are cumulative diff entries, not a count of unique files or original authorship. Missing API fields fail the refresh rather than being converted to zero.
 
 Recent work shows the latest three opened or merged public PRs. Dates use the original opening or merge timestamp, not the last edit time. Both modules refresh with the rest of the profile.
+
