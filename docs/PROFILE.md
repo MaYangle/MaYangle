@@ -30,18 +30,7 @@ Edit `profile.config.json` to:
 - Give a specific PR a shorter display title through `pullRequestLabels`.
 - Add published research, models/data, writing/talks, or demos to `showcase.sections[].items`. Empty areas are deliberately marked **No public entry yet**.
 
-Do not edit generated assets or README content directly. They will be regenerated. The only public data saved to `data/profile.json` is the normalized data used by the profile. Generated asset filenames contain a hash of their contents, so a data or design change gives GitHub a new image URL. The previous generation is retained for readers with cached README markup; older files owned by the asset manifest are removed.
-
-## Choosing displayed repositories
-
-`projects.featured` is an ordered list of repository names such as `MaYangle/Multimodal-Sentiment-Analysis`. The configured order is preserved.
-
-- `projects.mode: "auto"` puts these repositories first, then fills the remaining `maxVisible` slots from discovered public projects.
-- `projects.mode: "manual"` displays only eligible repositories in the featured list. A private, empty, archived, or excluded repository will not be made public by listing it here.
-- Forks still need an explicit `projects.include` entry before they are eligible.
-- `projects.showMore: true` adds a native, collapsed **Other public repositories** list only when eligible repositories exist beyond the selected cards. It can be disabled for a tightly curated profile.
-
-Visitors click a repository card to open that repository or a PR card to open its pull request. Showcase entries have their own public links. The README uses native links, pictures, and optional disclosure lists; it does not run a JavaScript repository selector. The previous global work-navigation row and duplicate text-version section remain removed.
+Do not edit generated assets or README content directly. They will be regenerated. The only public data saved to `data/profile.json` is the normalized data used by the profile. Generated asset filenames contain a hash of their contents, so a data or design change gives GitHub a new image URL. The previous generation is retained for readers with cached README markup; older generated files are removed.
 
 ## Local development
 
@@ -64,7 +53,7 @@ Otherwise the generator uses `GITHUB_TOKEN` when it is set, or GitHub's anonymou
 
 The full-page illustration uses a twelve-second loop of a light particle wave and moving signals in the project pipeline. The instrument values come from GitHub data and do not animate into invented values. A separate mobile layout stacks the modules and avoids shrinking desktop labels into unreadable text. The README's `<picture>` element selects static versions for readers who request reduced motion.
 
-The profile uses a white background, dark typography, restrained blue accents, and a circular contribution readout. The header, project cards, PR cards, and statistics are separate SVG assets within native Markdown links. Desktop and mobile versions share the same visual system. Contact links remain at the end. The introduction is intentionally limited to “AI engineer”.
+The canvas uses a white background, dark typography, restrained blue accents, a circular contribution readout, and a curved baseline. Identity, repository scale, project detail, and merged contributions share one layout. The generated canvas grows with the visible project and contribution modules. Contact links remain below the illustration. The introduction is intentionally limited to “AI engineer”.
 
 ## Research and design references
 
@@ -87,9 +76,9 @@ GitHub README images are the presentation surface; this project does not rely on
 
 ## Research and public-output areas
 
-The four showcase areas broaden the profile beyond PR statistics while preserving the white visual system. Empty areas are compressed into one small reserved strip by default; use `showcase.emptyMode: "hidden"` to omit them entirely. Add a real public item using `title`, `url` (HTTPS), and optionally `kind`, `date`, and `summary`. Populated entries become individually linked cards; up to `showcase.maxVisible` entries are shown per area.
+The four showcase areas broaden the profile beyond PR statistics while preserving the white visual system. They begin as empty, explicitly labeled areas, not claims of completed work. Add a real public item using `title`, `url` (HTTPS), and optionally `kind`, `date`, and `summary`. A populated area replaces its empty state automatically and grows to fit its content; up to `showcase.maxVisible` entries are shown per area.
 
-Public URLs remain in `data/profile.json` for provenance and are also used as the cards' native link targets. The removed work-navigation row is not reintroduced.
+The artwork displays entry titles and metadata. Public URLs remain in `data/profile.json` for provenance; the removed work-navigation row is not reintroduced.
 
 - **Research & experiments:** explicitly tagged project repositories are included when their topics match `autoTopics`, such as `paper-reproduction`, `research`, or `benchmark`. They are labeled as repositories, not as accepted publications.
 - **Models & datasets:** explicitly tagged repositories such as `dataset`, `model-release`, or `model-weights` are included. Generic `machine-learning` tags alone do not qualify.

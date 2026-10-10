@@ -1,6 +1,5 @@
 import { execFileSync } from 'node:child_process';
 import { validateShowcase, collectShowcase } from './showcase.mjs';
-import { validateProjectSelection } from './projects.mjs';
 
 export function validateConfig(config) {
   if (!/^[a-z\d-]+$/i.test(config.username ?? '')) throw new Error('Invalid GitHub username');
@@ -13,7 +12,6 @@ export function validateConfig(config) {
     if (!/^(https:\/\/|mailto:)/.test(url)) throw new Error('Contact links must use HTTPS or mailto');
   }
   validateShowcase(config.showcase);
-  validateProjectSelection(config);
 }
 
 export function createApi({ token = process.env.GITHUB_TOKEN, useGh = false } = {}) {
@@ -191,7 +189,7 @@ export async function collectProfile(config, api) {
   const projects=selectProjects(repos,config);
   const showcase=await collectShowcase(config,projects,api);
   return {
-    schemaVersion:5, username:config.username,
+    schemaVersion:4, username:config.username,
     mergedPullRequests:merged.total_count, openPullRequests:open.total_count,
     spotlight, openSpotlight,
     projects, contributions, impact, activity, showcase

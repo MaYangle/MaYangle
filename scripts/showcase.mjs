@@ -1,5 +1,4 @@
 import {xml,wrap} from './format.mjs';
-import {selectFeaturedProjects} from './projects.mjs';
 
 const ink='#17232f',muted='#667583',blue='#4264e8',rule='#e1e7ed';
 const text=(x,y,value,size=18,color=ink,extra='')=>`<text x="${x}" y="${y}" font-size="${size}" fill="${color}" ${extra}>${xml(value)}</text>`;
@@ -7,7 +6,6 @@ const line=(x,y,x2,y2)=>`<path d="M${x} ${y}L${x2} ${y2}" fill="none" stroke="${
 
 export function validateShowcase(showcase){
   if(!showcase)return;
-  if(!['compact','hidden'].includes(showcase.emptyMode||'compact'))throw new Error('Empty showcase mode must be compact or hidden');
   if(!Array.isArray(showcase.sections)||showcase.sections.length>6)throw new Error('Showcase supports up to six sections');
   if(!Number.isInteger(showcase.maxVisible)||showcase.maxVisible<1||showcase.maxVisible>3)throw new Error('Showcase maxVisible must be between one and three');
   const ids=new Set();
@@ -31,7 +29,7 @@ export async function collectShowcase(config,projects,api){
   validateShowcase(setup);
   const releases=[];
   if(setup.sections.some(section=>section.autoReleases)){
-    const featured=selectFeaturedProjects(projects,config);
+    const featured=projects.slice(0,config.projects.maxVisible);
     for(let i=0;i<featured.length;i+=4){
       const batch=await Promise.all(featured.slice(i,i+4).map(async project=>{
         const rows=await api(`repos/${project.repo}/releases?per_page=3`);
@@ -57,7 +55,7 @@ export async function collectShowcase(config,projects,api){
     const items=combined.filter(item=>{if(seen.has(item.url))return false;seen.add(item.url);return true;});
     return {id:section.id,title:section.title,description:section.description,items};
   });
-  return {title:setup.title||'RESEARCH & OUTPUTS',maxVisible:setup.maxVisible,emptyMode:setup.emptyMode||'compact',sections};
+  return {title:setup.title||'RESEARCH & OUTPUTS',maxVisible:setup.maxVisible,sections};
 }
 
 function icon(id,x,y){
@@ -99,26 +97,16 @@ function card(section,x,y,width,mobile,maxVisible){
 
 export function renderShowcase(showcase,x,y,width,mobile){
   if(!showcase?.sections?.length)return {svg:'',bottom:y-20};
-  const populated=showcase.sections.filter(section=>section.items.length);
-  const reserved=showcase.sections.filter(section=>!section.items.length);
-  if(!populated.length && showcase.emptyMode==='hidden')return {svg:'',bottom:y-20};
   const columns=mobile?1:2,gap=64,cw=(width-gap*(columns-1))/columns;
   let svg=line(x,y,x+width,y)+text(x,y+36,showcase.title,13,muted,'font-weight="600" letter-spacing="1.3"');
   let py=y+76;
-  for(let i=0;i<populated.length;i+=columns){
+  for(let i=0;i<showcase.sections.length;i+=columns){
     let rowBottom=py;
-    populated.slice(i,i+columns).forEach((section,j)=>{
+    showcase.sections.slice(i,i+columns).forEach((section,j)=>{
       const result=card(section,x+j*(cw+gap),py,cw,mobile,showcase.maxVisible);
       svg+=result.svg;rowBottom=Math.max(rowBottom,result.bottom);
     });
     py=rowBottom+18;
-  }
-  if(reserved.length && showcase.emptyMode!=='hidden'){
-    const cols=mobile?2:4,cell=width/cols;
-    if(populated.length){svg+=text(x,py+16,'RESERVED AREAS',12,muted,'letter-spacing="1"');py+=48;}
-    else svg+=text(x+width,y+36,'No public entry yet',mobile?11:12,muted,'text-anchor="end"');
-    reserved.forEach((section,i)=>{svg+=text(x+(i%cols)*cell,py+Math.floor(i/cols)*30,section.title,mobile?17:17,muted);});
-    py+=Math.ceil(reserved.length/cols)*30;
   }
   return {svg,bottom:py};
 }
