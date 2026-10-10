@@ -41,7 +41,7 @@ Do not edit generated assets or README content directly. They will be regenerate
 - Forks still need an explicit `projects.include` entry before they are eligible.
 - `projects.showMore: true` adds a native, collapsed **Other public repositories** list only when eligible repositories exist beyond the selected cards. It can be disabled for a tightly curated profile.
 
-Visitors click a repository card to open that repository or a PR card to open its pull request. Showcase entries have their own public links. The README uses native links, pictures, and optional disclosure lists; it does not run a JavaScript repository selector. The previous global work-navigation row and duplicate text-version section remain removed.
+Visitors click a repository card to open that repository or a PR link/card to open its pull request. The latest merged contribution is directly visible; the complete selected PR list uses a native disclosure control. Showcase entries have their own public links. The README does not run a JavaScript repository selector. The previous global work-navigation row and duplicate text-version section remain removed.
 
 ## Local development
 
@@ -64,7 +64,7 @@ Otherwise the generator uses `GITHUB_TOKEN` when it is set, or GitHub's anonymou
 
 The full-page illustration uses a twelve-second loop of a light particle wave and moving signals in the project pipeline. The instrument values come from GitHub data and do not animate into invented values. A separate mobile layout stacks the modules and avoids shrinking desktop labels into unreadable text. The README's `<picture>` element selects static versions for readers who request reduced motion.
 
-The profile uses a white background, dark typography, restrained blue accents, and a circular contribution readout. The header, project cards, PR cards, and statistics are separate SVG assets within native Markdown links. Desktop and mobile versions share the same visual system. Contact links remain at the end. The introduction is intentionally limited to “AI engineer”.
+The profile uses a white background, restrained typography and blue link accents. Selected projects lead the page, followed by accepted contributions and current proposals. Counts and cumulative diff totals are secondary metadata rather than oversized gauges. Recent activity is shown only when it adds events not already covered by the contribution and proposal sections. The header and cards are separate SVG assets within native Markdown links; PR details use accessible native links and disclosure controls. Desktop and mobile versions share the same visual system. Contact links remain at the end. The introduction is intentionally limited to “AI engineer”.
 
 ## Research and design references
 
@@ -87,7 +87,7 @@ GitHub README images are the presentation surface; this project does not rely on
 
 ## Research and public-output areas
 
-The four showcase areas broaden the profile beyond PR statistics while preserving the white visual system. Empty areas are compressed into one small reserved strip by default; use `showcase.emptyMode: "hidden"` to omit them entirely. Add a real public item using `title`, `url` (HTTPS), and optionally `kind`, `date`, and `summary`. Populated entries become individually linked cards; up to `showcase.maxVisible` entries are shown per area.
+The four showcase areas broaden the profile beyond PR statistics while preserving the white visual system. The public configuration uses `showcase.emptyMode: "hidden"` so empty areas do not occupy portfolio space. Use `"compact"` to show a small reserved strip while planning. Add a real public item using `title`, `url` (HTTPS), and optionally `kind`, `date`, and `summary`. Populated entries appear automatically as individually linked cards; up to `showcase.maxVisible` entries are shown per area.
 
 Public URLs remain in `data/profile.json` for provenance and are also used as the cards' native link targets. The removed work-navigation row is not reintroduced.
 

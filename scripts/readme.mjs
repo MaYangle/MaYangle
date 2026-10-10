@@ -4,6 +4,11 @@ import {buildPresentation} from './modules.mjs';
 export function renderReadme(data,config,assets={}){
   const blocks=buildPresentation(data,config).map(block=>{
     if(block.kind==='repositories')return `<details>\n<summary>Other public repositories (${block.items.length})</summary>\n\n${block.items.map(project=>`- [${markdown(project.name)}](${project.url})`).join('\n')}\n\n</details>`;
+    if(block.kind==='contribution-links'){
+      const c=block.contribution,latest=c.pulls[0];
+      const remaining=c.count>c.pulls.length?`\n\n[All merged PRs](https://github.com/search?q=${encodeURIComponent(`author:${config.username} repo:${c.repo} is:pr is:merged`)}&type=pullrequests)`:'';
+      return `<p><a href="${xml(latest.url)}">Latest merged · #${latest.number}: ${xml(latest.title)}</a></p>\n\n<details>\n<summary>View ${c.count} merged pull requests</summary>\n\n${c.pulls.map(pr=>`- [#${pr.number}: ${markdown(pr.title)}](${pr.url})`).join('\n')}${remaining}\n\n</details>`;
+    }
     const paths=assets[block.id]||{desktop:`assets/generated/${block.id}.svg`,mobile:`assets/generated/${block.id}-mobile.svg`,still:`assets/generated/${block.id}-still.svg`,mobileStill:`assets/generated/${block.id}-mobile-still.svg`};
     const picture=`<picture>\n  <source media="(prefers-reduced-motion: reduce) and (max-width: 600px)" srcset="${paths.mobileStill}">\n  <source media="(prefers-reduced-motion: reduce)" srcset="${paths.still}">\n  <source media="(max-width: 600px)" srcset="${paths.mobile}">\n  <img src="${paths.desktop}" width="100%" alt="${xml(block.alt)}">\n</picture>`;
     return `<p>\n${block.href?`<a href="${xml(block.href)}">\n${picture}\n</a>`:picture}\n</p>`;

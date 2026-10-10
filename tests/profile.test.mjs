@@ -209,7 +209,8 @@ test('the concise profile has only the chosen subtitle and no expandable text co
   const svg=renderHero(data,minimal),md=renderReadme(data,minimal);
   assert.ok(svg.includes('>AI engineer</text>'));
   assert.ok(!svg.includes(config.bio));
-  assert.ok(!md.includes('<details>') && !md.includes('Text version'));
+  assert.ok(!md.includes('Text version'));
+  assert.ok(md.includes('<summary>View 1 merged pull requests</summary>'));
   assert.ok(!md.includes('[PR #') && !md.includes('All projects') && !md.includes('Merged contributions'));
   assert.ok(md.includes('[GitHub](https://github.com/MaYangle)'));
 });
