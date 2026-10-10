@@ -39,7 +39,19 @@
           "MFCC",
           "MediaPipe"
         ],
-        "output": "Sentiment"
+        "fusion": "Cross-attention",
+        "output": "Sentiment",
+        "engineeringEvidence": [
+          {
+            "label": "PR #7 · Training and inference reliability",
+            "points": [
+              "Regression/classification output dtypes and batch_size=1 shapes",
+              "NaN/Inf prediction handling",
+              "Missing-face feature shapes and cross-platform result opening"
+            ],
+            "url": "https://github.com/19376357/Bilingual-Multimodal-Sentiment-Analysis/pull/7"
+          }
+        ]
       }
     ]
   },

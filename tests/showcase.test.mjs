@@ -1,8 +1,10 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {collectShowcase,renderShowcase,validateShowcase} from '../scripts/showcase.mjs';
+import {collectShowcase,renderShowcase,renderShowcaseModule,validateShowcase} from '../scripts/showcase.mjs';
 import {collectProfile} from '../scripts/data.mjs';
 import {renderHero} from '../scripts/render.mjs';
+import {buildModules} from '../scripts/modules.mjs';
+import {renderReadme} from '../scripts/readme.mjs';
 
 const section=(id,title,extra={})=>({id,title,description:'Public work in this area.',items:[],...extra});
 const setup=()=>({title:'RESEARCH & OUTPUTS',maxVisible:2,sections:[
@@ -19,17 +21,44 @@ test('four empty areas are honest placeholders with no fabricated entries',async
   assert.equal(result.sections.length,4);
   assert.ok(result.sections.every(s=>s.items.length===0));
   const svg=renderShowcase(result,56,100,1088,false).svg;
-  assert.equal((svg.match(/No public entry yet/g)||[]).length,4);
+  assert.equal((svg.match(/NO PUBLIC ENTRY YET/gi)||[]).length,4);
   assert.ok(!svg.includes('Coming soon'));
+});
+
+test('empty showcase cards stay compact and grow when mobile description wraps',()=>{
+  const card=section('research','Research & experiments',{description:'Paper reproductions, ablations and evaluations.'});
+  const desktop=renderShowcaseModule(card,1200,false,2,false);
+  const mobile=renderShowcaseModule(card,600,true,2,false);
+  assert.ok(desktop.bottom>=130&&desktop.bottom<=150);
+  assert.ok(mobile.bottom>desktop.bottom);
+  assert.match(mobile.svg,/No public entry yet/);
 });
 
 test('a curated item replaces its empty state while the other areas remain ready',async()=>{
   const c=config();c.showcase.sections[2].items=[{title:'A published technical note',url:'https://example.org/note',kind:'Article',date:'2026-10-10',summary:'A short explanation.'}];
   const result=await collectShowcase(c,[],async()=>[]);
   const svg=renderShowcase(result,30,50,540,true).svg;
-  assert.equal((svg.match(/No public entry yet/g)||[]).length,3);
+  assert.equal((svg.match(/NO PUBLIC ENTRY YET/gi)||[]).length,3);
   assert.ok(svg.includes('A published technical note'));
   assert.equal(result.sections[2].items[0].source,'curated');
+});
+
+test('each visible showcase entry gets a direct full-width link with no profile table layout',async()=>{
+  const c=config();
+  c.showcase.sections[2].items=[
+    {title:'A technical note',url:'https://example.org/note',kind:'Article',summary:'A concise note.'},
+    {title:'A conference talk',url:'https://example.org/talk',kind:'Talk',summary:'A recorded talk.'}
+  ];
+  const showcase=await collectShowcase(c,[],async()=>[]);
+  const data={username:c.username,mergedPullRequests:0,closedPullRequests:0,openPullRequests:0,spotlight:null,resolvedSpotlight:null,projects:[],contributions:[],impact:null,showcase};
+  const modules=buildModules(data,c);
+  const entries=modules.filter(module=>module.showcaseSection===2);
+  assert.deepEqual(entries.map(module=>module.id),['showcase-3-1','showcase-3-2']);
+  assert.deepEqual(entries.map(module=>module.href),['https://example.org/note','https://example.org/talk']);
+  const readme=renderReadme(data,c);
+  assert.ok(readme.includes('href="https://example.org/note"'));
+  assert.ok(readme.includes('href="https://example.org/talk"'));
+  assert.doesNotMatch(readme,/<table\b/);
 });
 
 test('explicit topics classify repositories without inventing research or model claims',async()=>{

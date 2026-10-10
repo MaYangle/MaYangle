@@ -7,6 +7,14 @@ export function validateConfig(config) {
   if (!Number.isInteger(config.projects?.maxVisible) || config.projects.maxVisible < 1 || config.projects.maxVisible > 8) throw new Error('maxVisible must be between 1 and 8');
   for (const item of config.projects.include ?? []) {
     if (!/^[\w.-]+\/[\w.-]+$/.test(item.repo) || item.repo.split('/')[0].toLowerCase() !== config.username.toLowerCase()) throw new Error('Included projects must belong to the configured user');
+    if (item.fusion !== undefined && (typeof item.fusion !== 'string' || !item.fusion.trim())) throw new Error('Project fusion labels must be non-empty text');
+    if (item.engineeringEvidence && (!Array.isArray(item.engineeringEvidence) || item.engineeringEvidence.length > 3)) throw new Error('Projects support up to three engineering evidence links');
+    for (const evidence of item.engineeringEvidence ?? []) {
+      const points=evidence.points??(evidence.summary?[evidence.summary]:[]);
+      if (typeof evidence.label !== 'string' || !evidence.label.trim() || !Array.isArray(points) || points.length<1 || points.length>3 || points.some(point=>typeof point!=='string'||!point.trim())) throw new Error('Project evidence needs a label and one to three factual points');
+      let url;try { url = new URL(evidence.url); } catch { throw new Error('Project evidence needs a public HTTPS URL'); }
+      if (url.protocol !== 'https:' || url.hostname !== 'github.com' || url.username || url.password) throw new Error('Project evidence needs a public GitHub HTTPS URL');
+    }
   }
   for (const url of Object.values(config.links ?? {})) {
     if (!/^(https:\/\/|mailto:)/.test(url)) throw new Error('Contact links must use HTTPS or mailto');
@@ -57,11 +65,15 @@ export function selectProjects(repos, config) {
       language:repo.language || null,
       topics:Array.isArray(repo.topics)?repo.topics.filter(topic=>typeof topic==='string'):[],
       fork:repo.fork,
-      role:custom?.role || (repo.fork ? 'Working fork' : 'Independent project'),
+      role:custom?.role || (repo.fork ? 'Working fork' : 'Original repository'),
       stack:custom?.stack || (repo.language ? [repo.language] : []),
       inputs:custom?.inputs || [],
       encoders:custom?.encoders || [],
-      output:custom?.output || ''
+      fusion:custom?.fusion || '',
+      output:custom?.output || '',
+      engineeringEvidence:(custom?.engineeringEvidence||[]).map(evidence=>({
+        label:evidence.label,points:evidence.points??[evidence.summary],url:evidence.url
+      }))
     };
   });
 }
@@ -183,8 +195,10 @@ export async function collectProfile(config, api) {
     validateSearch(result);validateSearch(closedResult);
     const mergedItems=result.items.filter(pr=>pr.pull_request?.merged_at).sort((a,b)=>b.pull_request.merged_at.localeCompare(a.pull_request.merged_at));
     const closedItems=closedResult.items.filter(pr=>pr.state==='closed'&&!pr.pull_request?.merged_at).sort((a,b)=>(b.closed_at||b.updated_at||'').localeCompare(a.closed_at||a.updated_at||''));
+    const repository=repositoryMap.get(repo);
     return {
       repo, name:config.repositoryLabels?.[repo] || repositoryMap.get(repo).name.replaceAll('-',' '),
+      stars:repository.stargazers_count,forks:repository.forks_count,
       count:result.total_count,
       closedCount:closedResult.total_count,
       summary:config.contributionSummaries?.[repo] || repo.split('/')[1].replaceAll('-',' '),
@@ -204,8 +218,8 @@ export async function collectProfile(config, api) {
   const projects=selectProjects(repos,config);
   const showcase=await collectShowcase(config,projects,api);
   return {
-    schemaVersion:5, username:config.username,
-    mergedPullRequests:merged.total_count, openPullRequests:open.total_count,
+    schemaVersion:7, username:config.username,
+    mergedPullRequests:merged.total_count, closedPullRequests:closed.total_count, openPullRequests:open.total_count,
     spotlight, openSpotlight, resolvedSpotlight,
     projects, contributions, impact, showcase
   };

@@ -5,6 +5,7 @@ import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { collectProfile, selectProjects, selectSpotlight, normalizePullRequests } from '../scripts/data.mjs';
 import { renderHero, renderReadme, compact } from '../scripts/render.mjs';
+import { buildModules, renderModule } from '../scripts/modules.mjs';
 import { updateProfile } from '../scripts/update-profile.mjs';
 
 const config={username:'MaYangle',name:'Yangle Ma',tagline:'AI engineering',bio:'Building reproducible AI systems.',links:{GitHub:'https://github.com/MaYangle'},projects:{discover:true,maxVisible:3,exclude:[],include:[{repo:'MaYangle/team-ml',name:'Team ML',description:'Team project, working fork'}]}};
@@ -36,6 +37,7 @@ test('public project discovery grows with new original repos and includes the ch
   assert.equal(after.length,2);
   assert.equal(after[0].description,'Team project, working fork');
   assert.equal(after[1].repo,'MaYangle/new-ai-system');
+  assert.equal(after[1].role,'Original repository');
 });
 
 test('closed unmerged proposals cannot appear as the spotlight',()=>{
@@ -50,24 +52,49 @@ test('a PR merge changes both the displayed status and the data, with no hardcod
   const merged=await collectProfile(config,mockApi({merged:[issue(527,'merged')],open:[]}));
   assert.equal(opened.spotlight.status,'open');
   assert.equal(merged.spotlight.status,'merged');
-  assert.match(renderHero(merged,config),/MERGED PR #527/);
+  assert.ok(renderHero(merged,config).includes('#527 · MERGED'));
   assert.doesNotMatch(renderReadme(merged,config),/\(open\)/);
   assert.equal(merged.mergedPullRequests,1);
 });
 
-test('a newly discovered project appears in the rendered homepage and the instrument count',async()=>{
+test('a newly discovered project gets a full-width feature module',async()=>{
   const data=await collectProfile(config,mockApi({repos:[repository('team-ml',{fork:true}),repository('next-build')]}));
   const md=renderReadme(data,config);
   assert.ok(renderHero(data,config).includes('next build'));
-  assert.match(renderHero(data,config),/>02<\/text>/);
+  assert.ok(md.includes('Featured build: next build'));
+  const feature=buildModules(data,config).find(module=>module.id==='project-2');
+  assert.ok(renderModule(feature).includes('ORIGINAL REPOSITORY'));
+  assert.doesNotMatch(md,/<table\b/);
 });
 
-test('the compact layout limits visible projects while keeping the total',async()=>{
+test('a discovered API project gets no configured MSA flow while the curated project keeps its configured fusion',async()=>{
+  const sourceConfig={...config,projects:{...config.projects,include:[{
+    ...config.projects.include[0],
+    stack:['Python','PyTorch'],
+    inputs:['Text','Audio','Vision'],
+    encoders:['Whisper / BERT','MFCC','MediaPipe'],
+    fusion:'Cross-attention',
+    output:'Sentiment'
+  }]}};
+  const data=await collectProfile(sourceConfig,mockApi({repos:[repository('team-ml',{fork:true}),repository('new-api-service')]}));
+  assert.equal(data.projects[0].fusion,'Cross-attention');
+  const modules=buildModules(data,sourceConfig);
+  const curated=renderModule(modules.find(module=>module.id==='project-1'));
+  const discovered=renderModule(modules.find(module=>module.id==='project-2'));
+  assert.ok(curated.includes('CROSS-ATTENTION')&&curated.includes('SENTIMENT'));
+  data.projects[0].fusion='';data.projects[0].output='';
+  const genericPipeline=renderModule(modules.find(module=>module.id==='project-1'));
+  assert.ok(genericPipeline.includes('PROCESSING')&&genericPipeline.includes('OUTPUT'));
+  assert.ok(discovered.includes('new api service')&&discovered.includes('PYTHON'));
+  assert.doesNotMatch(discovered,/INPUT MODALITIES|CROSS-ATTENTION|SENTIMENT|PREDICTION|PROCESSING|OUTPUT/);
+});
+
+test('the compact layout limits visible project cards while retaining collected projects',async()=>{
   const data=await collectProfile(config,mockApi({repos:Array.from({length:7},(_,i)=>repository(`build-${i}`))}));
   const md=renderReadme(data,config);
-  assert.equal((renderHero(data,config).match(/>build \d+<\/text>/g)||[]).length,3);
+  assert.equal((md.match(/alt="Featured build: build \d"/g)||[]).length,3);
   assert.equal(data.projects.length,7);
-  assert.match(renderHero(data,config),/>07<\/text>/);
+  assert.doesNotMatch(md,/<table\b/);
 });
 
 test('API failure does not overwrite the last successful homepage',async()=>{
@@ -106,8 +133,8 @@ test('incomplete search data is rejected',async()=>{
 
 test('repository text is escaped and compact metrics remain numerical',async()=>{
   const data=await collectProfile(config,mockApi());
-  data.spotlight.repoName='<script>&"';
-  data.spotlight.title='[unsafe](javascript:alert(1)) <b>';
+  data.projects[0].name='<script>&"';
+  data.projects[0].description='[unsafe](javascript:alert(1)) <b>';
   assert.doesNotMatch(renderHero(data,config),/<script>/);
   assert.ok(/&lt;script&gt;&amp;/i.test(renderHero(data,config)), 'Repository text must be XML escaped');
   assert.doesNotMatch(renderReadme(data,config),/<b>/);
@@ -131,6 +158,42 @@ test('a stale search result is checked against the current PR before displaying 
   assert.equal(data.spotlight.number,7);
   assert.equal(data.spotlight.status,'merged');
   assert.equal(data.openSpotlight,null);
+});
+
+test('merged totals exclude closed proposals and each contribution group links to its repository',async()=>{
+  const data=await collectProfile(config,mockApi({merged:[issue(7,'merged','upstream/ai')],closed:[issue(6,'closed','upstream/ai')],open:[]}));
+  assert.equal(data.mergedPullRequests,1);
+  assert.equal(data.closedPullRequests,1);
+  const modules=buildModules(data,config);
+  const gauge=modules.find(module=>module.id==='contribution-overview');
+  assert.match(renderModule(gauge),/>01<\/text>/);
+  assert.match(renderModule(gauge),/MERGED PRS/);
+  assert.ok(renderModule(gauge).includes('>01</text>'));
+  assert.match(renderModule(gauge),/CLOSED \/ NOT MERGED/);
+  const contribution=modules.find(module=>module.id==='contribution-repo-1');
+  assert.equal(data.contributions[0].stars,66000);
+  assert.equal(data.contributions[0].forks,11000);
+  assert.match(renderModule(contribution),/CLOSED \/ NOT MERGED/);
+  assert.match(renderModule(contribution),/#6/);
+  assert.equal(new URL(contribution.href).searchParams.get('q'),'author:MaYangle repo:upstream/ai is:pr is:closed is:public');
+  const readme=renderReadme(data,config);
+  assert.doesNotMatch(readme,/<table\b/);
+});
+
+test('configured engineering evidence passes through collection and appears inside its linked PR card',async()=>{
+  const evidence={label:'PR #7 · Reliability fixes',points:['Regression/classification output dtypes','NaN/Inf prediction handling','Cross-platform results path'],url:'https://github.com/upstream/ai/pull/7'};
+  const sourceConfig={...config,projects:{...config.projects,include:[{...config.projects.include[0],engineeringEvidence:[evidence]}]}};
+  const data=await collectProfile(sourceConfig,mockApi());
+  assert.deepEqual(data.projects[0].engineeringEvidence,[evidence]);
+  const modules=buildModules(data,sourceConfig);
+  const evidenceCard=modules.find(module=>module.id==='engineering-work-1-1');
+  assert.equal(evidenceCard.href,evidence.url);
+  const evidenceSvg=renderModule(evidenceCard);
+  assert.match(evidenceSvg,/ENGINEERING EVIDENCE/);
+  assert.ok(evidenceSvg.includes('Regression/classification')&&evidenceSvg.includes('Cross-platform results path'));
+  const readme=renderReadme(data,sourceConfig);
+  assert.ok(readme.includes('href="'+evidence.url+'"'));
+  assert.doesNotMatch(readme,/<table\b|<br><a/);
 });
 
 test('merged work beats a popular open PR, and newer merges beat repository stars',()=>{
@@ -160,8 +223,8 @@ test('all six merged PRs are visible and ordered by merge time, with open work s
   assert.equal(data.openSpotlight.number,527);
   assert.deepEqual(data.contributions[0].pulls.map(p=>p.number),[7,5,4,3,2,1]);
   const svg=renderHero(data,config);
-  for(const n of [1,2,3,4,5,7])assert.ok(svg.includes(`>#${n}</text>`));
-  assert.ok(svg.includes('LATEST MERGED PR') && svg.includes('OPEN PROPOSAL'));
+  for(const n of [1,2,3,4,5,7])assert.ok(svg.includes('#'+n));
+  assert.ok(svg.includes('06')&&svg.includes('MERGED PRS')&&svg.includes('OPEN PRS'));
 });
 
 test('a new merge makes a newly contributed codebase visible ahead of older work',async()=>{
@@ -193,7 +256,7 @@ test('the full-page canvas expands when another project is added',async()=>{
 test('merged impact sums real diff fields and reports its sample size',async()=>{
   const data=await collectProfile(config,mockApi({merged:[issue(7,'merged'),issue(5,'merged')]}));
   assert.deepEqual(data.impact,{sampleSize:2,additions:200,deletions:20,fileChanges:4});
-  assert.match(renderHero(data,config),/MERGED IMPACT/);
+  assert.match(renderHero(data,config),/MERGED PR DIFFS/);
   assert.doesNotMatch(renderHero(data,config),/RECENT WORK/);
   assert.equal('activity' in data,false);
   assert.doesNotMatch(renderReadme(data,config),/RECENT WORK/);
@@ -212,5 +275,5 @@ test('the concise profile has only the chosen subtitle and no expandable text co
   assert.ok(!svg.includes(config.bio));
   assert.ok(!md.includes('<details>') && !md.includes('Text version'));
   assert.ok(!md.includes('[PR #') && !md.includes('All projects') && !md.includes('Merged contributions'));
-  assert.ok(md.includes('[GitHub](https://github.com/MaYangle)'));
+  assert.ok(md.includes('href="https://github.com/MaYangle"'));
 });

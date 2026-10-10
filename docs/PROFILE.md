@@ -9,14 +9,15 @@ The **Refresh profile** workflow runs every six hours, on changes to the configu
 The generator updates each dashboard module independently:
 
 - The total number of merged public PRs to repositories outside this account.
-- The spotlight PR, its current status, and the upstream repository's stars and forks.
-- Public projects, their descriptions, and the project count.
-- The project, merged-contribution, showcase, and impact modules.
-- Native README links for the profile, each PR spotlight, project, contribution record, showcase area, and impact panel.
+- The total number of closed, unmerged public PRs, labeled separately from merged contributions.
+- Featured public projects, their descriptions, and explicit team or repository roles.
+- Configuration-backed engineering evidence, linked to its public PR.
+- The project, contribution overview, repository record, showcase, and diff modules.
+- Native README links for the profile, project, engineering evidence, each upstream contribution repository, each showcase entry, and diff panel.
 
-The primary spotlight prefers merged upstream PRs, ordered by merge date; stars only break date ties. A separate **Recently resolved PR** panel selects a closed PR, or another merged PR when no closed PR exists. Open PRs awaiting a response are not used in that panel. Current PR status is checked against the pull-request endpoint before publication. The candidate pool is the latest 100 open, merged, and closed-unmerged public PRs. Repository stars always describe the upstream repository, not personal ownership.
+The contribution overview shows global merged, closed-unmerged, and open counts from separate public upstream searches. Each repository card lists merged and closed-unmerged records, labels their outcome, and links to a repository-scoped closed-PR search that includes merged PRs. Repository stars and forks are a small secondary readout labeled as upstream scale; project stars describe MaYangle's own public repository.
 
-Contribution records include up to three upstream codebases, show up to six merged PRs and four closed-unmerged PRs per codebase, and label each record's outcome. Exact merged and closed counts are fetched separately for each codebase. PRs merged into repositories owned by MaYangle are excluded from the **upstream merged** total.
+The summary separates global merged and closed-unmerged totals from the public upstream PR searches. Repository cards show up to three upstream codebases, with up to six merged PRs and four closed-unmerged PRs per codebase. Each card shows that upstream repository's star and fork counts as secondary scale, links to a repository-scoped GitHub search containing that author's merged and closed PRs, and labels each outcome. Exact stars and forks are refreshed through the repositories API. PRs merged into repositories owned by MaYangle are excluded from the **upstream merged** total.
 
 ## Adding projects
 
@@ -25,13 +26,15 @@ New, non-empty public repositories owned by MaYangle are discovered automaticall
 Edit `profile.config.json` to:
 
 - Change the introduction, name, contact links, or tagline.
-- Give a project a curated name or description through `projects.include`.
+- Give a project a curated name, description, stack, or role through `projects.include`. Projects with configured `inputs` can also define `encoders`, `fusion`, and `output` to show a data-flow diagram.
 - Hide a repository with `projects.exclude`.
-- Change the number of visible projects with `projects.maxVisible` (default: three). Additional projects remain included in the gauge count.
+- Change the number of visible projects with `projects.maxVisible` (default: three). Additional projects are collected but not shown until the visible limit includes them.
 - Give a specific PR a shorter display title through `pullRequestLabels`.
 - Add published research, models/data, writing/talks, or demos to `showcase.sections[].items`. Empty areas are deliberately marked **No public entry yet**.
 
 Do not edit generated assets or README content directly. They will be regenerated. The only public data saved to `data/profile.json` is the normalized data used by the profile. Generated asset filenames contain a hash of their contents, so a data or design change gives GitHub a new image URL. The previous generation is retained for readers with cached README markup; older generated files are removed.
+
+For verified engineering evidence on an included project, add an engineeringEvidence entry with a short label, one to three factual points, and a public GitHub PR URL. Each evidence entry is a separate full-width SVG module immediately after its project card and links directly to its cited PR.
 
 ## Local development
 
@@ -52,9 +55,9 @@ Otherwise the generator uses `GITHUB_TOKEN` when it is set, or GitHub's anonymou
 
 ## Motion and layout
 
-The white dashboard is assembled from individually linked SVG modules in the README. The contribution instrument uses a twelve-second loop of a light particle wave; project pipelines animate their moving signal. Instrument values come from GitHub data and do not animate into invented values. Each image's `<picture>` element selects a static version for readers who request reduced motion. Image filenames include content hashes, so updates replace cached assets reliably.
+The white dashboard is assembled from full-width linked SVG modules in the README. The contribution overview animates one light blue signal wave; all counts come from current GitHub data. Each image's `<picture>` element selects a static version for readers who request reduced motion. Image filenames include content hashes, so updates replace cached assets reliably.
 
-The dashboard keeps its white background, dark typography, restrained blue accents, and telemetry-style contribution network. Native anchors make each module a direct route to its related public page. The recently resolved PR panel gives upstream repository stars and forks a stronger readout and labels them as repository metrics. Project, contribution, showcase, and impact modules grow or change as the public GitHub data changes. Contact links remain below the dashboard. The introduction is intentionally limited to “AI engineer”.
+The dashboard keeps its white background, dark typography, restrained blue accents, and telemetry-style contribution network. Native anchors make each module a direct route to its related public page. Configuration-backed engineering evidence appears in a full-width linked SVG module after its project card; each module links to the cited public PR. Project, contribution, showcase, and diff modules grow or change as public GitHub data changes. Contact links remain below the dashboard. The introduction is intentionally limited to “AI engineer”.
 
 ## Research and design references
 
@@ -88,8 +91,10 @@ The artwork displays entry titles and metadata. Public URLs remain in `data/prof
 
 The broader information structure was informed by [Sebastian Raschka's research and educational work](https://github.com/rasbt), [Chip Huyen's tools, writing and teaching](https://github.com/chiphuyen), and [Simon Willison's automatically updated releases, blog and TIL sections](https://github.com/simonw). These references inform categories only; their achievements are not attributed to this profile.
 
+Research, models, writing, and demos each render as a separate full-width card. This preserves readable text on phones and lets every future entry open its own public URL.
+
 ## Contribution impact
 
-The impact module sums additions, deletions, and changed-file counts from the latest 30 merged public upstream PRs (or all of them when fewer are available). The displayed sample size makes that scope explicit. File changes are cumulative diff entries, not a count of unique files or original authorship. Missing API fields fail the refresh rather than being converted to zero.
+The **Merged PR Diffs** module sums additions, deletions, and changed-file counts from the latest 30 merged public upstream PRs (or all of them when fewer are available). The displayed sample size makes that scope explicit. File changes are cumulative diff entries, not a count of unique files or original authorship. Missing API fields fail the refresh rather than being converted to zero.
 
-Open PRs awaiting a response remain out of the resolved PR panel and contribution records. Closed and merged records refresh with the rest of the profile. The former Recent Work timeline is removed from the generated profile and data collection.
+Open PRs awaiting a response appear only in the open-count readout. Repository cards list merged and closed-unmerged records. Automatically discovered non-fork repositories use the role **Original repository**; a configured role such as **Team project · working fork** takes precedence. The former Recent Work timeline remains out of the generated profile and data collection.

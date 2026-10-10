@@ -54,4 +54,3 @@ export async function updateProfile({directory=root,api=createApi(),now=()=>new 
 if (process.argv[1] && resolve(process.argv[1])===fileURLToPath(import.meta.url)) {
   updateProfile({api:createApi({useGh:process.argv.includes('--gh')})}).then(data=>console.log(`Updated profile: ${data.projects.length} projects, ${data.mergedPullRequests} merged upstream PRs, spotlight ${data.spotlight?.repo||'none'}`)).catch(error=>{console.error(error.message);process.exitCode=1;});
 }
-
