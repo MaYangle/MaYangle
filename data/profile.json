@@ -1,5 +1,5 @@
 {
-  "schemaVersion": 3,
+  "schemaVersion": 4,
   "username": "MaYangle",
   "mergedPullRequests": 6,
   "openPullRequests": 1,
@@ -19,8 +19,8 @@
     "repo": "rohitg00/ai-engineering-from-scratch",
     "repoName": "AI Engineering from Scratch",
     "repoUrl": "https://github.com/rohitg00/ai-engineering-from-scratch",
-    "stars": 66447,
-    "forks": 11635,
+    "stars": 66455,
+    "forks": 11636,
     "number": 527,
     "title": "Research links for seven lessons",
     "url": "https://github.com/rohitg00/ai-engineering-from-scratch/pull/527",
@@ -35,6 +35,7 @@
       "url": "https://github.com/MaYangle/Multimodal-Sentiment-Analysis",
       "stars": 4,
       "language": "Python",
+      "topics": [],
       "fork": true,
       "role": "Team project · working fork",
       "stack": [
@@ -131,5 +132,35 @@
       "date": "2025-08-27T07:32:59Z"
     }
   ],
-  "updatedAt": "2026-10-10T13:08:25.947Z"
+  "showcase": {
+    "title": "RESEARCH & OUTPUTS",
+    "maxVisible": 2,
+    "sections": [
+      {
+        "id": "research",
+        "title": "Research & experiments",
+        "description": "Paper reproductions, ablations and evaluations.",
+        "items": []
+      },
+      {
+        "id": "models",
+        "title": "Models & datasets",
+        "description": "Model releases, datasets and reusable artifacts.",
+        "items": []
+      },
+      {
+        "id": "writing",
+        "title": "Writing & talks",
+        "description": "Technical notes, tutorials and presentations.",
+        "items": []
+      },
+      {
+        "id": "releases",
+        "title": "Demos & releases",
+        "description": "Interactive demos, applications and packages.",
+        "items": []
+      }
+    ]
+  },
+  "updatedAt": "2026-10-10T13:20:36.819Z"
 }
