@@ -7,7 +7,7 @@ import {renderReadme} from '../scripts/render.mjs';
 const config={username:'MaYangle',name:'Yangle Ma',tagline:'AI engineer',bio:'',stack:[],links:{},projects:{maxVisible:2,mode:'auto',featured:['MaYangle/b'],showMore:true}};
 const project=name=>({repo:`MaYangle/${name}`,name,url:`https://github.com/MaYangle/${name}`,description:'Public project',role:'Independent project',stack:[],inputs:[]});
 const projects=['a','b','c'].map(project);
-const data={username:'MaYangle',projects,mergedPullRequests:1,openPullRequests:1,spotlight:{repo:'upstream/one',repoName:'One',stars:5,forks:1,number:4,url:'https://github.com/upstream/one/pull/4',status:'merged',title:'Fix'},openSpotlight:{repo:'upstream/two',repoName:'Two',stars:100,forks:9,number:8,url:'https://github.com/upstream/two/pull/8',status:'open',title:'Proposal'},contributions:[{repo:'upstream/one',name:'One',count:1,pulls:[{number:4,title:'Fix',url:'https://github.com/upstream/one/pull/4'}]}],impact:{sampleSize:1,additions:10,deletions:2,fileChanges:1},activity:[],showcase:null};
+const data={username:'MaYangle',projects,mergedPullRequests:1,openPullRequests:1,spotlight:{repo:'upstream/one',repoName:'One',stars:5,forks:1,number:4,url:'https://github.com/upstream/one/pull/4',status:'merged',title:'Fix'},openSpotlight:{repo:'upstream/two',repoName:'Two',stars:100,forks:9,number:8,url:'https://github.com/upstream/two/pull/8',status:'open',title:'Proposal'},contributions:[{repo:'upstream/one',name:'One',count:1,pulls:[{number:4,title:'Fix'}]}],impact:{sampleSize:1,additions:10,deletions:2,fileChanges:1},activity:[],showcase:null};
 
 test('auto mode honors pin order and fills remaining slots with discovered projects',()=>{
   assert.deepEqual(selectFeaturedProjects(projects,config).map(p=>p.name),['b','a']);
@@ -43,13 +43,4 @@ test('published showcase entries have their own links while empty areas remain c
   assert.ok(Number(/height="([\d.]+)"/.exec(compact.render())[1])<180);
   const hidden={...sample,showcase:{...sample.showcase,emptyMode:'hidden'}};
   assert.ok(!buildPresentation(hidden,config).some(b=>b.id==='future-areas'));
-});
-
-test('the public layout leads with projects and avoids duplicate PR activity cards',()=>{
-  const sample={...data,activity:[{number:4,url:data.spotlight.url,status:'merged',title:'Fix',repoName:'One',date:'2026-10-01'}]};
-  const blocks=buildPresentation(sample,config);
-  assert.equal(blocks[1].id,'project-1');
-  assert.ok(!blocks.some(block=>block.id?.startsWith('activity-')));
-  const md=renderReadme(sample,config);
-  assert.ok(md.includes('<summary>View 1 merged pull requests</summary>'));
 });

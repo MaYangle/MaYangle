@@ -47,7 +47,7 @@
     ]
   },
   "showcase": {
-    "emptyMode": "hidden",
+    "emptyMode": "compact",
     "title": "RESEARCH & OUTPUTS",
     "maxVisible": 2,
     "sections": [
