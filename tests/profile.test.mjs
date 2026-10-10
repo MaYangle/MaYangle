@@ -13,7 +13,13 @@ const issue=(number,status='open',repo='upstream/ai')=>({number,title:`Contribut
 const response=items=>({items,total_count:items.length,incomplete_results:false});
 const mockApi=({repos=[repository('team-ml',{fork:true})],merged=[issue(7,'merged')],open=[issue(527)],stars=66000}={})=>async endpoint=>{
   if(endpoint.startsWith('users/')) return repos;
-  if(endpoint.startsWith('search/')) return decodeURIComponent(endpoint).includes('is:merged')?response(merged):response(open);
+  if(endpoint.startsWith('search/')) {
+    const query=decodeURIComponent(endpoint);
+    let items=query.includes('is:merged')?merged:open;
+    const scope=/repo:([\w.-]+\/[\w.-]+)/.exec(query)?.[1];
+    if(scope)items=items.filter(item=>item.repository_url===`https://api.github.com/repos/${scope}`);
+    return response(items);
+  }
   if(endpoint.includes('/pulls/')) {
     const number=Number(endpoint.split('/').at(-1));
     const item=[...merged,...open].find(item=>item.number===number);
@@ -56,7 +62,7 @@ test('a newly discovered project appears in the rendered homepage and the instru
   assert.match(renderHero(data,config),/>02<\/text>/);
 });
 
-test('the compact layout limits visible projects while keeping the total and index link',async()=>{
+test('the compact layout limits visible projects while keeping the total',async()=>{
   const data=await collectProfile(config,mockApi({repos:Array.from({length:7},(_,i)=>repository(`build-${i}`))}));
   const md=renderReadme(data,config);
   assert.equal((renderHero(data,config).match(/>build \d+<\/text>/g)||[]).length,3);
@@ -124,6 +130,47 @@ test('a stale search result is checked against the current PR before displaying 
   });
   assert.equal(data.spotlight.number,7);
   assert.equal(data.spotlight.status,'merged');
+  assert.equal(data.openSpotlight,null);
+});
+
+test('merged work beats a popular open PR, and newer merges beat repository stars',()=>{
+  const map=new Map([
+    ['popular/ai',{name:'ai',stargazers_count:66000,forks_count:11000}],
+    ['team/ml',{name:'ml',stargazers_count:7,forks_count:3}],
+    ['other/tool',{name:'tool',stargazers_count:2,forks_count:0}]
+  ]);
+  const pulls=[
+    {repo:'popular/ai',number:527,status:'open',title:'Proposal',createdAt:'2026-10-10T00:00:00Z'},
+    {repo:'team/ml',number:7,status:'merged',title:'Fix',mergedAt:'2025-08-31T00:00:00Z'}
+  ];
+  assert.equal(selectSpotlight(pulls,map,config).number,7);
+  pulls.push({repo:'other/tool',number:99,status:'merged',title:'New fix',mergedAt:'2026-10-09T00:00:00Z'});
+  assert.equal(selectSpotlight(pulls,map,config).number,99);
+});
+
+test('all six merged PRs are visible and ordered by merge time, with open work separate',async()=>{
+  const merged=[1,2,3,4,5,7].map(n=>{
+    const item=issue(n,'merged');
+    item.pull_request.merged_at=`2026-10-${String(n).padStart(2,'0')}T00:00:00Z`;
+    item.updated_at=`2026-10-${String(10-n).padStart(2,'0')}T00:00:00Z`;
+    return item;
+  });
+  const data=await collectProfile(config,mockApi({merged}));
+  assert.equal(data.spotlight.number,7);
+  assert.equal(data.openSpotlight.number,527);
+  assert.deepEqual(data.contributions[0].pulls.map(p=>p.number),[7,5,4,3,2,1]);
+  const svg=renderHero(data,config);
+  for(const n of [1,2,3,4,5,7])assert.ok(svg.includes(`>#${n}</text>`));
+  assert.ok(svg.includes('LATEST MERGED PR') && svg.includes('OPEN PROPOSAL'));
+});
+
+test('a new merge makes a newly contributed codebase visible ahead of older work',async()=>{
+  const old=issue(7,'merged','team/ml');old.pull_request.merged_at='2025-08-31T00:00:00Z';
+  const fresh=issue(99,'merged','other/tool');fresh.pull_request.merged_at='2026-10-09T00:00:00Z';
+  const data=await collectProfile(config,mockApi({merged:[old,fresh]}));
+  assert.equal(data.spotlight.repo,'other/tool');
+  assert.equal(data.contributions[0].repo,'other/tool');
+  assert.equal(data.contributions[0].count,1);
 });
 
 test('empty public work renders without fabricated metrics or invalid links',async()=>{

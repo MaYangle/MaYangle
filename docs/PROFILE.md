@@ -11,9 +11,11 @@ The generator updates:
 - The total number of merged public PRs to repositories outside this account.
 - The spotlight PR, its current status, and the upstream repository's stars and forks.
 - Public projects, their descriptions, and the project count.
-- The readable links below the artwork.
+- The project and merged-contribution details inside the artwork.
 
-The spotlight is the highest-starred upstream repository among the latest 100 open and 100 merged public PRs. At equal star counts, merged work is preferred. Closed, unmerged proposals are excluded. Repository stars always describe the upstream repository, not personal ownership.
+The primary spotlight prefers merged upstream PRs, ordered by merge date; stars only break date ties. If no merged work exists, it uses the latest open PR. A separate, explicitly labeled open-proposal summary keeps current work visible. Current PR status is checked against the pull-request endpoint before publication. The candidate pool is the latest 100 open and 100 merged public PRs. Closed, unmerged proposals are excluded. Repository stars always describe the upstream repository, not personal ownership.
+
+Merged contributions show the three codebases with the most recent merges, with up to six PRs per codebase ordered by merge time. Each codebase's total count is fetched separately; if more than six exist, the panel states how many additional merged PRs there are. PRs merged into repositories owned by MaYangle are excluded from the **upstream** count.
 
 ## Adding projects
 
@@ -24,7 +26,7 @@ Edit `profile.config.json` to:
 - Change the introduction, name, contact links, or tagline.
 - Give a project a curated name or description through `projects.include`.
 - Hide a repository with `projects.exclude`.
-- Change the number of visible projects with `projects.maxVisible` (default: three). Additional projects remain included in the gauge count and the repositories link.
+- Change the number of visible projects with `projects.maxVisible` (default: three). Additional projects remain included in the gauge count.
 - Give a specific PR a shorter display title through `pullRequestLabels`.
 
 Do not edit generated assets or README content directly. They will be regenerated. The only public data saved to `data/profile.json` is the normalized data used by the profile. Generated asset filenames contain a hash of their contents, so a data or design change gives GitHub a new image URL. The previous generation is retained for readers with cached README markup; older generated files are removed.

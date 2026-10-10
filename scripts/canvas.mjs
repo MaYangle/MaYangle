@@ -28,17 +28,22 @@ function gauge(x,y,count,animated){
 }
 function spotlight(data,x,y,width,mobile){
   const s=data.spotlight;
-  let svg=label(x,y,'OPEN-SOURCE SPOTLIGHT');
+  let svg=label(x,y,s?.status==='merged'?'LATEST MERGED PR':'RECENT OPEN PR');
   if(!s)return {svg:svg+t(x,y+52,'Building in public',30),bottom:y+220};
-  const title=block(x,y+47,s.repoName,width,mobile?28:31,ink,2,38,'font-weight="600" letter-spacing="-.5"');svg+=title.svg;
-  const metricsY=title.bottom+62;
-  svg+=t(x,metricsY,compact(s.stars),46,ink,'letter-spacing="-1.4"')+label(x,metricsY+24,'REPOSITORY STARS');
-  const fx=x+(mobile?width*.56:238);
-  svg+=t(fx,metricsY,compact(s.forks),36,ink,'letter-spacing="-1"')+label(fx,metricsY+24,'FORKS');
-  const statusY=metricsY+61;
+  const title=block(x,y+43,s.repoName,width,mobile?27:26,ink,2,33,'font-weight="600" letter-spacing="-.4"');svg+=title.svg;
+  const statusY=title.bottom+29;
   svg+=`<circle cx="${x+4}" cy="${statusY-4}" r="3" fill="${blue}"/>`+t(x+17,statusY,`${s.status.toUpperCase()} PR #${s.number}`,13,blue,'font-weight="600" letter-spacing=".6"');
-  const desc=block(x,statusY+30,s.title,width,18,muted,2,25);svg+=desc.svg;
-  return {svg,bottom:desc.bottom+10};
+  const desc=block(x,statusY+29,s.title,width,18,ink,2,25);svg+=desc.svg;
+  let bottom=desc.bottom+25;
+  svg+=t(x,bottom,`${compact(s.stars)} repository stars  ·  ${compact(s.forks)} forks`,13,muted);
+  const open=data.openSpotlight;
+  if(open){
+    svg+=line(x,bottom+22,x+width,bottom+22)+label(x,bottom+47,'OPEN PROPOSAL');
+    const name=block(x,bottom+77,open.repoName,width,mobile?23:22,ink,2,29,'font-weight="500"');svg+=name.svg;
+    bottom=name.bottom+28;
+    svg+=t(x,bottom,`OPEN PR #${open.number}  ·  ${compact(open.stars)} stars / ${compact(open.forks)} forks`,13,blue);
+  }
+  return {svg,bottom:bottom+12};
 }
 function pipeline(p,x,y,width,mobile,animated){
   if(!p.inputs?.length)return {svg:'',bottom:y};
@@ -78,6 +83,7 @@ function contributionCard(c,x,y,width,mobile){
   if(layouts.length>1)svg+=line(x+5,layouts[0].y-6,x+5,layouts.at(-1).y-6,'#d8e2f7');
   for(const {pr,y:iy,body} of layouts){svg+=`<circle cx="${x+5}" cy="${iy-6}" r="4" fill="#fff" stroke="${blue}"/>`+t(x+20,iy,`#${pr.number}`,12,blue)+body.svg;}
   if(!layouts.length){const summary=block(x,py,c.summary,width,18,muted);svg+=summary.svg;py=summary.bottom+25;}
+  if(c.count>pulls.length){svg+=t(x,py,`+ ${c.count-pulls.length} more merged PRs`,13,muted);py+=24;}
   return {svg,bottom:py+2};
 }
 
@@ -119,13 +125,13 @@ export function renderHero(data,config,{mobile=false,animated=true}={}){
     svg+=label(margin,worksY,'SELECTED PROJECTS');let py=worksY+47;
     for(const p of projects){const card=projectCard(p,margin,py,inner,true,animated);svg+=card.svg;py=card.bottom+32;if(p!==projects.at(-1))svg+=line(margin,py-17,width-margin,py-17);}
     if(!projects.length){svg+=t(margin,py,'New public projects will appear here.',19,muted);py+=50;}
-    py+=20;svg+=line(margin,py-26,width-margin,py-26)+label(margin,py,'CONTRIBUTOR TO');py+=47;
+    py+=20;svg+=line(margin,py-26,width-margin,py-26)+label(margin,py,'MERGED CONTRIBUTIONS');py+=47;
     for(const c of contributions){const card=contributionCard(c,margin,py,inner,true);svg+=card.svg;py=card.bottom+28;}
     if(!contributions.length){svg+=t(margin,py,'Open-source work in progress.',19,muted);py+=45;}
     bottom=py;
   }else{
     const colWidth=496,right=648;
-    svg+=label(margin,worksY,'SELECTED PROJECTS')+label(right,worksY,'CONTRIBUTOR TO');
+    svg+=label(margin,worksY,'SELECTED PROJECTS')+label(right,worksY,'MERGED CONTRIBUTIONS');
     let py=worksY+49,cy=worksY+49;
     for(const p of projects){const card=projectCard(p,margin,py,colWidth,false,animated);svg+=card.svg;py=card.bottom+34;if(p!==projects.at(-1))svg+=line(margin,py-18,margin+colWidth,py-18);}
     for(const c of contributions){const card=contributionCard(c,right,cy,496,false);svg+=card.svg;cy=card.bottom+25;if(c!==contributions.at(-1))svg+=line(right,cy-17,width-margin,cy-17);}

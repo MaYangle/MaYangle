@@ -85,7 +85,8 @@ export function normalizePullRequests(merged, open) {
 
 export function selectSpotlight(pulls, repositoryMap, config) {
   const eligible = pulls.filter(pr => ['merged','open'].includes(pr.status) && !repositoryMap.get(pr.repo)?.private);
-  eligible.sort((a,b) => repositoryMap.get(b.repo).stargazers_count - repositoryMap.get(a.repo).stargazers_count || Number(b.status === 'merged') - Number(a.status === 'merged') || String(b.updatedAt).localeCompare(String(a.updatedAt)) || a.number - b.number);
+  const eventDate = pr => pr.status === 'merged' ? (pr.mergedAt || pr.updatedAt || '') : (pr.createdAt || pr.updatedAt || '');
+  eligible.sort((a,b) => Number(b.status === 'merged') - Number(a.status === 'merged') || eventDate(b).localeCompare(eventDate(a)) || repositoryMap.get(b.repo).stargazers_count - repositoryMap.get(a.repo).stargazers_count || a.number - b.number);
   if (!eligible.length) return null;
   const pr = eligible[0];
   const repo = repositoryMap.get(pr.repo);
@@ -93,7 +94,7 @@ export function selectSpotlight(pulls, repositoryMap, config) {
     repo:pr.repo, repoName:config.repositoryLabels?.[pr.repo] || repo.name.replaceAll('-', ' '), repoUrl:`https://github.com/${pr.repo}`,
     stars:repo.stargazers_count, forks:repo.forks_count,
     number:pr.number, title:config.pullRequestLabels?.[`${pr.repo}#${pr.number}`] || pr.title,
-    url:pr.url, status:pr.status
+    url:pr.url, status:pr.status, date:eventDate(pr)
   };
 }
 
@@ -134,29 +135,37 @@ export async function collectProfile(config, api) {
     if (!detailCache.has(key)) detailCache.set(key, api(`repos/${pr.repo}/pulls/${pr.number}`));
     return detailCache.get(key);
   };
-  let spotlight = null;
-  const pending = [...publicPulls];
-  for (let attempt = 0; pending.length && attempt < 20; attempt++) {
-    const candidate = selectSpotlight(pending, repositoryMap, config);
-    const current = await loadPull(candidate);
-    if (!['open','closed'].includes(current.state) || typeof current.merged !== 'boolean') throw new Error('Missing current pull request status');
-    if (current.merged || current.state === 'open') {
-      spotlight = {...candidate, status:current.merged ? 'merged' : 'open'};
-      break;
+  const resolveSpotlight = async (candidates,openOnly=false) => {
+    const pending = [...candidates];
+    for (let attempt=0;pending.length && attempt<20;attempt++) {
+      const candidate=selectSpotlight(pending,repositoryMap,config);
+      const current=await loadPull(candidate);
+      if (!['open','closed'].includes(current.state) || typeof current.merged!=='boolean') throw new Error('Missing current pull request status');
+      if ((!openOnly && current.merged) || (!current.merged && current.state==='open')) {
+        return {...candidate,status:current.merged?'merged':'open',date:current.merged?(current.merged_at || candidate.date):(current.created_at || candidate.date)};
+      }
+      pending.splice(pending.findIndex(pr=>pr.url===candidate.url),1);
     }
-    pending.splice(pending.findIndex(pr => pr.url === candidate.url),1);
-  }
-  if (!spotlight && pending.length) throw new Error('Too many stale pull request search results');
+    if(pending.length)throw new Error('Too many stale pull request search results');
+    return null;
+  };
+  const spotlight=await resolveSpotlight(publicPulls);
+  const openSpotlight=spotlight?.status==='merged'?await resolveSpotlight(publicPulls.filter(pr=>pr.status==='open'),true):null;
   const mergedRepos = new Map();
-  for (const pr of publicPulls.filter(pr => pr.status === 'merged')) mergedRepos.set(pr.repo, (mergedRepos.get(pr.repo) || 0) + 1);
-  const contributions = await Promise.all([...mergedRepos].sort((a,b) => b[1] - a[1] || a[0].localeCompare(b[0])).slice(0,3).map(async ([repo]) => {
-    const result=await api(`search/issues?q=${encodeURIComponent(`${query} is:merged repo:${repo}`)}&sort=updated&order=desc&per_page=3`);
+  const latestMerge = new Map();
+  for (const pr of publicPulls.filter(pr => pr.status === 'merged')) {
+    mergedRepos.set(pr.repo,(mergedRepos.get(pr.repo)||0)+1);
+    const date=pr.mergedAt || pr.updatedAt || '';
+    if(date>(latestMerge.get(pr.repo)||''))latestMerge.set(pr.repo,date);
+  }
+  const contributions = await Promise.all([...mergedRepos].sort((a,b) => latestMerge.get(b[0]).localeCompare(latestMerge.get(a[0])) || b[1]-a[1] || a[0].localeCompare(b[0])).slice(0,3).map(async ([repo]) => {
+    const result=await api(`search/issues?q=${encodeURIComponent(`${query} is:merged repo:${repo}`)}&sort=updated&order=desc&per_page=100`);
     validateSearch(result);
     return {
       repo, name:config.repositoryLabels?.[repo] || repositoryMap.get(repo).name.replaceAll('-',' '),
       count:result.total_count,
       summary:config.contributionSummaries?.[repo] || repo.split('/')[1].replaceAll('-',' '),
-      pulls:result.items.slice(0,3).map(pr=>({number:pr.number,url:pr.html_url,title:config.pullRequestLabels?.[`${repo}#${pr.number}`] || pr.title}))
+      pulls:result.items.filter(pr=>pr.pull_request?.merged_at).sort((a,b)=>b.pull_request.merged_at.localeCompare(a.pull_request.merged_at)).slice(0,6).map(pr=>({number:pr.number,url:pr.html_url,title:config.pullRequestLabels?.[`${repo}#${pr.number}`] || pr.title}))
     };
   }));
   const sampled = publicPulls.filter(pr => pr.status === 'merged').sort((a,b) => String(b.mergedAt).localeCompare(String(a.mergedAt))).slice(0,30);
@@ -175,9 +184,9 @@ export async function collectProfile(config, api) {
     date:pr.status==='merged'?pr.mergedAt:pr.createdAt
   })).filter(pr=>pr.date && Number.isFinite(Date.parse(pr.date))).sort((a,b)=>b.date.localeCompare(a.date)).slice(0,3);
   return {
-    schemaVersion:2, username:config.username,
+    schemaVersion:3, username:config.username,
     mergedPullRequests:merged.total_count, openPullRequests:open.total_count,
-    spotlight,
+    spotlight, openSpotlight,
     projects:selectProjects(repos, config), contributions, impact, activity
   };
 }
