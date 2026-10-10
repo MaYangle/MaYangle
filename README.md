@@ -14,7 +14,6 @@
 
 <p><a href="https://github.com/search?q=author%3AMaYangle%20is%3Apr%20is%3Amerged%20is%3Apublic%20-user%3AMaYangle&amp;type=pullrequests"><picture><source media="(prefers-reduced-motion: reduce) and (max-width: 600px)" srcset="assets/generated/impact-mobile-still.51f84b45ce9d.svg"><source media="(prefers-reduced-motion: reduce)" srcset="assets/generated/impact-still.a665328bcc08.svg"><source media="(max-width: 600px)" srcset="assets/generated/impact-mobile.eefd62a6efb0.svg"><img src="assets/generated/impact.eb0afdbcd3b1.svg" width="100%" alt="Diff impact across 6 merged pull requests"></picture></a></p>
 
-<p><a href="https://github.com/MaYangle"><picture><source media="(prefers-reduced-motion: reduce) and (max-width: 600px)" srcset="assets/generated/footer-mobile-still.91fdf8e12684.svg"><source media="(prefers-reduced-motion: reduce)" srcset="assets/generated/footer-still.e82cf6ecd4d6.svg"><source media="(max-width: 600px)" srcset="assets/generated/footer-mobile.1f108d73dbe4.svg"><img src="assets/generated/footer.c096c8f5ebc3.svg" width="100%" alt="Public GitHub data refresh date"></picture></a></p>
+<p><a href="https://github.com/MaYangle"><picture><source media="(prefers-reduced-motion: reduce) and (max-width: 600px)" srcset="assets/generated/footer-mobile-still.3f52eddf9072.svg"><source media="(prefers-reduced-motion: reduce)" srcset="assets/generated/footer-still.df4933b31aa6.svg"><source media="(max-width: 600px)" srcset="assets/generated/footer-mobile.47d48b07dbf1.svg"><img src="assets/generated/footer.2f528d24dc2c.svg" width="100%" alt="Public GitHub data refresh date"></picture></a></p>
 
 [LinkedIn](https://www.linkedin.com/in/yangle-ma-84877a294/) · [Email](mailto:yanglema44@gmail.com)
-
