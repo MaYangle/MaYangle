@@ -220,6 +220,7 @@ function footer(data,mobile=false){
 export function buildModules(data,config){
   const owner='https://github.com/'+config.username;
   const allPulls=searchPulls('author:'+config.username+' is:pr is:public -user:'+config.username);
+  const mergedPulls=searchPulls('author:'+config.username+' is:pr is:merged is:public -user:'+config.username);
   const modules=[];
   const add=(id,alt,href,draw,metadata={})=>modules.push({id,alt,href,draw,...metadata});
   add('identity',config.name+' — '+config.tagline,owner,({mobile=false}={})=>identity(data,config,mobile));
@@ -236,7 +237,7 @@ export function buildModules(data,config){
     if(items.length)items.forEach((item,itemIndex)=>modules.push(showcaseModule(section,index,data,config,item,itemIndex)));
     else modules.push(showcaseModule(section,index,data,config));
   });
-  if(data.impact?.sampleSize)add('impact','Merged upstream PR diff totals across '+data.impact.sampleSize+' PRs',allPulls,({mobile=false}={})=>({body:renderImpact(data,mobile?30:56,1,mobile?540:1088,mobile).svg,width:mobile?600:1200,height:mobile?220:195}));
+  if(data.impact?.sampleSize)add('impact','Merged upstream PR diff totals across '+data.impact.sampleSize+' PRs',mergedPulls,({mobile=false}={})=>({body:renderImpact(data,mobile?30:56,1,mobile?540:1088,mobile).svg,width:mobile?600:1200,height:mobile?220:195}));
   add('footer','Public profile data refresh date',owner,({mobile=false}={})=>footer(data,mobile));
   for(const module of modules){
     const url=new URL(module.href);

@@ -257,6 +257,9 @@ test('merged impact sums real diff fields and reports its sample size',async()=>
   const data=await collectProfile(config,mockApi({merged:[issue(7,'merged'),issue(5,'merged')]}));
   assert.deepEqual(data.impact,{sampleSize:2,additions:200,deletions:20,fileChanges:4});
   assert.match(renderHero(data,config),/MERGED PR DIFFS/);
+  const diffQuery=new URL(buildModules(data,config).find(module=>module.id==='impact').href).searchParams.get('q');
+  assert.match(diffQuery,/is:merged/);
+  assert.match(diffQuery,/-user:MaYangle/);
   assert.doesNotMatch(renderHero(data,config),/RECENT WORK/);
   assert.equal('activity' in data,false);
   assert.doesNotMatch(renderReadme(data,config),/RECENT WORK/);
