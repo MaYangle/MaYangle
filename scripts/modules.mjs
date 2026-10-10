@@ -1,5 +1,5 @@
 import {xml,wrap,compact} from './format.mjs';
-import {gauge,wave,projectCard,contributionCard} from './canvas.mjs';
+import {projectCard,contributionCard} from './canvas.mjs';
 import {renderShowcaseModule} from './showcase.mjs';
 import {renderImpact} from './sections.mjs';
 
@@ -9,6 +9,12 @@ const line=(x,y,x2,y2)=>`<path d="M${x} ${y}L${x2} ${y2}" stroke="${rule}" fill=
 const label=(x,y,value)=>text(x,y,value,13,muted,'font-weight="600" letter-spacing="1.3"');
 const date=value=>new Date(value).toLocaleDateString('en-GB',{day:'2-digit',month:'short',year:'numeric',timeZone:'Asia/Shanghai'}).toUpperCase();
 const searchPulls=query=>`https://github.com/search?q=${encodeURIComponent(query)}&type=pullrequests`;
+function repositorySignalName(name,width,size){
+  const key=name.toLowerCase();
+  if(key.includes('bilingual-multimodal-sentiment')||key.includes('bilingual multimodal sentiment'))return 'BILINGUAL MSA';
+  if(key.includes('ai-engineering-from-scratch')||key.includes('ai engineering from scratch'))return 'AI ENGINEERING';
+  return wrap(name.toUpperCase(),width,size,1)[0];
+}
 
 function frame(body,width,height,alt,animated){
   return `<svg xmlns="http://www.w3.org/2000/svg" width="${width}" height="${height}" viewBox="0 0 ${width} ${height}" role="img" aria-labelledby="title"><title id="title">${xml(alt)}</title><style>text{font-family:Arial,Helvetica,sans-serif}${animated?'.wave{animation:wave 12s ease-in-out infinite}.flow{animation:flow 12s linear infinite}@keyframes wave{0%,100%{transform:translateY(0)}50%{transform:translateY(-9px)}}@keyframes flow{to{stroke-dashoffset:-100}}@media(prefers-reduced-motion:reduce){.wave,.flow{animation:none!important}}':''}</style><rect width="${width}" height="${height}" fill="#fff"/>${body}</svg>\n`;
@@ -22,18 +28,18 @@ function prModule(pr,role,mobile=false){
     return {body,width,height:144};
   }
   const proposal=role==='RECENTLY RESOLVED PR';
-  const titleSize=mobile?(proposal?38:34):(proposal?27:24),titleGap=Math.round(titleSize*1.3);
+  const titleSize=mobile?(proposal?28:24):(proposal?27:24),titleGap=Math.round(titleSize*1.3);
   const title=wrap(pr.repoName,contentWidth,titleSize,mobile?3:2);
   title.forEach((part,i)=>body+=text(x,74+i*titleGap,part,titleSize,ink,'font-weight="600" letter-spacing="-.3"'));
   const bottom=74+(title.length-1)*titleGap;
-  const statusSize=mobile?(proposal?23:20):(proposal?15:13),detailSize=mobile?(proposal?27:23):(proposal?19:17);
+  const statusSize=mobile?(proposal?19:17):(proposal?15:13),detailSize=mobile?(proposal?21:18):(proposal?19:17);
   body+=text(x,bottom+(proposal?37:32),`${pr.status.toUpperCase()} PR #${pr.number}`,statusSize,blue,'font-weight="600" letter-spacing=".6"');
   const detail=wrap(pr.title,contentWidth,detailSize,2);
   detail.forEach((part,i)=>body+=text(x,bottom+(proposal?72:62)+i*(proposal?detailSize*1.4:24),part,detailSize,muted));
   if(proposal){
     const statsY=bottom+72+(detail.length-1)*(proposal?detailSize*1.4:24)+54;
-    const starSize=mobile?58:43,forkSize=mobile?40:27,captionSize=mobile?16:12;
-    const forkX=x+(mobile?195:238),visibleForkSize=mobile?28:forkSize;
+    const starSize=mobile?50:43,forkSize=mobile?32:27,captionSize=mobile?15:12;
+    const forkX=x+(mobile?191:238),visibleForkSize=mobile?27:forkSize;
     body+=text(x,statsY,compact(pr.stars),starSize,blue,'font-weight="500" letter-spacing="-1.2"');
     body+=text(x,statsY+captionSize+5,'REPOSITORY STARS',captionSize,muted,'font-weight="600" letter-spacing="1.3"');
     body+=text(forkX,statsY-3,compact(pr.forks),visibleForkSize,ink,'font-weight="500" letter-spacing="-.6"');
@@ -53,15 +59,58 @@ function identity(data,config){
 }
 
 function contributionRecord(data,animated,mobile=false){
-  const width=mobile?300:600,margin=mobile?18:56,cx=mobile?150:226,cy=mobile?150:177;
-  let body=text(margin,mobile?28:35,'CONTRIBUTION RECORD',mobile?19:13,muted,'font-weight="600" letter-spacing="1.3"')+gauge(cx,cy,data.mergedPullRequests,animated,mobile?20:12);
-  body+=wave(margin,mobile?272:309,width-margin*2,animated)+line(width-1,30,width-1,mobile?318:350);
+  const width=mobile?300:600,margin=mobile?18:56;
+  const groups=(data.contributions||[]).slice(0,3);
+  const mergedRepositories=groups.filter(group=>group.count>0).length;
   const closed=(data.contributions||[]).reduce((sum,group)=>sum+(group.closedCount||0),0);
-  const repositories=data.contributions?.length||0;
-  const detail=closed?`${closed} CLOSED  ·  ${repositories} CONTRIBUTING REPOSITORIES`:`${repositories} CONTRIBUTING REPOSITORIES`;
-  const detailSize=mobile?14:13,detailY=mobile?351:392;
-  wrap(detail,width-margin*2,detailSize,mobile?2:1).forEach((part,index)=>body+=text(margin,detailY+index*(mobile?18:16),part,detailSize,muted,'letter-spacing=".5"'));
-  return {body,width,height:mobile?400:418};
+  const repositories=groups.length;
+  let body=text(margin,mobile?29:35,'CONTRIBUTION RECORDS',mobile?19:16,muted,'font-weight="600" letter-spacing="1.2"');
+  body+=line(margin,mobile?45:53,width-margin,mobile?45:53);
+  if(mobile){
+    const metricY=110;
+    body+=text(margin,metricY,String(data.mergedPullRequests).padStart(2,'0'),48,blue,'font-weight="400" letter-spacing="-1.2"');
+    body+=text(159,metricY,String(closed).padStart(2,'0'),48,ink,'font-weight="400" letter-spacing="-1.2"');
+    body+=text(margin,metricY+25,'MERGED',15,muted,'font-weight="600" letter-spacing=".8"')+text(159,metricY+25,'CLOSED',15,muted,'font-weight="600" letter-spacing=".8"');
+    body+=text(margin,metricY+58,`${String(repositories).padStart(2,'0')} CONTRIBUTING REPOSITORIES`,14,muted,'letter-spacing=".4"');
+    const sourceX=margin+7,hubX=margin+61,nodeX=margin+82,startY=252,gap=100;
+    body+=`<rect x="${sourceX}" y="${startY-12}" width="42" height="36" fill="#fff" stroke="#b9c9f4"/>`+text(sourceX+7,startY+3,'PR',13,blue,'font-weight="600" letter-spacing=".6"');
+    body+=`<path d="M${sourceX+42} ${startY+6}H${hubX}V${startY+6+(groups.length-1)*gap}" fill="none" stroke="#cbd7f2" stroke-width="1.5"/>`;
+    groups.forEach((group,index)=>{
+      const y=startY+6+index*gap,label=repositorySignalName(group.name,132,14);
+      const path=`M${hubX} ${y}H${nodeX}`;
+      body+=`<path d="${path}" fill="none" stroke="#cbd7f2" stroke-width="1.5"/><path ${animated?'class="flow"':''} d="${path}" pathLength="100" fill="none" stroke="${blue}" stroke-width="2" stroke-dasharray="2 98"/>`;
+      body+=`<rect x="${nodeX-5}" y="${y-5}" width="10" height="10" fill="#fff" stroke="${blue}" stroke-width="1.5"/>`;
+      body+=text(nodeX+12,y-1,label,14,ink,'font-weight="600" letter-spacing=".2"');
+      body+=text(nodeX+12,y+18,`${group.count||0} MERGED`,13,muted,'letter-spacing=".25"')+text(nodeX+12,y+35,`${group.closedCount||0} CLOSED`,13,muted,'letter-spacing=".25"');
+    });
+    const signalY=Math.max(478,startY+groups.length*gap+13);
+    body+=`<path d="M${margin} ${signalY}H${width-margin}" stroke="#dce5f5" fill="none"/><path ${animated?'class="flow"':''} d="M${margin} ${signalY}H${width-margin}" pathLength="100" fill="none" stroke="${blue}" stroke-opacity=".65" stroke-dasharray="2 98"/>`;
+    return {body,width,height:signalY+22};
+  }
+  const graphLeft=margin,hubX=152,nodeX=184,startY=122,gap=91;
+  body+=text(graphLeft,84,'PUBLIC REPOSITORY NETWORK',13,muted,'font-weight="600" letter-spacing=".8"');
+  const sourceY=startY+Math.max(0,(groups.length-1)*gap/2);
+  body+=`<rect x="${graphLeft}" y="${sourceY-22}" width="60" height="46" fill="#fff" stroke="#b9c9f4" stroke-width="1.2"/>`;
+  body+=text(graphLeft+8,sourceY-2,'PR',15,blue,'font-weight="600" letter-spacing=".6"')+text(graphLeft+8,sourceY+14,'FLOW',11,muted,'font-weight="600" letter-spacing=".8"');
+  body+=`<path d="M${graphLeft+60} ${sourceY+1}H${hubX}V${startY+(groups.length-1)*gap/2}" fill="none" stroke="#cbd7f2" stroke-width="1.5"/>`;
+  groups.forEach((group,index)=>{
+    const y=startY+index*gap,repoName=repositorySignalName(group.name,125,14);
+    const path=`M${hubX} ${y}H${nodeX}`;
+    body+=`<path d="${path}" fill="none" stroke="#cbd7f2" stroke-width="1.5"/><path ${animated?'class="flow"':''} d="${path}" pathLength="100" fill="none" stroke="${blue}" stroke-width="2" stroke-dasharray="2 98"/>`;
+    body+=`<rect x="${nodeX-6}" y="${y-6}" width="12" height="12" fill="#fff" stroke="${blue}" stroke-width="1.5"/>`;
+    body+=text(nodeX+19,y-1,repoName,14,ink,'font-weight="600" letter-spacing=".3"');
+    body+=text(nodeX+19,y+19,`${String(group.count||0).padStart(2,'0')} MERGED`,13,muted,'letter-spacing=".2"')+text(nodeX+19,y+36,`${String(group.closedCount||0).padStart(2,'0')} CLOSED`,13,muted,'letter-spacing=".2"');
+  });
+  const junctionY=startY+(groups.length-1)*gap/2;
+  body+=`<path d="M${nodeX+7} ${junctionY}H335" fill="none" stroke="#cbd7f2" stroke-width="1.5"/><path ${animated?'class="flow"':''} d="M${nodeX+7} ${junctionY}H335" pathLength="100" fill="none" stroke="${blue}" stroke-width="2" stroke-dasharray="2 98"/><path d="M335 75V304" stroke="${rule}" fill="none"/>`;
+  const metricX=359;
+  body+=text(metricX,138,String(data.mergedPullRequests).padStart(2,'0'),58,blue,'font-weight="400" letter-spacing="-1.6"')+text(metricX,164,'MERGED',15,muted,'font-weight="600" letter-spacing=".8"');
+  body+=text(465,138,String(closed).padStart(2,'0'),58,ink,'font-weight="400" letter-spacing="-1.6"')+text(465,164,'CLOSED',15,muted,'font-weight="600" letter-spacing=".8"');
+  body+=line(metricX,204,width-margin,204)+text(metricX,236,String(repositories).padStart(2,'0'),23,blue,'font-weight="500"')+text(metricX+38,236,'REPOSITORIES',13,muted,'font-weight="600" letter-spacing=".5"');
+  body+=text(metricX,270,`${mergedRepositories} MERGED REPOS`,13,muted,'letter-spacing=".5"')+text(metricX,290,`${closed} CLOSED RECORDS`,13,muted,'letter-spacing=".5"');
+  for(let i=0;i<20;i++)body+=`<rect class="${animated?'wave':''}" style="animation-delay:-${(i*.17).toFixed(2)}s" x="${margin+i*25}" y="363" width="${i%4===0?3:2}" height="3" fill="${blue}" opacity="${i%3===0?.55:.24}"/>`;
+  body+=`<path d="M${margin} 384C180 367 294 399 402 376S500 377 544 370" fill="none" stroke="${blue}" stroke-opacity=".3"/><path ${animated?'class="flow"':''} d="M${margin} 384C180 367 294 399 402 376S500 377 544 370" pathLength="100" fill="none" stroke="${blue}" stroke-width="1.5" stroke-dasharray="1 99"/>`;
+  return {body,width,height:418};
 }
 
 function metrics(data,config,mobile=false){

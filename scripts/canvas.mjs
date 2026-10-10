@@ -75,34 +75,36 @@ export function projectCard(p,x,y,width,mobile,animated){
 export function contributionCard(c,x,y,width,mobile){
   const groups=c.groups||[c];let svg='',py=y;
   groups.forEach((group,index)=>{
-    if(index)svg+=line(x,py-14,x+width,py-14);
-    const headingSize=mobile?22:19;
-    const title=block(x,py,group.name||group.repo?.split('/')[1]?.replaceAll('-',' ')||'Open-source work',width,headingSize,ink,2,headingSize*1.3,'font-weight="600" letter-spacing="-.3"');
-    svg+=title.svg;py=title.bottom+(mobile?29:26);
+    if(index)svg+=line(x,py-12,x+width,py-12);
+    const headingSize=mobile?22:20;
+    const heading=group.name||group.repo?.split('/')[1]?.replaceAll('-',' ')||'Open-source work';
+    const headingBlock=block(x,py,heading,width,headingSize,ink,2,headingSize*1.25,'font-weight="600" letter-spacing="-.2"');
+    svg+=headingBlock.svg;py=headingBlock.bottom+(mobile?27:24);
     const summary=[];
-    if(group.count)summary.push(`${group.count} merged`);
-    if(group.closedCount)summary.push(`${group.closedCount} closed`);
-    if(summary.length)svg+=t(x,py,summary.join('  ·  ')+' PRs',mobile?16:15,blue);
-    else if(group.summary)svg+=t(x,py,group.summary,mobile?16:15,muted);
-    py+=mobile?31:28;
-    const rows=[...(group.pulls||[]).map(pr=>({...pr,status:'merged'})),...(group.closed||[])].slice(0,8);
-    const columns=mobile?1:2,gap=22,columnWidth=(width-gap*(columns-1))/columns;
-    const perColumn=Math.ceil(rows.length/columns);let groupBottom=py;
+    if(group.count)summary.push(`${String(group.count).padStart(2,'0')} MERGED`);
+    if(group.closedCount)summary.push(`${String(group.closedCount).padStart(2,'0')} CLOSED`);
+    if(summary.length)svg+=t(x,py,summary.join('  /  ')+' PRs',mobile?15:14,blue,'letter-spacing=".5"');
+    py+=mobile?31:27;
+    const rows=[...(group.pulls||[]).map(pr=>({...pr,status:'merged'})),...(group.closed||[])].slice(0,10);
+    const columns=mobile?1:2,gap=mobile?0:20,columnWidth=(width-gap*(columns-1))/columns,perColumn=Math.ceil(rows.length/columns);
+    let groupBottom=py;
     for(let col=0;col<columns;col++){
-      const slice=rows.slice(col*perColumn,(col+1)*perColumn),cx=x+col*(columnWidth+gap),startY=py;
-      let rowY=startY;
+      const cx=x+col*(columnWidth+gap),slice=rows.slice(col*perColumn,(col+1)*perColumn),trackX=cx+4;
+      let rowY=py;
       for(const pr of slice){
-        svg+=`<circle cx="${cx+4}" cy="${rowY-5}" r="3.5" fill="#fff" stroke="${blue}"/>`;
-        svg+=t(cx+15,rowY,`#${pr.number}${pr.status==='closed'?' · CLOSED':''}`,11,blue);
-        const titleX=cx+(pr.status==='closed'?105:84),body=block(titleX,rowY,pr.title,columnWidth-(titleX-cx+3),mobile?16:14,muted,2,mobile?21:18);
-        svg+=body.svg;rowY=body.bottom+(mobile?27:24);
+        const meta=`#${pr.number}  ·  ${pr.status==='closed'?'CLOSED':'MERGED'}  ·  ${pr.date?new Date(pr.date).toLocaleDateString('en-GB',{day:'2-digit',month:'short',year:'numeric',timeZone:'Asia/Shanghai'}).toUpperCase():''}`;
+        svg+=`<circle cx="${trackX}" cy="${rowY-5}" r="3.5" fill="${pr.status==='merged'?blue:'#fff'}" stroke="${blue}"/>`;
+        svg+=t(cx+18,rowY,meta,mobile?14:12,pr.status==='merged'?blue:muted,'font-weight="600" letter-spacing=".5"');
+        const title=block(cx+18,rowY+18,pr.title,columnWidth-20,mobile?18:16,ink,2,mobile?21:18);
+        svg+=title.svg;rowY=title.bottom+(mobile?23:20);
       }
+      if(slice.length>1)svg+=line(trackX,py-5,trackX,rowY-(mobile?27:24),'#d8e2f7');
       groupBottom=Math.max(groupBottom,rowY);
     }
     py=groupBottom;
     if(group.count>(group.pulls||[]).length){svg+=t(x,py,`+ ${group.count-group.pulls.length} merged PRs`,12,muted);py+=21;}
     if(group.closedCount>(group.closed||[]).length){svg+=t(x,py,`+ ${group.closedCount-(group.closed||[]).length} closed PRs`,12,muted);py+=21;}
-    py+=index<groups.length-1?14:0;
+    py+=index<groups.length-1?16:0;
   });
   return {svg,bottom:py+2};
 }

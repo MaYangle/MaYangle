@@ -54,7 +54,7 @@ Otherwise the generator uses `GITHUB_TOKEN` when it is set, or GitHub's anonymou
 
 The white dashboard is assembled from individually linked SVG modules in the README. The contribution instrument uses a twelve-second loop of a light particle wave; project pipelines animate their moving signal. Instrument values come from GitHub data and do not animate into invented values. Each image's `<picture>` element selects a static version for readers who request reduced motion. Image filenames include content hashes, so updates replace cached assets reliably.
 
-The dashboard keeps its white background, dark typography, restrained blue accents, circular contribution readout, and curved baseline. Native anchors make each module a direct route to its related public page. The recently resolved PR panel gives upstream repository stars and forks a stronger readout and labels them as repository metrics. Project, contribution, showcase, and recent-work modules grow or change as the public GitHub data changes. Contact links remain below the dashboard. The introduction is intentionally limited to “AI engineer”.
+The dashboard keeps its white background, dark typography, restrained blue accents, and telemetry-style contribution network. Native anchors make each module a direct route to its related public page. The recently resolved PR panel gives upstream repository stars and forks a stronger readout and labels them as repository metrics. Project, contribution, showcase, and recent-work modules grow or change as the public GitHub data changes. Contact links remain below the dashboard. The introduction is intentionally limited to “AI engineer”.
 
 ## Research and design references
 
