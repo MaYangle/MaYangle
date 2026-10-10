@@ -1,6 +1,7 @@
 import {xml,compact,wrap} from './format.mjs';
 import {renderImpact,renderActivity} from './sections.mjs';
 import {renderShowcase} from './showcase.mjs';
+import {selectFeaturedProjects} from './projects.mjs';
 
 const ink='#17232f', muted='#667583', blue='#4264e8', rule='#e1e7ed';
 const t=(x,y,value,size=18,color=ink,extra='')=>`<text x="${x}" y="${y}" font-size="${size}" fill="${color}" ${extra}>${xml(value)}</text>`;
@@ -10,7 +11,7 @@ function block(x,y,value,width,size=18,color=ink,maxLines=3,lineHeight=size*1.4,
   const lines=wrap(value,width,size,maxLines);
   return {svg:lines.map((s,i)=>t(x,y+i*lineHeight,s,size,color,extra)).join(''),bottom:y+(lines.length-1)*lineHeight};
 }
-function wave(x,y,width,animated){
+export function wave(x,y,width,animated){
   const path=`M${x} ${y+10}C${x+width*.24} ${y+31} ${x+width*.48} ${y-21} ${x+width*.7} ${y+5}S${x+width*.9} ${y+26} ${x+width} ${y+17}`;
   let svg=`<path d="${path}" fill="none" stroke="${blue}" stroke-opacity=".1"/><path ${animated?'class="flow"':''} d="${path}" pathLength="100" fill="none" stroke="${blue}" stroke-opacity=".75" stroke-width="3" stroke-linecap="round" stroke-dasharray=".4 99.6"/>`;
   for(let row=0;row<3;row++)for(let i=0;i<38;i++){
@@ -19,7 +20,7 @@ function wave(x,y,width,animated){
   }
   return svg;
 }
-function gauge(x,y,count,animated){
+export function gauge(x,y,count,animated){
   const value=count<100?String(count).padStart(2,'0'):compact(count);
   const size=value.length>3?83:value.length>2?104:126;
   return `<circle cx="${x}" cy="${y}" r="106" fill="#fbfcff" stroke="#e7edfa"/>
@@ -62,7 +63,7 @@ function pipeline(p,x,y,width,mobile,animated){
   svg+=t(end,y+14,(p.output||'OUTPUT').toUpperCase(),mobile?14:12,muted,'text-anchor="end" letter-spacing=".5"');
   return {svg,bottom:y+104};
 }
-function projectCard(p,x,y,width,mobile,animated){
+export function projectCard(p,x,y,width,mobile,animated){
   let svg='';const name=block(x,y,p.name,width,mobile?26:26,ink,2,34,'font-weight="600" letter-spacing="-.3"');svg+=name.svg;
   const desc=block(x,name.bottom+35,p.description,width,mobile?20:18,muted,3,mobile?29:26);svg+=desc.svg;
   svg+=t(x,desc.bottom+31,(p.role||(p.fork?'Working fork':'Independent project')).toUpperCase(),11,muted,'letter-spacing=".8"');
@@ -72,7 +73,7 @@ function projectCard(p,x,y,width,mobile,animated){
   else bottom+=18;
   return {svg,bottom};
 }
-function contributionCard(c,x,y,width,mobile){
+export function contributionCard(c,x,y,width,mobile){
   let svg='';const title=block(x,y,c.name||c.repo.split('/')[1].replaceAll('-',' '),width,mobile?26:25,ink,3,32,'font-weight="600" letter-spacing="-.3"');svg+=title.svg;
   svg+=t(x,title.bottom+36,`${c.count} merged pull requests`,20,blue);
   let py=title.bottom+80;
@@ -120,7 +121,7 @@ export function renderHero(data,config,{mobile=false,animated=true}={}){
     svg+=label(786,stripY+35,'TOOLS IN USE')+t(786,stripY+63,(config.stack||[]).join(' / '),17,ink);
     svg+=line(margin,stripY+96,width-margin,stripY+96);worksY=stripY+140;
   }
-  const projects=data.projects.slice(0,config.projects.maxVisible),contributions=data.contributions.slice(0,3);
+  const projects=selectFeaturedProjects(data.projects,config),contributions=data.contributions.slice(0,3);
   let bottom;
   if(mobile){
     svg+=label(margin,worksY,'SELECTED PROJECTS');let py=worksY+47;

@@ -19,7 +19,8 @@ test('four empty areas are honest placeholders with no fabricated entries',async
   assert.equal(result.sections.length,4);
   assert.ok(result.sections.every(s=>s.items.length===0));
   const svg=renderShowcase(result,56,100,1088,false).svg;
-  assert.equal((svg.match(/No public entry yet/g)||[]).length,4);
+  assert.equal((svg.match(/No public entry yet/g)||[]).length,1);
+  assert.ok(renderShowcase(result,56,100,1088,false).bottom<240);
   assert.ok(!svg.includes('Coming soon'));
 });
 
@@ -27,7 +28,8 @@ test('a curated item replaces its empty state while the other areas remain ready
   const c=config();c.showcase.sections[2].items=[{title:'A published technical note',url:'https://example.org/note',kind:'Article',date:'2026-10-10',summary:'A short explanation.'}];
   const result=await collectShowcase(c,[],async()=>[]);
   const svg=renderShowcase(result,30,50,540,true).svg;
-  assert.equal((svg.match(/No public entry yet/g)||[]).length,3);
+  assert.equal((svg.match(/No public entry yet/g)||[]).length,0);
+  assert.ok(svg.includes('RESERVED AREAS'));
   assert.ok(svg.includes('A published technical note'));
   assert.equal(result.sections[2].items[0].source,'curated');
 });
