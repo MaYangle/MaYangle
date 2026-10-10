@@ -21,7 +21,7 @@ function prModule(pr,role,mobile=false){
     body+=text(x,78,'Building in public',mobile?34:24,ink)+text(x,108,'New work will appear here automatically.',mobile?22:15,muted);
     return {body,width,height:144};
   }
-  const proposal=role==='OPEN PROPOSAL';
+  const proposal=role==='RECENTLY RESOLVED PR';
   const titleSize=mobile?(proposal?38:34):(proposal?27:24),titleGap=Math.round(titleSize*1.3);
   const title=wrap(pr.repoName,contentWidth,titleSize,mobile?3:2);
   title.forEach((part,i)=>body+=text(x,74+i*titleGap,part,titleSize,ink,'font-weight="600" letter-spacing="-.3"'));
@@ -32,8 +32,8 @@ function prModule(pr,role,mobile=false){
   detail.forEach((part,i)=>body+=text(x,bottom+(proposal?72:62)+i*(proposal?detailSize*1.4:24),part,detailSize,muted));
   if(proposal){
     const statsY=bottom+72+(detail.length-1)*(proposal?detailSize*1.4:24)+54;
-    const starSize=mobile?58:43,forkSize=mobile?40:27,captionSize=mobile?18:12;
-    const forkX=x+(mobile?185:238),visibleForkSize=mobile?32:forkSize;
+    const starSize=mobile?58:43,forkSize=mobile?40:27,captionSize=mobile?16:12;
+    const forkX=x+(mobile?195:238),visibleForkSize=mobile?28:forkSize;
     body+=text(x,statsY,compact(pr.stars),starSize,blue,'font-weight="500" letter-spacing="-1.2"');
     body+=text(x,statsY+captionSize+5,'REPOSITORY STARS',captionSize,muted,'font-weight="600" letter-spacing="1.3"');
     body+=text(forkX,statsY-3,compact(pr.forks),visibleForkSize,ink,'font-weight="500" letter-spacing="-.6"');
@@ -53,10 +53,15 @@ function identity(data,config){
 }
 
 function contributionRecord(data,animated,mobile=false){
-  const width=600;
-  let body=text(56,35,'CONTRIBUTION RECORD',mobile?22:13,muted,'font-weight="600" letter-spacing="1.3"')+gauge(226,177,data.mergedPullRequests,animated,mobile?24:12);
-  body+=wave(56,309,532,animated)+line(width-1,30,width-1,350);
-  return {body,width,height:365};
+  const width=mobile?300:600,margin=mobile?18:56,cx=mobile?150:226,cy=mobile?150:177;
+  let body=text(margin,mobile?28:35,'CONTRIBUTION RECORD',mobile?19:13,muted,'font-weight="600" letter-spacing="1.3"')+gauge(cx,cy,data.mergedPullRequests,animated,mobile?20:12);
+  body+=wave(margin,mobile?272:309,width-margin*2,animated)+line(width-1,30,width-1,mobile?318:350);
+  const closed=(data.contributions||[]).reduce((sum,group)=>sum+(group.closedCount||0),0);
+  const repositories=data.contributions?.length||0;
+  const detail=closed?`${closed} CLOSED  ·  ${repositories} CONTRIBUTING REPOSITORIES`:`${repositories} CONTRIBUTING REPOSITORIES`;
+  const detailSize=mobile?14:13,detailY=mobile?351:392;
+  wrap(detail,width-margin*2,detailSize,mobile?2:1).forEach((part,index)=>body+=text(margin,detailY+index*(mobile?18:16),part,detailSize,muted,'letter-spacing=".5"'));
+  return {body,width,height:mobile?400:418};
 }
 
 function metrics(data,config,mobile=false){
@@ -97,17 +102,21 @@ function projectModule(project,index,first,mobile=false,animated=true){
     });
     if(project.inputs?.length){body+=line(x,row-10,x+contentWidth,row-10,blue,'stroke-opacity=".3"')+text(x+contentWidth,row+14,(project.output||'OUTPUT').toUpperCase(),12,blue,'text-anchor="end" letter-spacing=".5"');row+=35;}
     if(project.stack?.length)wrap(project.stack.join(' / '),contentWidth,14,2).forEach((part,i)=>body+=text(x,row+i*18,part,14,blue));
-    return {body,width,height:Math.max(190,row+35)};
+    row+=project.stack?.length?30:8;
+    body+=line(x,row-8,x+contentWidth,row-8)+text(x,row+15,`${compact(project.stars||0)} STARS  ·  ${compact(project.forks||0)} FORKS  ·  ${(project.language||'PUBLIC REPOSITORY').toUpperCase()}`,12,muted,'letter-spacing=".4"');
+    return {body,width,height:Math.max(210,row+34)};
   }
   const card=projectCard(project,x,y,contentWidth,mobile,animated);body+=card.svg;
-  return {body,width,height:Math.max(card.bottom+20,first?150:0)};
+  const metaY=card.bottom+20;
+  body+=line(x,metaY-8,x+contentWidth,metaY-8)+text(x,metaY+16,`${compact(project.stars||0)} STARS  ·  ${compact(project.forks||0)} FORKS  ·  ${(project.language||'PUBLIC REPOSITORY').toUpperCase()}`,13,muted,'letter-spacing=".4"');
+  return {body,width,height:Math.max(metaY+33,first?150:0)};
 }
 
-function contributionModule(contribution,first,mobile=false){
+function contributionModule(contributions,first,mobile=false){
   const width=mobile?300:600,x=mobile?24:48,contentWidth=width-x*2,y=mobile?55:78;
   let body='';
-  if(first)body+=text(x,mobile?28:35,'MERGED CONTRIBUTIONS',mobile?19:13,muted,'font-weight="600" letter-spacing="1.3"');
-  const card=contributionCard(contribution,x,y,contentWidth,mobile);body+=card.svg;
+  if(first)body+=text(x,mobile?28:35,'CONTRIBUTION RECORDS',mobile?19:13,muted,'font-weight="600" letter-spacing="1.3"');
+  const card=contributionCard({groups:contributions},x,y,contentWidth,mobile);body+=card.svg;
   return {body,width,height:Math.max(card.bottom+14,first?150:0)};
 }
 
@@ -137,7 +146,7 @@ function activityModule(item,index,mobile=false){
   const font=Math.round(17*scale);
   let body=line(x,y,width-x,y);
   if(index===0)body+=text(x,y+35,'RECENT WORK',Math.round(13*scale),muted,'font-weight="600" letter-spacing="1.3"');
-  const top=index===0?Math.round(72*scale):Math.round(37*scale);
+  const top=Math.round(72*scale);
   body+=text(x,top,date(item.date),Math.round(12*scale),muted,'letter-spacing=".5"')+`<circle cx="${x+4}" cy="${top+25}" r="4" fill="#fff" stroke="${blue}"/>`;
   body+=text(x,top+57,`${item.status.toUpperCase()} · #${item.number}`,Math.round(12*scale),blue,'font-weight="600" letter-spacing=".5"');
   const title=wrap(item.title,contentWidth,font,2);
@@ -157,20 +166,21 @@ function footer(data,mobile=false){
 export function buildModules(data,config){
   const owner=`https://github.com/${config.username}`;
   const mergedUrl=searchPulls(`author:${config.username} is:pr is:merged is:public -user:${config.username}`);
-  const openUrl=searchPulls(`author:${config.username} is:pr is:open is:public -user:${config.username}`);
+  const resolvedUrl=searchPulls(`author:${config.username} is:pr is:closed is:public -user:${config.username}`);
   const blocks=[];
   const add=(id,alt,href,draw)=>blocks.push({id,alt,href,draw});
   add('identity',`${config.name} — ${config.tagline}`,owner,()=>identity(data,config));
   add('contribution-record',`${data.mergedPullRequests} merged upstream pull requests`,mergedUrl,({animated=true,mobile=false}={})=>contributionRecord(data,animated,mobile));
-  add('spotlight',data.spotlight?`Latest contribution: PR #${data.spotlight.number} in ${data.spotlight.repo}`:'Latest contribution',data.spotlight?.url||owner,({mobile=false}={})=>prModule(data.spotlight,'LATEST MERGED PR',mobile));
-  if(data.openSpotlight)add('open-proposal',`Open PR #${data.openSpotlight.number} in ${data.openSpotlight.repo}`,data.openSpotlight.url,({mobile=false}={})=>prModule(data.openSpotlight,'OPEN PROPOSAL',mobile));
+  const displayedSpotlight=data.spotlight?.status==='open'?null:data.spotlight;
+  add('spotlight',displayedSpotlight?`Latest resolved contribution: PR #${displayedSpotlight.number} in ${displayedSpotlight.repo}`:'No resolved upstream PR yet',displayedSpotlight?.url||owner,({mobile=false}={})=>prModule(displayedSpotlight,displayedSpotlight?.status==='merged'?'LATEST MERGED PR':displayedSpotlight?'LATEST CLOSED PR':'LATEST CONTRIBUTION',mobile));
+  if(data.resolvedSpotlight)add('resolved-pr',`${data.resolvedSpotlight.status==='merged'?'Merged':'Closed'} PR #${data.resolvedSpotlight.number} in ${data.resolvedSpotlight.repo}`,data.resolvedSpotlight.url,({mobile=false}={})=>prModule(data.resolvedSpotlight,'RECENTLY RESOLVED PR',mobile));
   add('metrics',`${data.projects.length} public projects and ${data.openPullRequests} open pull requests`,`${owner}?tab=repositories`,({mobile=false}={})=>metrics(data,config,mobile));
   if(data.projects.length){
     data.projects.slice(0,config.projects.maxVisible).forEach((project,index)=>add(`project-${index+1}`,`Open ${project.repo}`,project.url,({mobile=false,animated=true}={})=>projectModule(project,index,index===0,mobile,animated)));
   }else add('project-empty','No public projects yet',`${owner}?tab=repositories`,({mobile=false}={})=>emptyModule('SELECTED PROJECTS','New public projects will appear here.',mobile));
   if(data.contributions.length){
-    data.contributions.slice(0,3).forEach((contribution,index)=>add(`contribution-${index+1}`,`Merged pull requests in ${contribution.repo}`,searchPulls(`author:${config.username} repo:${contribution.repo} is:pr is:merged`),({mobile=false}={})=>contributionModule(contribution,index===0,mobile)));
-  }else add('contribution-empty','No merged contributions yet',mergedUrl,({mobile=false}={})=>emptyModule('MERGED CONTRIBUTIONS','Open-source work in progress.',mobile));
+    add('contribution-records',`Merged and closed pull requests across ${data.contributions.length} repositories`,resolvedUrl,({mobile=false}={})=>contributionModule(data.contributions,true,mobile));
+  }else add('contribution-empty','No merged contributions yet',mergedUrl,({mobile=false}={})=>emptyModule('CONTRIBUTION RECORDS','Open-source work in progress.',mobile));
   (data.showcase?.sections||[]).forEach((section,index)=>{
     const module=showcaseModule(section,index,data,config);
     module.draw=({mobile=false}={})=>{
@@ -183,6 +193,17 @@ export function buildModules(data,config){
   if(data.impact?.sampleSize)add('impact',`Diff impact across ${data.impact.sampleSize} merged pull requests`,mergedUrl,({mobile=false}={})=>impactModule(data,mobile));
   (data.activity||[]).slice(0,3).forEach((item,index)=>add(`activity-${index+1}`,`Open PR #${item.number}: ${item.title}`,item.url,({mobile=false}={})=>activityModule(item,index,mobile)));
   add('footer','Public GitHub data refresh date',owner,({mobile=false}={})=>footer(data,mobile));
+  const alignRows=(items,columns,bottomRule=false)=>{
+    for(let i=0;i<items.length;i+=columns){
+      const row=items.slice(i,i+columns),heights={};
+      for(const [key,options] of [['desktop',{mobile:false,animated:true}],['mobile',{mobile:true,animated:true}]]){
+        heights[key]=Math.max(...row.map(module=>module.draw(options).height));
+      }
+      row.forEach(module=>{module.layoutHeights=heights;if(bottomRule)module.bottomRule=true;});
+    }
+  };
+  alignRows(blocks.filter(module=>/^showcase-\d+$/.test(module.id)),2);
+  alignRows(blocks.filter(module=>/^activity-\d+$/.test(module.id)),3,true);
   for(const module of blocks){
     const url=new URL(module.href);
     if(url.protocol!=='https:'||url.username||url.password)throw new Error('Dashboard modules need public HTTPS links');
@@ -191,7 +212,9 @@ export function buildModules(data,config){
 }
 
 export function renderModule(module,options={}){
-  const {body,width,height}=module.draw({mobile:false,animated:true,...options});
-  return frame(body,width,height,module.alt,options.animated!==false);
+  const mobile=options.mobile===true,{body,width,height}=module.draw({mobile:false,animated:true,...options});
+  const targetHeight=Math.max(height,module.layoutHeights?.[mobile?'mobile':'desktop']||height);
+  const finalBody=module.bottomRule?body+line(mobile?16:20,targetHeight-1,width-(mobile?16:20),targetHeight-1):body;
+  return frame(finalBody,width,targetHeight,module.alt,options.animated!==false);
 }
 

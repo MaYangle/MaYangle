@@ -73,18 +73,37 @@ export function projectCard(p,x,y,width,mobile,animated){
   return {svg,bottom};
 }
 export function contributionCard(c,x,y,width,mobile){
-  let svg='';const title=block(x,y,c.name||c.repo.split('/')[1].replaceAll('-',' '),width,mobile?26:25,ink,3,32,'font-weight="600" letter-spacing="-.3"');svg+=title.svg;
-  svg+=t(x,title.bottom+36,`${c.count} merged pull requests`,20,blue);
-  let py=title.bottom+80;
-  const pulls=c.pulls||[];
-  const layouts=pulls.map(pr=>{
-    const body=block(x+59,py,pr.title,width-59,mobile?19:17,muted,2,mobile?28:25);
-    const item={pr,y:py,body};py=body.bottom+41;return item;
+  const groups=c.groups||[c];let svg='',py=y;
+  groups.forEach((group,index)=>{
+    if(index)svg+=line(x,py-14,x+width,py-14);
+    const headingSize=mobile?22:19;
+    const title=block(x,py,group.name||group.repo?.split('/')[1]?.replaceAll('-',' ')||'Open-source work',width,headingSize,ink,2,headingSize*1.3,'font-weight="600" letter-spacing="-.3"');
+    svg+=title.svg;py=title.bottom+(mobile?29:26);
+    const summary=[];
+    if(group.count)summary.push(`${group.count} merged`);
+    if(group.closedCount)summary.push(`${group.closedCount} closed`);
+    if(summary.length)svg+=t(x,py,summary.join('  ·  ')+' PRs',mobile?16:15,blue);
+    else if(group.summary)svg+=t(x,py,group.summary,mobile?16:15,muted);
+    py+=mobile?31:28;
+    const rows=[...(group.pulls||[]).map(pr=>({...pr,status:'merged'})),...(group.closed||[])].slice(0,8);
+    const columns=mobile?1:2,gap=22,columnWidth=(width-gap*(columns-1))/columns;
+    const perColumn=Math.ceil(rows.length/columns);let groupBottom=py;
+    for(let col=0;col<columns;col++){
+      const slice=rows.slice(col*perColumn,(col+1)*perColumn),cx=x+col*(columnWidth+gap),startY=py;
+      let rowY=startY;
+      for(const pr of slice){
+        svg+=`<circle cx="${cx+4}" cy="${rowY-5}" r="3.5" fill="#fff" stroke="${blue}"/>`;
+        svg+=t(cx+15,rowY,`#${pr.number}${pr.status==='closed'?' · CLOSED':''}`,11,blue);
+        const titleX=cx+(pr.status==='closed'?105:84),body=block(titleX,rowY,pr.title,columnWidth-(titleX-cx+3),mobile?16:14,muted,2,mobile?21:18);
+        svg+=body.svg;rowY=body.bottom+(mobile?27:24);
+      }
+      groupBottom=Math.max(groupBottom,rowY);
+    }
+    py=groupBottom;
+    if(group.count>(group.pulls||[]).length){svg+=t(x,py,`+ ${group.count-group.pulls.length} merged PRs`,12,muted);py+=21;}
+    if(group.closedCount>(group.closed||[]).length){svg+=t(x,py,`+ ${group.closedCount-(group.closed||[]).length} closed PRs`,12,muted);py+=21;}
+    py+=index<groups.length-1?14:0;
   });
-  if(layouts.length>1)svg+=line(x+5,layouts[0].y-6,x+5,layouts.at(-1).y-6,'#d8e2f7');
-  for(const {pr,y:iy,body} of layouts){svg+=`<circle cx="${x+5}" cy="${iy-6}" r="4" fill="#fff" stroke="${blue}"/>`+t(x+20,iy,`#${pr.number}`,12,blue)+body.svg;}
-  if(!layouts.length){const summary=block(x,py,c.summary,width,18,muted);svg+=summary.svg;py=summary.bottom+25;}
-  if(c.count>pulls.length){svg+=t(x,py,`+ ${c.count-pulls.length} more merged PRs`,13,muted);py+=24;}
   return {svg,bottom:py+2};
 }
 

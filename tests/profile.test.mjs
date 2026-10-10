@@ -9,20 +9,20 @@ import { updateProfile } from '../scripts/update-profile.mjs';
 
 const config={username:'MaYangle',name:'Yangle Ma',tagline:'AI engineering',bio:'Building reproducible AI systems.',links:{GitHub:'https://github.com/MaYangle'},projects:{discover:true,maxVisible:3,exclude:[],include:[{repo:'MaYangle/team-ml',name:'Team ML',description:'Team project, working fork'}]}};
 const repository=(name,more={})=>({full_name:`MaYangle/${name}`,name,private:false,archived:false,disabled:false,fork:false,size:20,stargazers_count:2,forks_count:1,language:'Python',pushed_at:'2026-10-01T00:00:00Z',...more});
-const issue=(number,status='open',repo='upstream/ai')=>({number,title:`Contribution ${number}`,html_url:`https://github.com/${repo}/pull/${number}`,repository_url:`https://api.github.com/repos/${repo}`,state:status==='open'?'open':'closed',updated_at:'2026-10-09T00:00:00Z',created_at:'2026-10-01T00:00:00Z',pull_request:{merged_at:status==='merged'?'2026-10-08T00:00:00Z':null}});
+const issue=(number,status='open',repo='upstream/ai')=>({number,title:`Contribution ${number}`,html_url:`https://github.com/${repo}/pull/${number}`,repository_url:`https://api.github.com/repos/${repo}`,state:status==='open'?'open':'closed',updated_at:'2026-10-09T00:00:00Z',created_at:'2026-10-01T00:00:00Z',closed_at:status==='closed'?'2026-10-09T00:00:00Z':null,pull_request:{merged_at:status==='merged'?'2026-10-08T00:00:00Z':null}});
 const response=items=>({items,total_count:items.length,incomplete_results:false});
-const mockApi=({repos=[repository('team-ml',{fork:true})],merged=[issue(7,'merged')],open=[issue(527)],stars=66000}={})=>async endpoint=>{
+const mockApi=({repos=[repository('team-ml',{fork:true})],merged=[issue(7,'merged')],open=[issue(527)],closed=[],stars=66000}={})=>async endpoint=>{
   if(endpoint.startsWith('users/')) return repos;
   if(endpoint.startsWith('search/')) {
     const query=decodeURIComponent(endpoint);
-    let items=query.includes('is:merged')?merged:open;
+    let items=query.includes('is:closed')?closed:query.includes('is:merged')?merged:open;
     const scope=/repo:([\w.-]+\/[\w.-]+)/.exec(query)?.[1];
     if(scope)items=items.filter(item=>item.repository_url===`https://api.github.com/repos/${scope}`);
     return response(items);
   }
   if(endpoint.includes('/pulls/')) {
     const number=Number(endpoint.split('/').at(-1));
-    const item=[...merged,...open].find(item=>item.number===number);
+    const item=[...merged,...open,...closed].find(item=>item.number===number);
     return {state:item.state,merged:Boolean(item.pull_request.merged_at),additions:100,deletions:10,changed_files:2};
   }
   if(endpoint.startsWith('repos/')) return {name:endpoint.split('/').at(-1),stargazers_count:stars,forks_count:11000,private:false};
@@ -213,3 +213,4 @@ test('the concise profile has only the chosen subtitle and no expandable text co
   assert.ok(!md.includes('[PR #') && !md.includes('All projects') && !md.includes('Merged contributions'));
   assert.ok(md.includes('[GitHub](https://github.com/MaYangle)'));
 });
+

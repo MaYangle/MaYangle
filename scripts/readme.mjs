@@ -13,14 +13,13 @@ function image(module,assets){
 }
 
 function table(rows){
-  return `<table role="presentation" width="100%" border="0" cellpadding="0" cellspacing="0"><tbody>${rows.map(row=>`<tr>${row.map(cell=>`<td width="${Math.floor(100/row.length)}%" valign="top">${cell||'&nbsp;'}</td>`).join('')}</tr>`).join('')}</tbody></table>`;
+  return rows.map(row=>`<table role="presentation" width="100%" border="0" cellpadding="0" cellspacing="0"><tbody><tr>${row.map(cell=>`<td width="${Math.floor(100/row.length)}%" valign="top">${cell||'&nbsp;'}</td>`).join('')}</tr></tbody></table>`).join('\n');
 }
 
 function paired(left,right,assets){
-  const count=Math.max(left.length,right.length);
-  const rows=[];
-  for(let i=0;i<count;i++)rows.push([left[i]?image(left[i],assets):'',right[i]?image(right[i],assets):'']);
-  return rows.length?table(rows):'';
+  const leftColumn=left.map(module=>image(module,assets)).join('<br>');
+  const rightColumn=right.map(module=>image(module,assets)).join('<br>');
+  return left.length||right.length?table([[leftColumn,rightColumn]]):'';
 }
 
 function imageGrid(items,columns,assets){
@@ -34,10 +33,10 @@ export function renderReadme(data,config,assets={}){
   const identity=byId.get('identity');
   const gauge=byId.get('contribution-record');
   const spotlight=byId.get('spotlight');
-  const proposal=byId.get('open-proposal');
+  const proposal=byId.get('resolved-pr');
   const metrics=byId.get('metrics');
   const projects=modules.filter(module=>/^project-\d+$/.test(module.id)||module.id==='project-empty');
-  const contributions=modules.filter(module=>/^contribution-\d+$/.test(module.id)||module.id==='contribution-empty');
+  const contributions=modules.filter(module=>module.id==='contribution-records'||module.id==='contribution-empty');
   const showcases=modules.filter(module=>/^showcase-\d+$/.test(module.id));
   const impact=byId.get('impact');
   const activities=modules.filter(module=>/^activity-\d+$/.test(module.id));

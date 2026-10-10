@@ -14,9 +14,9 @@ The generator updates each dashboard module independently:
 - The project, merged-contribution, showcase, impact, and activity modules.
 - Native README links for the profile, each PR spotlight, project, contribution group, showcase area, impact panel, and recent-work card.
 
-The primary spotlight prefers merged upstream PRs, ordered by merge date; stars only break date ties. If no merged work exists, it uses the latest open PR. A separate, explicitly labeled open-proposal summary keeps current work visible. Current PR status is checked against the pull-request endpoint before publication. The candidate pool is the latest 100 open and 100 merged public PRs. Closed, unmerged proposals are excluded. Repository stars always describe the upstream repository, not personal ownership.
+The primary spotlight prefers merged upstream PRs, ordered by merge date; stars only break date ties. A separate **Recently resolved PR** panel selects a closed PR, or another merged PR when no closed PR exists. Open PRs awaiting a response are not used in that panel. Current PR status is checked against the pull-request endpoint before publication. The candidate pool is the latest 100 open, merged, and closed-unmerged public PRs. Repository stars always describe the upstream repository, not personal ownership.
 
-Merged contributions show the three codebases with the most recent merges, with up to six PRs per codebase ordered by merge time. Each codebase's total count is fetched separately; if more than six exist, the panel states how many additional merged PRs there are. PRs merged into repositories owned by MaYangle are excluded from the **upstream** count.
+Contribution records include up to three upstream codebases, show up to six merged PRs and four closed-unmerged PRs per codebase, and label each record's outcome. Exact merged and closed counts are fetched separately for each codebase. PRs merged into repositories owned by MaYangle are excluded from the **upstream merged** total.
 
 ## Adding projects
 
@@ -54,7 +54,7 @@ Otherwise the generator uses `GITHUB_TOKEN` when it is set, or GitHub's anonymou
 
 The white dashboard is assembled from individually linked SVG modules in the README. The contribution instrument uses a twelve-second loop of a light particle wave; project pipelines animate their moving signal. Instrument values come from GitHub data and do not animate into invented values. Each image's `<picture>` element selects a static version for readers who request reduced motion. Image filenames include content hashes, so updates replace cached assets reliably.
 
-The dashboard keeps its white background, dark typography, restrained blue accents, circular contribution readout, and curved baseline. Native anchors make each module a direct route to its related public page. The open-proposal panel gives upstream repository stars and forks a stronger readout and labels them as repository metrics. Project, contribution, showcase, and recent-work modules grow or change as the public GitHub data changes. Contact links remain below the dashboard. The introduction is intentionally limited to “AI engineer”.
+The dashboard keeps its white background, dark typography, restrained blue accents, circular contribution readout, and curved baseline. Native anchors make each module a direct route to its related public page. The recently resolved PR panel gives upstream repository stars and forks a stronger readout and labels them as repository metrics. Project, contribution, showcase, and recent-work modules grow or change as the public GitHub data changes. Contact links remain below the dashboard. The introduction is intentionally limited to “AI engineer”.
 
 ## Research and design references
 
