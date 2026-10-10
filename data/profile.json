@@ -1,8 +1,9 @@
 {
-  "schemaVersion": 5,
+  "schemaVersion": 7,
   "username": "MaYangle",
   "mergedPullRequests": 6,
-  "openPullRequests": 1,
+  "closedPullRequests": 2,
+  "openPullRequests": 2,
   "spotlight": {
     "repo": "19376357/Bilingual-Multimodal-Sentiment-Analysis",
     "repoName": "Bilingual Multimodal Sentiment Analysis",
@@ -19,20 +20,20 @@
     "repo": "rohitg00/ai-engineering-from-scratch",
     "repoName": "AI Engineering from Scratch",
     "repoUrl": "https://github.com/rohitg00/ai-engineering-from-scratch",
-    "stars": 66608,
-    "forks": 11670,
-    "number": 527,
-    "title": "Research links for seven lessons",
-    "url": "https://github.com/rohitg00/ai-engineering-from-scratch/pull/527",
+    "stars": 66647,
+    "forks": 11673,
+    "number": 583,
+    "title": "feat(quizzes): backfill 150 missing lesson quizzes",
+    "url": "https://github.com/rohitg00/ai-engineering-from-scratch/pull/583",
     "status": "open",
-    "date": "2026-10-03T12:16:31Z"
+    "date": "2026-10-10T16:56:35Z"
   },
   "resolvedSpotlight": {
     "repo": "rohitg00/ai-engineering-from-scratch",
     "repoName": "AI Engineering from Scratch",
     "repoUrl": "https://github.com/rohitg00/ai-engineering-from-scratch",
-    "stars": 66608,
-    "forks": 11670,
+    "stars": 66647,
+    "forks": 11673,
     "number": 531,
     "title": "docs(i18n): complete and audit 12 README translations",
     "url": "https://github.com/rohitg00/ai-engineering-from-scratch/pull/531",
@@ -68,13 +69,27 @@
         "MFCC",
         "MediaPipe"
       ],
-      "output": "Sentiment"
+      "fusion": "Cross-attention",
+      "output": "Sentiment",
+      "engineeringEvidence": [
+        {
+          "label": "PR #7 · Training and inference reliability",
+          "points": [
+            "Regression/classification output dtypes and batch_size=1 shapes",
+            "NaN/Inf prediction handling",
+            "Missing-face feature shapes and cross-platform result opening"
+          ],
+          "url": "https://github.com/19376357/Bilingual-Multimodal-Sentiment-Analysis/pull/7"
+        }
+      ]
     }
   ],
   "contributions": [
     {
       "repo": "19376357/Bilingual-Multimodal-Sentiment-Analysis",
       "name": "Bilingual Multimodal Sentiment Analysis",
+      "stars": 7,
+      "forks": 3,
       "count": 6,
       "closedCount": 1,
       "summary": "Training reliability and bilingual documentation",
@@ -135,6 +150,8 @@
     {
       "repo": "rohitg00/ai-engineering-from-scratch",
       "name": "AI Engineering from Scratch",
+      "stars": 66647,
+      "forks": 11673,
       "count": 0,
       "closedCount": 1,
       "summary": "ai engineering from scratch",
@@ -186,5 +203,5 @@
       }
     ]
   },
-  "updatedAt": "2026-10-10T16:30:05.954Z"
+  "updatedAt": "2026-10-10T17:24:42.103Z"
 }
