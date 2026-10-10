@@ -1,5 +1,5 @@
 {
-  "schemaVersion": 4,
+  "schemaVersion": 5,
   "username": "MaYangle",
   "mergedPullRequests": 6,
   "openPullRequests": 1,
@@ -19,8 +19,8 @@
     "repo": "rohitg00/ai-engineering-from-scratch",
     "repoName": "AI Engineering from Scratch",
     "repoUrl": "https://github.com/rohitg00/ai-engineering-from-scratch",
-    "stars": 66455,
-    "forks": 11636,
+    "stars": 66478,
+    "forks": 11641,
     "number": 527,
     "title": "Research links for seven lessons",
     "url": "https://github.com/rohitg00/ai-engineering-from-scratch/pull/527",
@@ -135,6 +135,7 @@
   "showcase": {
     "title": "RESEARCH & OUTPUTS",
     "maxVisible": 2,
+    "emptyMode": "compact",
     "sections": [
       {
         "id": "research",
@@ -162,5 +163,5 @@
       }
     ]
   },
-  "updatedAt": "2026-10-10T13:20:36.819Z"
+  "updatedAt": "2026-10-10T13:49:07.252Z"
 }
