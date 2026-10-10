@@ -2,8 +2,12 @@ import {xml,markdown} from './format.mjs';
 import {buildModules} from './modules.mjs';
 
 function image(module,assets){
-  const paths=assets[module.id];
-  if(!paths)throw new Error(`Missing generated images for ${module.id}`);
+  const paths=assets[module.id]||{
+    desktop:`assets/generated/${module.id}.svg`,
+    mobile:`assets/generated/${module.id}-mobile.svg`,
+    still:`assets/generated/${module.id}-still.svg`,
+    mobileStill:`assets/generated/${module.id}-mobile-still.svg`
+  };
   const picture=`<picture><source media="(prefers-reduced-motion: reduce) and (max-width: 600px)" srcset="${paths.mobileStill}"><source media="(prefers-reduced-motion: reduce)" srcset="${paths.still}"><source media="(max-width: 600px)" srcset="${paths.mobile}"><img src="${paths.desktop}" width="100%" alt="${xml(module.alt)}"></picture>`;
   return `<a href="${xml(module.href)}">${picture}</a>`;
 }
