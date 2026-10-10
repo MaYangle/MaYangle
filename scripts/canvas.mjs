@@ -92,9 +92,10 @@ export function contributionCard(c,x,y,width,mobile){
       const cx=x+col*(columnWidth+gap),slice=rows.slice(col*perColumn,(col+1)*perColumn),trackX=cx+4;
       let rowY=py;
       for(const pr of slice){
-        const meta=`#${pr.number}  ·  ${pr.status==='closed'?'CLOSED':'MERGED'}  ·  ${pr.date?new Date(pr.date).toLocaleDateString('en-GB',{day:'2-digit',month:'short',year:'numeric',timeZone:'Asia/Shanghai'}).toUpperCase():''}`;
+        const meta=`${pr.status==='closed'?'CLOSED':'MERGED'}  ·  ${pr.date?new Date(pr.date).toLocaleDateString('en-GB',{day:'2-digit',month:'short',year:'numeric',timeZone:'Asia/Shanghai'}).toUpperCase():''}`;
         svg+=`<circle cx="${trackX}" cy="${rowY-5}" r="3.5" fill="${pr.status==='merged'?blue:'#fff'}" stroke="${blue}"/>`;
-        svg+=t(cx+18,rowY,meta,mobile?14:12,pr.status==='merged'?blue:muted,'font-weight="600" letter-spacing=".5"');
+        svg+=t(cx+18,rowY,`#${pr.number}`,mobile?14:12,blue,'font-weight="600" letter-spacing=".5"');
+        svg+=t(cx+63,rowY,meta,mobile?14:12,pr.status==='merged'?blue:muted,'font-weight="600" letter-spacing=".5"');
         const title=block(cx+18,rowY+18,pr.title,columnWidth-20,mobile?18:16,ink,2,mobile?21:18);
         svg+=title.svg;rowY=title.bottom+(mobile?23:20);
       }
