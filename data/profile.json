@@ -20,8 +20,8 @@
     "repo": "rohitg00/ai-engineering-from-scratch",
     "repoName": "AI Engineering from Scratch",
     "repoUrl": "https://github.com/rohitg00/ai-engineering-from-scratch",
-    "stars": 67639,
-    "forks": 11860,
+    "stars": 67904,
+    "forks": 11898,
     "number": 583,
     "title": "feat(quizzes): backfill 150 missing lesson quizzes",
     "url": "https://github.com/rohitg00/ai-engineering-from-scratch/pull/583",
@@ -32,8 +32,8 @@
     "repo": "rohitg00/ai-engineering-from-scratch",
     "repoName": "AI Engineering from Scratch",
     "repoUrl": "https://github.com/rohitg00/ai-engineering-from-scratch",
-    "stars": 67639,
-    "forks": 11860,
+    "stars": 67904,
+    "forks": 11898,
     "number": 531,
     "title": "docs(i18n): complete and audit 12 README translations",
     "url": "https://github.com/rohitg00/ai-engineering-from-scratch/pull/531",
@@ -150,8 +150,8 @@
     {
       "repo": "rohitg00/ai-engineering-from-scratch",
       "name": "AI Engineering from Scratch",
-      "stars": 67639,
-      "forks": 11860,
+      "stars": 67904,
+      "forks": 11898,
       "count": 0,
       "closedCount": 1,
       "summary": "ai engineering from scratch",
@@ -203,5 +203,5 @@
       }
     ]
   },
-  "updatedAt": "2026-10-12T05:56:54.197Z"
+  "updatedAt": "2026-10-12T15:23:49.791Z"
 }
