@@ -20,8 +20,8 @@
     "repo": "rohitg00/ai-engineering-from-scratch",
     "repoName": "AI Engineering from Scratch",
     "repoUrl": "https://github.com/rohitg00/ai-engineering-from-scratch",
-    "stars": 68897,
-    "forks": 12067,
+    "stars": 69037,
+    "forks": 12088,
     "number": 583,
     "title": "feat(quizzes): backfill 150 missing lesson quizzes",
     "url": "https://github.com/rohitg00/ai-engineering-from-scratch/pull/583",
@@ -32,15 +32,37 @@
     "repo": "rohitg00/ai-engineering-from-scratch",
     "repoName": "AI Engineering from Scratch",
     "repoUrl": "https://github.com/rohitg00/ai-engineering-from-scratch",
-    "stars": 68897,
-    "forks": 12067,
+    "stars": 69037,
+    "forks": 12088,
     "number": 531,
     "title": "docs(i18n): complete and audit 12 README translations",
     "url": "https://github.com/rohitg00/ai-engineering-from-scratch/pull/531",
     "status": "closed",
     "date": "2026-10-09T05:36:00Z"
   },
-  "projects": [],
+  "projects": [
+    {
+      "repo": "MaYangle/Multimodal-Sentiment-Fusion",
+      "name": "Multimodal Sentiment Fusion",
+      "description": "Research on multimodal sentiment analysis and fusion algorithms with native CH-SIMS v2 and CMU-MOSEI evaluation protocols.",
+      "url": "https://github.com/MaYangle/Multimodal-Sentiment-Fusion",
+      "stars": 0,
+      "forks": 0,
+      "pushedAt": "2026-10-14T11:47:14Z",
+      "language": "Python",
+      "topics": [],
+      "fork": false,
+      "role": "Original repository",
+      "stack": [
+        "Python"
+      ],
+      "inputs": [],
+      "encoders": [],
+      "fusion": "",
+      "output": "",
+      "engineeringEvidence": []
+    }
+  ],
   "contributions": [
     {
       "repo": "19376357/Bilingual-Multimodal-Sentiment-Analysis",
@@ -107,8 +129,8 @@
     {
       "repo": "rohitg00/ai-engineering-from-scratch",
       "name": "AI Engineering from Scratch",
-      "stars": 68897,
-      "forks": 12067,
+      "stars": 69037,
+      "forks": 12088,
       "count": 0,
       "closedCount": 1,
       "summary": "ai engineering from scratch",
@@ -160,5 +182,5 @@
       }
     ]
   },
-  "updatedAt": "2026-10-14T11:51:09.832Z"
+  "updatedAt": "2026-10-14T17:09:51.357Z"
 }
