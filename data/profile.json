@@ -9,7 +9,7 @@
     "repoName": "Bilingual Multimodal Sentiment Analysis",
     "repoUrl": "https://github.com/19376357/Bilingual-Multimodal-Sentiment-Analysis",
     "stars": 7,
-    "forks": 3,
+    "forks": 2,
     "number": 7,
     "title": "Training and inference reliability",
     "url": "https://github.com/19376357/Bilingual-Multimodal-Sentiment-Analysis/pull/7",
@@ -20,8 +20,8 @@
     "repo": "rohitg00/ai-engineering-from-scratch",
     "repoName": "AI Engineering from Scratch",
     "repoUrl": "https://github.com/rohitg00/ai-engineering-from-scratch",
-    "stars": 68756,
-    "forks": 12038,
+    "stars": 68897,
+    "forks": 12067,
     "number": 583,
     "title": "feat(quizzes): backfill 150 missing lesson quizzes",
     "url": "https://github.com/rohitg00/ai-engineering-from-scratch/pull/583",
@@ -32,64 +32,21 @@
     "repo": "rohitg00/ai-engineering-from-scratch",
     "repoName": "AI Engineering from Scratch",
     "repoUrl": "https://github.com/rohitg00/ai-engineering-from-scratch",
-    "stars": 68756,
-    "forks": 12038,
+    "stars": 68897,
+    "forks": 12067,
     "number": 531,
     "title": "docs(i18n): complete and audit 12 README translations",
     "url": "https://github.com/rohitg00/ai-engineering-from-scratch/pull/531",
     "status": "closed",
     "date": "2026-10-09T05:36:00Z"
   },
-  "projects": [
-    {
-      "repo": "MaYangle/Multimodal-Sentiment-Analysis",
-      "name": "Multimodal Sentiment Analysis",
-      "description": "Chinese–English video-to-sentiment pipeline with cross-attention.",
-      "url": "https://github.com/MaYangle/Multimodal-Sentiment-Analysis",
-      "stars": 4,
-      "forks": 1,
-      "pushedAt": "2025-08-31T09:26:43Z",
-      "language": "Python",
-      "topics": [],
-      "fork": true,
-      "role": "Team project · working fork",
-      "stack": [
-        "Python",
-        "PyTorch",
-        "Whisper",
-        "BERT"
-      ],
-      "inputs": [
-        "Text",
-        "Audio",
-        "Vision"
-      ],
-      "encoders": [
-        "Whisper / BERT",
-        "MFCC",
-        "MediaPipe"
-      ],
-      "fusion": "Cross-attention",
-      "output": "Sentiment",
-      "engineeringEvidence": [
-        {
-          "label": "PR #7 · Training and inference reliability",
-          "points": [
-            "Regression/classification output dtypes and batch_size=1 shapes",
-            "NaN/Inf prediction handling",
-            "Missing-face feature shapes and cross-platform result opening"
-          ],
-          "url": "https://github.com/19376357/Bilingual-Multimodal-Sentiment-Analysis/pull/7"
-        }
-      ]
-    }
-  ],
+  "projects": [],
   "contributions": [
     {
       "repo": "19376357/Bilingual-Multimodal-Sentiment-Analysis",
       "name": "Bilingual Multimodal Sentiment Analysis",
       "stars": 7,
-      "forks": 3,
+      "forks": 2,
       "count": 6,
       "closedCount": 1,
       "summary": "Training reliability and bilingual documentation",
@@ -150,8 +107,8 @@
     {
       "repo": "rohitg00/ai-engineering-from-scratch",
       "name": "AI Engineering from Scratch",
-      "stars": 68756,
-      "forks": 12038,
+      "stars": 68897,
+      "forks": 12067,
       "count": 0,
       "closedCount": 1,
       "summary": "ai engineering from scratch",
@@ -203,5 +160,5 @@
       }
     ]
   },
-  "updatedAt": "2026-10-14T04:53:07.538Z"
+  "updatedAt": "2026-10-14T11:51:09.832Z"
 }
