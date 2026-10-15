@@ -1,0 +1,140 @@
+{
+  "username": "MaYangle",
+  "counts": {
+    "merged": 6,
+    "open": 2,
+    "closed": 2,
+    "mergedRepositories": 1,
+    "publicProjects": 1
+  },
+  "queries": {
+    "merged": "author:MaYangle is:pr is:public -user:MaYangle is:merged",
+    "open": "author:MaYangle is:pr is:public -user:MaYangle is:open",
+    "closed": "author:MaYangle is:pr is:public -user:MaYangle is:closed -is:merged"
+  },
+  "pullRequests": [
+    {
+      "repo": "rohitg00/ai-engineering-from-scratch",
+      "number": 583,
+      "title": "feat(quizzes): backfill 150 missing lesson quizzes",
+      "url": "https://github.com/rohitg00/ai-engineering-from-scratch/pull/583",
+      "status": "open",
+      "updatedAt": "2026-10-10T17:37:40Z",
+      "eventAt": "2026-10-10T17:37:40Z"
+    },
+    {
+      "repo": "rohitg00/ai-engineering-from-scratch",
+      "number": 531,
+      "title": "docs(i18n): complete and audit 12 README translations",
+      "url": "https://github.com/rohitg00/ai-engineering-from-scratch/pull/531",
+      "status": "closed",
+      "updatedAt": "2026-10-09T05:36:00Z",
+      "eventAt": "2026-10-09T05:36:00Z"
+    },
+    {
+      "repo": "rohitg00/ai-engineering-from-scratch",
+      "number": 527,
+      "title": "docs: connect primary papers to existing lessons",
+      "url": "https://github.com/rohitg00/ai-engineering-from-scratch/pull/527",
+      "status": "open",
+      "updatedAt": "2026-10-04T11:19:52Z",
+      "eventAt": "2026-10-04T11:19:52Z"
+    },
+    {
+      "repo": "19376357/Bilingual-Multimodal-Sentiment-Analysis",
+      "number": 7,
+      "title": "Solve train errors",
+      "url": "https://github.com/19376357/Bilingual-Multimodal-Sentiment-Analysis/pull/7",
+      "status": "merged",
+      "updatedAt": "2025-08-31T09:29:55Z",
+      "eventAt": "2025-08-31T09:29:55Z"
+    },
+    {
+      "repo": "19376357/Bilingual-Multimodal-Sentiment-Analysis",
+      "number": 6,
+      "title": "Solve train and",
+      "url": "https://github.com/19376357/Bilingual-Multimodal-Sentiment-Analysis/pull/6",
+      "status": "closed",
+      "updatedAt": "2025-08-31T09:28:04Z",
+      "eventAt": "2025-08-31T09:28:04Z"
+    },
+    {
+      "repo": "19376357/Bilingual-Multimodal-Sentiment-Analysis",
+      "number": 5,
+      "title": "Readme two languages",
+      "url": "https://github.com/19376357/Bilingual-Multimodal-Sentiment-Analysis/pull/5",
+      "status": "merged",
+      "updatedAt": "2025-08-27T07:33:00Z",
+      "eventAt": "2025-08-27T07:32:59Z"
+    },
+    {
+      "repo": "19376357/Bilingual-Multimodal-Sentiment-Analysis",
+      "number": 4,
+      "title": "Add license",
+      "url": "https://github.com/19376357/Bilingual-Multimodal-Sentiment-Analysis/pull/4",
+      "status": "merged",
+      "updatedAt": "2025-08-27T00:43:47Z",
+      "eventAt": "2025-08-27T00:43:47Z"
+    },
+    {
+      "repo": "19376357/Bilingual-Multimodal-Sentiment-Analysis",
+      "number": 3,
+      "title": "Readme for MSA version",
+      "url": "https://github.com/19376357/Bilingual-Multimodal-Sentiment-Analysis/pull/3",
+      "status": "merged",
+      "updatedAt": "2025-08-26T14:52:00Z",
+      "eventAt": "2025-08-26T14:51:59Z"
+    },
+    {
+      "repo": "19376357/Bilingual-Multimodal-Sentiment-Analysis",
+      "number": 2,
+      "title": "Change something to make it accessible easily",
+      "url": "https://github.com/19376357/Bilingual-Multimodal-Sentiment-Analysis/pull/2",
+      "status": "merged",
+      "updatedAt": "2025-08-26T14:42:37Z",
+      "eventAt": "2025-08-26T14:42:37Z"
+    },
+    {
+      "repo": "19376357/Bilingual-Multimodal-Sentiment-Analysis",
+      "number": 1,
+      "title": "Add README.md  Version 1",
+      "url": "https://github.com/19376357/Bilingual-Multimodal-Sentiment-Analysis/pull/1",
+      "status": "merged",
+      "updatedAt": "2025-08-20T15:45:52Z",
+      "eventAt": "2025-08-20T15:45:52Z"
+    }
+  ],
+  "repositories": [
+    {
+      "repo": "19376357/Bilingual-Multimodal-Sentiment-Analysis",
+      "url": "https://github.com/19376357/Bilingual-Multimodal-Sentiment-Analysis",
+      "merged": 6,
+      "open": 0,
+      "closed": 1
+    },
+    {
+      "repo": "rohitg00/ai-engineering-from-scratch",
+      "url": "https://github.com/rohitg00/ai-engineering-from-scratch",
+      "merged": 0,
+      "open": 2,
+      "closed": 1
+    }
+  ],
+  "projects": [
+    {
+      "repo": "MaYangle/Multimodal-Sentiment-Fusion",
+      "url": "https://github.com/MaYangle/Multimodal-Sentiment-Fusion",
+      "pushedAt": "2026-10-14T11:47:14Z",
+      "stars": 1,
+      "forks": 0,
+      "language": "Python",
+      "latestCommit": {
+        "sha": "74608094ea55b6f9aaa896831796105e3eee3c18",
+        "url": "https://github.com/MaYangle/Multimodal-Sentiment-Fusion/commit/74608094ea55b6f9aaa896831796105e3eee3c18",
+        "message": "Record verified Linux CI and explain scientific audit gate failures",
+        "date": "2026-10-14T11:47:11Z"
+      }
+    }
+  ],
+  "updatedAt": "2026-10-15T14:39:39.882Z"
+}
