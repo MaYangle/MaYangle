@@ -26,19 +26,10 @@ const shortened = (value, length = 85) => value.length > length ? value.slice(0,
 function queryLink(query) {
   return `https://github.com/search?q=${encodeURIComponent(query)}&type=pullrequests`;
 }
-function picture(assets, prefix, alt, href) {
-  const variants = Object.fromEntries(['animated', 'still', 'mobile', 'mobileStill'].map(key => {
-    const path = assets?.[`${prefix}${key}`];
-    if (!/^assets\/generated\/(?:summary|research)(?:-mobile)?(?:-still)?\.[a-f0-9]{12}\.svg$/.test(path ?? '')) throw new Error('Invalid profile image asset');
-    return [key, path];
-  }));
-  const escapedHref = url(href, 'image link').replaceAll('&', '&amp;');
-  return `<a href="${escapedHref}"><picture><source media="(prefers-reduced-motion: reduce) and (max-width: 600px)" srcset="${variants.mobileStill}"><source media="(prefers-reduced-motion: reduce)" srcset="${variants.still}"><source media="(max-width: 600px)" srcset="${variants.mobile}"><img src="${variants.animated}" width="100%" alt="${alt.replaceAll('"', '&quot;')}"></picture></a>`;
-}
-export function renderReadme(config, activity, assets) {
+export function renderTextVersion(config, activity) {
   if (!config || typeof config !== 'object') throw new Error('Invalid profile');
   const name = text(config.name, 'name');
-  const lines = ['<!-- Generated from profile.config.json and public GitHub data. -->'];
+  const lines = [`# ${name}`];
   if (!Array.isArray(config.projects) || !config.projects.length) throw new Error('Invalid projects');
   if (!config.links || typeof config.links !== 'object' || Array.isArray(config.links) || !Object.keys(config.links).length) throw new Error('Invalid contact links');
   if (!activity || activity.username !== config.username) throw new Error('Activity snapshot does not match profile');
@@ -46,17 +37,17 @@ export function renderReadme(config, activity, assets) {
   for (const key of ['merged', 'open', 'closed', 'mergedRepositories', 'publicProjects']) {
     if (!Number.isInteger(counts?.[key]) || counts[key] < 0) throw new Error(`Invalid activity count ${key}`);
   }
-  const alt = `${name} — ${counts.merged} merged upstream PRs; ${counts.open} open; ${counts.mergedRepositories} repositories with merged contributions; ${counts.publicProjects} public projects.`;
-  lines.push('', picture(assets, 'summary', alt, queryLink(activity.queries.merged)), '',
+  lines.push('',
     `**${text(config.tagline, 'tagline')}**`, '', text(config.bio, 'bio'), '',
     Object.entries(config.links).map(([label, target]) => link(label, target, 'contact', true)).join(' · '));
+  lines.push('', '## Public activity', '',
+    `${link(`${counts.merged} merged upstream PRs`, queryLink(activity.queries.merged), 'merged query')} · ${counts.open} open PRs · ${counts.closed} closed without merge · ${counts.mergedRepositories} upstream repositories with merges · ${counts.publicProjects} public projects.`);
   lines.push('', '## Research & engineering');
   for (const project of config.projects) {
     lines.push('', `### ${link(project.name, project.url, 'project')}`, '', text(project.description, 'description'), '', links(project.links, 'project links'));
   }
   const research = config.research;
   if (!Array.isArray(research?.directions) || !research.directions.length) throw new Error('Invalid research directions');
-  lines.push('', picture(assets, 'research', 'Research model path: frozen multimodal features, masked branches, cross-attention, policy routing and scalar sentiment.', research.directions[0].url));
   lines.push('', '| Direction | What I work on |', '| --- | --- |');
   for (const direction of research.directions) {
     lines.push(`| ${link(direction.name, direction.url, 'direction')} | ${text(direction.summary, 'direction summary')} |`);
@@ -88,8 +79,8 @@ export function renderReadme(config, activity, assets) {
   }
   const limit = config.activity?.recentLimit;
   if (!Number.isInteger(limit) || limit < 1 || limit > 10) throw new Error('Invalid recent activity limit');
-  lines.push('', '### Recent upstream activity', '', '| Updated (UTC) | Pull request | Status |', '| --- | --- | --- |');
-  for (const pr of activity.pullRequests.slice(0, limit)) {
+  lines.push('', '### Upstream PR records', '', '| Updated (UTC) | Pull request | Status |', '| --- | --- | --- |');
+  for (const pr of activity.pullRequests) {
     if (!['merged', 'open', 'closed'].includes(pr.status)) throw new Error('Invalid PR state');
     const title = config.activity?.pullRequestLabels?.[`${pr.repo}#${pr.number}`] ?? pr.title;
     const state = {merged: 'Merged', open: 'Open', closed: 'Closed without merge'}[pr.status];
@@ -103,6 +94,20 @@ export function renderReadme(config, activity, assets) {
   }
   const refreshed = new Date(activity.updatedAt).toISOString().replace('T', ' ').replace(/:\d{2}\.\d{3}Z$/, ' UTC');
   lines.push('', `*GitHub data refreshed: ${refreshed}. Checked every 6 hours; the date changes when public data changes.*`, '',
-    '*Upstream PRs exclude my own repositories. Public projects exclude forks, empty/archived repositories and this profile. The moving signal illustrates the research workflow; it is not a live activity feed.*');
+    '*Upstream PRs exclude my own repositories. Public projects exclude forks, empty/archived repositories and this profile. Particle and orbit motion illustrate the research workflow; they are not live activity signals.*');
   return lines.join('\n') + '\n';
+}
+
+export function renderReadme(config, activity, assets) {
+  const body = renderTextVersion(config, activity);
+  for (const key of ['desktop', 'mobile', 'still', 'mobileStill']) {
+    if (!/^assets\/generated\/profile(?:-mobile)?(?:-still)?\.[a-f0-9]{12}\.svg$/.test(assets?.[key] ?? '')) throw new Error('Invalid unified profile asset');
+  }
+  const xml = value => String(value).replaceAll('&', '&amp;').replaceAll('<', '&lt;').replaceAll('>', '&gt;').replaceAll('"', '&quot;');
+  const alt = xml(`${config.name} — AI engineering and multimodal research; ${activity.counts.merged} merged upstream PRs, ${activity.counts.open} open PRs. Full research, experiment and contribution record; text and links below.`);
+  const picture = `<picture><source media="(prefers-reduced-motion: reduce) and (max-width: 600px)" srcset="${assets.mobileStill}"><source media="(prefers-reduced-motion: reduce)" srcset="${assets.still}"><source media="(max-width: 600px)" srcset="${assets.mobile}"><img src="${assets.desktop}" width="100%" alt="${alt}"></picture>`;
+  const navigation = config.projects.flatMap(project => [{label: project.name, url: project.url}, ...project.links]);
+  navigation.push({label: 'Upstream PRs', url: queryLink(`author:${config.username} is:pr is:public -user:${config.username}`)});
+  const contacts = Object.entries(config.links).map(([label, target]) => link(label, target, 'contact', true)).join(' · ');
+  return `<!-- Generated: one continuous profile canvas, with native evidence links below. -->\n\n<p>${picture}</p>\n\n${links(navigation, 'navigation')}\n\n${contacts}\n\n<details>\n<summary>Text version, sources & contribution links</summary>\n\n${body}\n</details>\n`;
 }

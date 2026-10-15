@@ -1,19 +1,15 @@
 {
   "current": [
+    "assets/generated/profile.ba3b10c8d8d1.svg",
+    "assets/generated/profile-still.05ba4e952395.svg",
+    "assets/generated/profile-mobile.a6c297307bfd.svg",
+    "assets/generated/profile-mobile-still.ca4b78f47d82.svg"
+  ],
+  "previous": [
     "assets/generated/summary.cb958330840b.svg",
     "assets/generated/summary-still.f53180dd9369.svg",
     "assets/generated/summary-mobile.754c45f68079.svg",
     "assets/generated/summary-mobile-still.1b0758d83cae.svg",
-    "assets/generated/research.633b84293b63.svg",
-    "assets/generated/research-still.fe343d351b74.svg",
-    "assets/generated/research-mobile.a02962fefe94.svg",
-    "assets/generated/research-mobile-still.1fe95344fc57.svg"
-  ],
-  "previous": [
-    "assets/generated/summary.c08084e809df.svg",
-    "assets/generated/summary-still.285bcc153884.svg",
-    "assets/generated/summary-mobile.39e8568d1db7.svg",
-    "assets/generated/summary-mobile-still.bf5cfc90fe12.svg",
     "assets/generated/research.633b84293b63.svg",
     "assets/generated/research-still.fe343d351b74.svg",
     "assets/generated/research-mobile.a02962fefe94.svg",

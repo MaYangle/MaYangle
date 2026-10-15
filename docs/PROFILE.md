@@ -1,40 +1,44 @@
 # Maintaining this profile
 
-The profile combines a restrained deep-space visual system with inspectable research and open-source evidence. The two SVG modules use warm white type, amber light, a procedural gravitational-lens motif and slow signal motion. Text, tables and links remain native Markdown. Desktop and mobile layouts have static reduced-motion alternatives.
+The visible profile is one continuous white SVG canvas, following the first white layout in commit `321c283`. Identity, the contribution ring, research directions, live activity, experiment evidence and the curved baseline share one page. It is not a collection of image cards interleaved with Markdown.
 
-## Content and data
+The visual system uses white, ice blue, silver grey and faint lavender. Low-contrast lens arcs, particles and slow orbital motion create depth without dark panels. Desktop uses the original two-column composition; mobile reflows into one column. Both have static reduced-motion alternatives.
 
-- `profile.config.json`: identity, research directions, selected projects, dated experiment snapshot, contact links and curated contribution descriptions.
-- `data/activity.json`: normalized public GitHub snapshot, verified PR states, upstream repository totals, public original project count and latest selected-project commit.
-- `scripts/data.mjs`: fetches public GitHub data. Upstream means public PRs authored by this account outside its own repositories. Merged, open and closed-without-merge are separate buckets; every PR is verified against its current detail endpoint. Private, own-repository and inconsistent results are rejected. Complete pagination is required, with a 1,000-result safety limit per search bucket.
-- `scripts/readme.mjs`: renders research records and activity as readable Markdown with direct source links.
-- `scripts/summary.mjs`: renders the compact activity header and research model overview. Signal motion illustrates a workflow; it does not imply new work or a live feed.
-- `scripts/update-profile.mjs`: collects, renders and publishes the local output bundle after the data and content validate. An API or rendering failure preserves the previously generated profile. Image names contain content hashes; one previous generation remains available for cached README copies.
+## Content, data and source links
 
-The project count excludes this profile, ordinary forks, private/archived/disabled repositories and empty repositories. It is not a count of papers, deployed products or model releases. Repository totals and each table cell link back to scoped GitHub searches. Diff line totals are deliberately omitted because they do not measure engineering impact or authorship.
+- `profile.config.json`: identity, research directions, selected project, dated experiment snapshot, contacts and curated contribution descriptions.
+- `data/activity.json`: normalized public GitHub snapshot with verified PR states, upstream repository totals, project counts and latest project commit.
+- `scripts/data.mjs`: collects and verifies public GitHub activity. Merged, open and closed-without-merge are separate buckets. Private, own-repository and inconsistent results are rejected. Complete pagination is required, with a 1,000-result safety limit per search bucket.
+- `scripts/canvas.mjs`: lays out the full profile in desktop/mobile and animated/static variants. Its height follows its content; it never renders a dashboard as independent cards.
+- `scripts/readme.mjs`: embeds one responsive picture, a slim row of native navigation/contact links and a collapsible complete text version.
+- `scripts/update-profile.mjs`: completes collection and validation before publishing generated output. API or rendering failures preserve the previous profile. Asset filenames contain content hashes, with one previous generation retained for cached readers.
 
-Research metrics are a separately dated, manually curated snapshot. Automatic GitHub refreshes do not update or reinterpret experimental results. Keep split, seed count, matched controls, limitations and source links alongside numbers. Do not describe an open/closed PR as merged, a fork as original research, or an inconclusive experiment as a performance gain.
+GitHub embeds SVGs as images: their internal links are not clickable regions in the README. All usable project, architecture, experiment, reproduction, PR, search and contact links are ordinary Markdown below the canvas and in **Text version, sources & contribution links**. The text version preserves the full experimental context, limitations, PR states and source URLs for accessibility and inspection.
+
+Public projects exclude this profile, private repositories, ordinary forks, empty repositories and archived/disabled repositories. Upstream PRs exclude repositories owned by the profile owner. Repository stars and diff size are not presented as personal impact. Motion is illustrative, not a live activity feed.
+
+Research metrics are a separately dated, manually curated snapshot. Automatic GitHub refreshes do not update experimental claims. The displayed CH-SIMS results are development VALID, mean ± sample SD over three seeds; final TEST remains independent. Preserve matched controls, negative results and open research gates alongside the numbers.
 
 ## Updating
 
-Node.js 22 or newer is sufficient; no runtime packages are required.
+Node.js 22 or newer is sufficient; there are no runtime dependencies.
 
 ```sh
 node --test
-node scripts/update-profile.mjs --offline  # Rebuild from the saved public snapshot
-node scripts/update-profile.mjs            # Fetch current public GitHub data
+node scripts/update-profile.mjs --offline
+node scripts/update-profile.mjs
 ```
 
-For an online local run, `GITHUB_TOKEN` is optional; otherwise the public anonymous API limit applies. Never place a token in the configuration. The workflow uses the repository-scoped GitHub token.
+`--offline` deterministically rebuilds the README and four SVG variants from saved public data. An online run fetches the current activity; `GITHUB_TOKEN` is optional locally, otherwise GitHub's anonymous API limit applies. Never place credentials in configuration or generated assets.
 
-The **Refresh and validate profile** workflow validates on pull requests and relevant pushes to main. It refreshes every six hours, on manual dispatch, and after configuration/generator changes. Its write permission is restricted to the refresh job; pull-request validation stays read-only. Scheduled runs are best effort, and GitHub can disable a schedule after prolonged repository inactivity. API failures stop generation rather than publishing fabricated zero counts. When public data has not changed, the previous snapshot timestamp and image paths remain stable.
+The **Refresh and validate profile** workflow validates pull requests and relevant pushes. It refreshes every six hours, on manual dispatch, and after configuration/generator changes. Only the refresh job has write permission. Schedules are best effort and may be disabled by GitHub after prolonged inactivity. Unchanged public data keeps its previous timestamp and asset URLs. The maintenance job commits only README, the public snapshot and generated assets.
 
-After editing content, run tests and an offline rebuild, then commit configuration, README and generated assets together. Changes to the collector may require a fresh online snapshot. The maintenance job commits only README, the normalized snapshot and generated assets. Generated commits do not recursively trigger the workflow.
+After a design/content change, run tests and an offline rebuild, inspect the complete desktop and mobile canvases, then commit configuration, source, README and generated output together. Check text bounds, numeric legibility and line overlap rather than checking only the header. A change to collected fields may require an online refresh.
 
-## Sources and references
+## Sources and layout history
 
-Research claims and the dated experiment table come from the public [architecture](https://github.com/MaYangle/Multimodal-Sentiment-Fusion/blob/main/docs/ARCHITECTURE.md), [experiment record](https://github.com/MaYangle/Multimodal-Sentiment-Fusion/blob/main/docs/EXPERIMENTS.md) and [reproduction protocol](https://github.com/MaYangle/Multimodal-Sentiment-Fusion/blob/main/docs/REPRODUCING.md). The registered study includes 21 fusion fits plus six branch selection/refit runs; all displayed MAEs are development VALID, not final TEST.
+The original white profile in `321c283` was inspected as both source and a rendered full-page image for this revision. Its large identity, circular readout, particle wave, shared whitespace and two-column structure inform the current canvas. The dark summary/research image modules from `0ed1450` have been retired. The earliest illustration can be recovered from Git history.
 
-The structure was informed by public profiles reviewed on 2026-10-15: [Andrej Karpathy](https://github.com/karpathy), [Hamel Husain](https://github.com/hamelsmu) and [Simon Willison](https://github.com/simonw). Their biographies, achievements and assets are not reused. The visual direction follows the user's request for the spatial atmosphere of *Interstellar*, using original vector artwork rather than film stills or copied assets.
+Research claims come from the public [architecture](https://github.com/MaYangle/Multimodal-Sentiment-Fusion/blob/main/docs/ARCHITECTURE.md), [experiment record](https://github.com/MaYangle/Multimodal-Sentiment-Fusion/blob/main/docs/EXPERIMENTS.md) and [reproduction protocol](https://github.com/MaYangle/Multimodal-Sentiment-Fusion/blob/main/docs/REPRODUCING.md). The completed registered study contains 21 fusion fits plus six branch selection/refit runs.
 
-The earlier dashboard's useful ideas are retained: public-data provenance, explicit PR outcomes, periodic refresh, linked evidence, content-hashed images and reduced-motion support. Its empty showcase cards and diff-size impact panels remain in Git history.
+The content structure was informed by [Andrej Karpathy](https://github.com/karpathy), [Hamel Husain](https://github.com/hamelsmu) and [Simon Willison](https://github.com/simonw), reviewed on 2026-10-15. Their biographies, achievements and assets are not reused. The visual direction follows the user's request for the white, open spatial atmosphere of *Interstellar*, using original vector artwork.

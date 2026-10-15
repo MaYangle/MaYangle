@@ -4,15 +4,15 @@ import {mkdtemp, readFile, writeFile, rm} from 'node:fs/promises';
 import {tmpdir} from 'node:os';
 import {join} from 'node:path';
 import {renderReadme} from '../scripts/readme.mjs';
-import {renderSummary, renderResearch} from '../scripts/summary.mjs';
+import {renderProfile} from '../scripts/canvas.mjs';
 import {updateProfile} from '../scripts/update-profile.mjs';
 const config = JSON.parse(await readFile(new URL('../profile.config.json', import.meta.url), 'utf8'));
-const assets = Object.fromEntries(['summary', 'research'].flatMap(kind => [
-  [`${kind}animated`, `assets/generated/${kind}.aaaaaaaaaaaa.svg`],
-  [`${kind}still`, `assets/generated/${kind}-still.aaaaaaaaaaaa.svg`],
-  [`${kind}mobile`, `assets/generated/${kind}-mobile.aaaaaaaaaaaa.svg`],
-  [`${kind}mobileStill`, `assets/generated/${kind}-mobile-still.aaaaaaaaaaaa.svg`]
-]));
+const assets = {
+  desktop: 'assets/generated/profile.aaaaaaaaaaaa.svg',
+  still: 'assets/generated/profile-still.aaaaaaaaaaaa.svg',
+  mobile: 'assets/generated/profile-mobile.aaaaaaaaaaaa.svg',
+  mobileStill: 'assets/generated/profile-mobile-still.aaaaaaaaaaaa.svg'
+};
 function fixture() {
   const repo = '19376357/Bilingual-Multimodal-Sentiment-Analysis';
   const pullRequests = config.contributions.flatMap(item => item.prs.map((pr, i) => ({repo, number: 7 - i * 2, title: 'Verified fix', url: pr.url, status: 'merged', updatedAt: '2025-08-31T12:00:00Z', eventAt: '2025-08-31T12:00:00Z'})));
@@ -28,7 +28,11 @@ const withDate = () => ({...fixture(), updatedAt: '2026-10-15T00:00:00.000Z'});
 
 test('profile exposes research evidence, PR states, dates and accessible image alternatives', () => {
   const output = renderReadme(config, withDate(), assets);
+  assert.equal((output.match(/<picture>/g) ?? []).length, 1);
+  assert.equal((output.match(/<img /g) ?? []).length, 1);
+  assert.ok(output.indexOf('<details>') < output.indexOf('## Research & engineering'));
   assert.match(output, /Research & engineering/);
+  assert.match(output, /Text version, sources & contribution links/);
   assert.match(output, /27\/27 fits/);
   assert.match(output, /Development VALID only/);
   assert.match(output, /0\.378497/);
@@ -48,17 +52,21 @@ test('selected contribution must still be verified as merged', () => {
 test('rejects missing data and unsafe contact destinations', () => {
   assert.throws(() => renderReadme({...config, name: undefined}, withDate(), assets), /name/);
   assert.throws(() => renderReadme({...config, links: {Email: 'javascript:alert(1)'}}, withDate(), assets), /contact/);
-  assert.throws(() => renderSummary({...withDate(), counts: {}}), /counts/);
+  assert.throws(() => renderProfile({...withDate(), counts: {}}, config), /counts/);
   assert.throws(() => renderReadme(config, {...withDate(), username: 'someone-else'}, assets), /match profile/);
 });
 test('SVGs stay self-contained and reduced-motion variants remove animation', () => {
   for (const mobile of [false, true]) {
-    const animated = renderSummary(withDate(), {mobile});
-    const still = renderSummary(withDate(), {animated: false, mobile});
+    const animated = renderProfile(withDate(), config, {mobile});
+    const still = renderProfile(withDate(), config, {animated: false, mobile});
     assert.match(animated, /@keyframes/);
     assert.doesNotMatch(still, /@keyframes|animation:|<animate/);
     assert.doesNotMatch(animated, /<script|<foreignObject|<image|<filter/);
-    assert.doesNotMatch(renderResearch({animated: false, mobile}), /@keyframes|animation:|<animate/);
+    assert.match(animated, /SELECTED RESEARCH/);
+    assert.match(animated, /UPSTREAM CONTRIBUTIONS/);
+    assert.match(animated, /0\.378497/);
+    assert.match(animated, /CLOSED WITHOUT MERGE/);
+    assert.match(still, /width="(?:600|1200)"/);
   }
 });
 test('unchanged data creates no timestamp churn and can regenerate offline', async () => {

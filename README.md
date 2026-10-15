@@ -1,12 +1,25 @@
-<!-- Generated from profile.config.json and public GitHub data. -->
+<!-- Generated: one continuous profile canvas, with native evidence links below. -->
 
-<a href="https://github.com/search?q=author%3AMaYangle%20is%3Apr%20is%3Apublic%20-user%3AMaYangle%20is%3Amerged&amp;type=pullrequests"><picture><source media="(prefers-reduced-motion: reduce) and (max-width: 600px)" srcset="assets/generated/summary-mobile-still.1b0758d83cae.svg"><source media="(prefers-reduced-motion: reduce)" srcset="assets/generated/summary-still.f53180dd9369.svg"><source media="(max-width: 600px)" srcset="assets/generated/summary-mobile.754c45f68079.svg"><img src="assets/generated/summary.cb958330840b.svg" width="100%" alt="Yangle Ma — 6 merged upstream PRs; 2 open; 1 repositories with merged contributions; 1 public projects."></picture></a>
+<p><picture><source media="(prefers-reduced-motion: reduce) and (max-width: 600px)" srcset="assets/generated/profile-mobile-still.ca4b78f47d82.svg"><source media="(prefers-reduced-motion: reduce)" srcset="assets/generated/profile-still.05ba4e952395.svg"><source media="(max-width: 600px)" srcset="assets/generated/profile-mobile.a6c297307bfd.svg"><img src="assets/generated/profile.ba3b10c8d8d1.svg" width="100%" alt="Yangle Ma — AI engineering and multimodal research; 6 merged upstream PRs, 2 open PRs. Full research, experiment and contribution record; text and links below."></picture></p>
+
+[Multimodal Sentiment Fusion](https://github.com/MaYangle/Multimodal-Sentiment-Fusion) · [Architecture](https://github.com/MaYangle/Multimodal-Sentiment-Fusion/blob/main/docs/ARCHITECTURE.md) · [Experiments](https://github.com/MaYangle/Multimodal-Sentiment-Fusion/blob/main/docs/EXPERIMENTS.md) · [Reproduce](https://github.com/MaYangle/Multimodal-Sentiment-Fusion/blob/main/docs/REPRODUCING.md) · [Upstream PRs](https://github.com/search?q=author%3AMaYangle%20is%3Apr%20is%3Apublic%20-user%3AMaYangle&type=pullrequests)
+
+[LinkedIn](https://www.linkedin.com/in/yangle-ma-84877a294/) · [Email](mailto:yanglema44@gmail.com)
+
+<details>
+<summary>Text version, sources & contribution links</summary>
+
+# Yangle Ma
 
 **AI engineer · Multimodal learning &amp; reproducible experiments**
 
 I build and evaluate multimodal learning systems, from text/audio/vision pipelines to controlled fusion experiments. I care about reproducible runs, clear evaluation boundaries and useful upstream fixes.
 
 [LinkedIn](https://www.linkedin.com/in/yangle-ma-84877a294/) · [Email](mailto:yanglema44@gmail.com)
+
+## Public activity
+
+[6 merged upstream PRs](https://github.com/search?q=author%3AMaYangle%20is%3Apr%20is%3Apublic%20-user%3AMaYangle%20is%3Amerged&type=pullrequests) · 2 open PRs · 2 closed without merge · 1 upstream repositories with merges · 1 public projects.
 
 ## Research & engineering
 
@@ -15,8 +28,6 @@ I build and evaluate multimodal learning systems, from text/audio/vision pipelin
 A Python/PyTorch research codebase for native continuous sentiment prediction on CH-SIMS v2.0 and CMU-MOSEI, with sequence fusion, matched controls, resumable training and independent evaluation.
 
 [Architecture](https://github.com/MaYangle/Multimodal-Sentiment-Fusion/blob/main/docs/ARCHITECTURE.md) · [Experiments](https://github.com/MaYangle/Multimodal-Sentiment-Fusion/blob/main/docs/EXPERIMENTS.md) · [Reproduce](https://github.com/MaYangle/Multimodal-Sentiment-Fusion/blob/main/docs/REPRODUCING.md)
-
-<a href="https://github.com/MaYangle/Multimodal-Sentiment-Fusion/blob/main/docs/ARCHITECTURE.md"><picture><source media="(prefers-reduced-motion: reduce) and (max-width: 600px)" srcset="assets/generated/research-mobile-still.1fe95344fc57.svg"><source media="(prefers-reduced-motion: reduce)" srcset="assets/generated/research-still.fe343d351b74.svg"><source media="(max-width: 600px)" srcset="assets/generated/research-mobile.a02962fefe94.svg"><img src="assets/generated/research.633b84293b63.svg" width="100%" alt="Research model path: frozen multimodal features, masked branches, cross-attention, policy routing and scalar sentiment."></picture></a>
 
 | Direction | What I work on |
 | --- | --- |
@@ -48,7 +59,7 @@ Open research gates: fresh full repetition, author-media verification, native MO
 
 Fixed missing-face features, single-sample output handling and non-finite predictions; added English and Chinese README documentation. [Reliability fixes · merged PR \#7](https://github.com/19376357/Bilingual-Multimodal-Sentiment-Analysis/pull/7) · [Documentation · merged PR \#5](https://github.com/19376357/Bilingual-Multimodal-Sentiment-Analysis/pull/5).
 
-### Recent upstream activity
+### Upstream PR records
 
 | Updated (UTC) | Pull request | Status |
 | --- | --- | --- |
@@ -57,6 +68,11 @@ Fixed missing-face features, single-sample output handling and non-finite predic
 | 2026-10-04 | [rohitg00/ai-engineering-from-scratch \#527 — Research links for seven lessons](https://github.com/rohitg00/ai-engineering-from-scratch/pull/527) | Open |
 | 2025-08-31 | [19376357/Bilingual-Multimodal-Sentiment-Analysis \#7 — Training and inference edge-case fixes](https://github.com/19376357/Bilingual-Multimodal-Sentiment-Analysis/pull/7) | Merged |
 | 2025-08-31 | [19376357/Bilingual-Multimodal-Sentiment-Analysis \#6 — Solve train and](https://github.com/19376357/Bilingual-Multimodal-Sentiment-Analysis/pull/6) | Closed without merge |
+| 2025-08-27 | [19376357/Bilingual-Multimodal-Sentiment-Analysis \#5 — English and Chinese documentation](https://github.com/19376357/Bilingual-Multimodal-Sentiment-Analysis/pull/5) | Merged |
+| 2025-08-27 | [19376357/Bilingual-Multimodal-Sentiment-Analysis \#4 — Add license](https://github.com/19376357/Bilingual-Multimodal-Sentiment-Analysis/pull/4) | Merged |
+| 2025-08-26 | [19376357/Bilingual-Multimodal-Sentiment-Analysis \#3 — Readme for MSA version](https://github.com/19376357/Bilingual-Multimodal-Sentiment-Analysis/pull/3) | Merged |
+| 2025-08-26 | [19376357/Bilingual-Multimodal-Sentiment-Analysis \#2 — Change something to make it accessible easily](https://github.com/19376357/Bilingual-Multimodal-Sentiment-Analysis/pull/2) | Merged |
+| 2025-08-20 | [19376357/Bilingual-Multimodal-Sentiment-Analysis \#1 — Add README.md  Version 1](https://github.com/19376357/Bilingual-Multimodal-Sentiment-Analysis/pull/1) | Merged |
 
 ### Latest project update
 
@@ -64,4 +80,6 @@ Fixed missing-face features, single-sample output handling and non-finite predic
 
 *GitHub data refreshed: 2026-10-15 14:39 UTC. Checked every 6 hours; the date changes when public data changes.*
 
-*Upstream PRs exclude my own repositories. Public projects exclude forks, empty/archived repositories and this profile. The moving signal illustrates the research workflow; it is not a live activity feed.*
+*Upstream PRs exclude my own repositories. Public projects exclude forks, empty/archived repositories and this profile. Particle and orbit motion illustrate the research workflow; they are not live activity signals.*
+
+</details>

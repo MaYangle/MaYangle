@@ -3,8 +3,8 @@ import {dirname, join, resolve} from 'node:path';
 import {fileURLToPath} from 'node:url';
 import {createHash} from 'node:crypto';
 import {isDeepStrictEqual} from 'node:util';
-import {renderReadme} from './readme.mjs';
-import {renderSummary, renderResearch} from './summary.mjs';
+import {renderReadme, renderTextVersion} from './readme.mjs';
+import {renderProfile} from './canvas.mjs';
 import {collectActivity, createApi} from './data.mjs';
 
 const root = resolve(dirname(fileURLToPath(import.meta.url)), '..');
@@ -24,17 +24,15 @@ export async function updateProfile({directory = root, api = createApi(), offlin
     const {updatedAt, ...oldData} = previous ?? {};
     activity = {...fresh, updatedAt: isDeepStrictEqual(fresh, oldData) ? updatedAt : now().toISOString()};
   }
+  renderTextVersion(config, activity);
   const files = new Map();
   const assets = {};
-  for (const kind of ['summary', 'research']) {
-    for (const [key, animated, mobile] of [['animated', true, false], ['still', false, false], ['mobile', true, true], ['mobileStill', false, true]]) {
-      const options = {animated, mobile, name: config.name};
-      const svg = kind === 'summary' ? renderSummary(activity, options) : renderResearch(options);
-      const hash = createHash('sha256').update(svg).digest('hex').slice(0, 12);
-      const file = `assets/generated/${kind}${mobile ? '-mobile' : ''}${animated ? '' : '-still'}.${hash}.svg`;
-      assets[`${kind}${key}`] = file;
-      files.set(file, svg);
-    }
+  for (const [key, animated, mobile] of [['desktop', true, false], ['still', false, false], ['mobile', true, true], ['mobileStill', false, true]]) {
+    const svg = renderProfile(activity, config, {animated, mobile});
+    const hash = createHash('sha256').update(svg).digest('hex').slice(0, 12);
+    const file = `assets/generated/profile${mobile ? '-mobile' : ''}${animated ? '' : '-still'}.${hash}.svg`;
+    assets[key] = file;
+    files.set(file, svg);
   }
   // Complete collection and rendering before changing any published output.
   const content = renderReadme(config, activity, assets);
@@ -52,7 +50,7 @@ export async function updateProfile({directory = root, api = createApi(), offlin
   for (const file of files.keys()) await rename(join(directory, file + '.tmp'), join(directory, file));
   const retained = new Set([...manifest.current, ...manifest.previous]);
   for (const file of new Set([...oldManifest.current, ...oldManifest.previous])) {
-    if (/^assets\/generated\/(?:summary|research)(?:-mobile)?(?:-still)?\.[a-f0-9]{12}\.svg$/.test(file) && !retained.has(file)) {
+    if (/^assets\/generated\/(?:profile|summary|research)(?:-mobile)?(?:-still)?\.[a-f0-9]{12}\.svg$/.test(file) && !retained.has(file)) {
       try {await unlink(join(directory, file));} catch (error) {if (error.code !== 'ENOENT') throw error;}
     }
   }
