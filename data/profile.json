@@ -20,8 +20,8 @@
     "repo": "rohitg00/ai-engineering-from-scratch",
     "repoName": "AI Engineering from Scratch",
     "repoUrl": "https://github.com/rohitg00/ai-engineering-from-scratch",
-    "stars": 69222,
-    "forks": 12125,
+    "stars": 69439,
+    "forks": 12178,
     "number": 583,
     "title": "feat(quizzes): backfill 150 missing lesson quizzes",
     "url": "https://github.com/rohitg00/ai-engineering-from-scratch/pull/583",
@@ -32,8 +32,8 @@
     "repo": "rohitg00/ai-engineering-from-scratch",
     "repoName": "AI Engineering from Scratch",
     "repoUrl": "https://github.com/rohitg00/ai-engineering-from-scratch",
-    "stars": 69222,
-    "forks": 12125,
+    "stars": 69439,
+    "forks": 12178,
     "number": 531,
     "title": "docs(i18n): complete and audit 12 README translations",
     "url": "https://github.com/rohitg00/ai-engineering-from-scratch/pull/531",
@@ -46,7 +46,7 @@
       "name": "Multimodal Sentiment Fusion",
       "description": "Research on multimodal sentiment analysis and fusion algorithms with native CH-SIMS v2 and CMU-MOSEI evaluation protocols.",
       "url": "https://github.com/MaYangle/Multimodal-Sentiment-Fusion",
-      "stars": 0,
+      "stars": 1,
       "forks": 0,
       "pushedAt": "2026-10-14T11:47:14Z",
       "language": "Python",
@@ -129,8 +129,8 @@
     {
       "repo": "rohitg00/ai-engineering-from-scratch",
       "name": "AI Engineering from Scratch",
-      "stars": 69222,
-      "forks": 12125,
+      "stars": 69439,
+      "forks": 12178,
       "count": 0,
       "closedCount": 1,
       "summary": "ai engineering from scratch",
@@ -182,5 +182,5 @@
       }
     ]
   },
-  "updatedAt": "2026-10-15T04:37:56.462Z"
+  "updatedAt": "2026-10-15T11:28:27.452Z"
 }
