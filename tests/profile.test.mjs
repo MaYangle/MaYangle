@@ -61,7 +61,7 @@ test('SVGs stay self-contained and reduced-motion variants remove animation', ()
     const still = renderProfile(withDate(), config, {animated: false, mobile});
     assert.match(animated, /@keyframes/);
     assert.doesNotMatch(still, /@keyframes|animation:|<animate/);
-    assert.doesNotMatch(animated, /<script|<foreignObject|<image|<filter/);
+    assert.doesNotMatch(animated, /<script|<foreignObject|<filter|<image/);
     assert.match(animated, /SELECTED RESEARCH/);
     assert.match(animated, /UPSTREAM CONTRIBUTIONS/);
     assert.match(animated, /0\.378497/);
@@ -69,6 +69,16 @@ test('SVGs stay self-contained and reduced-motion variants remove animation', ()
     assert.match(still, /width="(?:600|1200)"/);
   }
 });
+test('automatically discovered project illustrations also honor reduced motion', () => {
+  const activity=withDate();
+  activity.projects.push({repo:'MaYangle/New-Project',url:'https://github.com/MaYangle/New-Project',name:'New Project',description:'Newly discovered original work',pushedAt:'2026-10-17T00:00:00Z'});
+  for(const mobile of [false,true]){
+    const still=renderProfile(activity,config,{animated:false,mobile});
+    assert.match(still,/New Project/);
+    assert.doesNotMatch(still,/<animate|animation:|@keyframes/);
+  }
+});
+
 test('unchanged data creates no timestamp churn and can regenerate offline', async () => {
   const directory = await mkdtemp(join(tmpdir(), 'profile-test-'));
   try {

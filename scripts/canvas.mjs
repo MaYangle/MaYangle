@@ -1,4 +1,4 @@
-import {renderParticleArtwork, sampledParticleMotion} from './particle-art.mjs';
+import {renderParticleArtwork, particleMotion} from './particle-art.mjs';
 const esc = value => String(value ?? '').replaceAll('&', '&amp;').replaceAll('<', '&lt;').replaceAll('>', '&gt;').replaceAll('"', '&quot;').replaceAll("'", '&apos;');
 const ink = '#172c40';
 const mid = '#637d95';
@@ -59,8 +59,8 @@ function coverImage(cover, project, x, y, width, height) {
   if (!cover?.uri) return '';
   return `<svg x="${x}" y="${y}" width="${width}" height="${height}" viewBox="0 0 ${width} ${height}" preserveAspectRatio="xMidYMid slice"><image data-cover-repo="${esc(project.repo)}" data-cover-path="${esc(cover.path)}" data-cover-sha="${esc(cover.sha)}" href="${cover.uri}" width="${width}" height="${height}" preserveAspectRatio="xMidYMid slice"/></svg>`;
 }
-function miniOrbit(x, y, width, mobile, index) {
-  return renderParticleArtwork(index % 2 ? 'orbital' : 'landscape', x, y, width, mobile ? 96 : 111, {fit:'xMidYMid slice'});
+function miniOrbit(x, y, width, mobile, index, animated) {
+  return renderParticleArtwork(index % 2 ? 'orbital' : 'landscape', x, y, width, mobile ? 96 : 111, {animated,fit:'xMidYMid slice'});
 }
 function featureSection(config, activity, mobile, animated) {
   const width = mobile ? 600 : 1200;
@@ -114,7 +114,7 @@ function featureSection(config, activity, mobile, animated) {
   out += `<path d="M${left} ${bottom}H${right}" fill="none" stroke="#e5ebf1" stroke-width="1"/>`;
   return {svg: out, bottom, firstY: titleBottom, flowX};
 }
-function renderProjectRows(activity, config, y0, mobile, covers = {}) {
+function renderProjectRows(activity, config, y0, mobile, covers = {}, animated = true) {
   const projects = activity.projects.filter(item => !config.projects.some(project => project.url.toLowerCase() === item.url.toLowerCase()));
   if (!projects.length) return {svg: '', height: 0};
   const w = mobile ? 600 : 1200;
@@ -130,7 +130,7 @@ function renderProjectRows(activity, config, y0, mobile, covers = {}) {
     const imageW = mobile ? 522 : 338;
     const imageH = mobile ? 96 : 111;
     const art = covers[project.repo] ? coverImage(covers[project.repo], project, x, rowTop + 12, imageW, imageH) : '';
-    svg += art || miniOrbit(x, rowTop + 20, imageW, mobile, i);
+    svg += art || miniOrbit(x, rowTop + 20, imageW, mobile, i, animated);
     const tx = mobile ? x : x + imageW + 32;
     const tw = mobile ? 520 : 700;
     const titleY = mobile ? rowTop + imageH + 36 : rowTop + 43;
@@ -226,7 +226,7 @@ export function renderProfile(activity, config, {mobile = false, animated = true
   svg += '</svg>';
   const research = featureSection(config, activity, mobile, animated);
   const projectStart = research.bottom + (mobile ? 47 : 42);
-  const projects = renderProjectRows(activity, config, projectStart, mobile, covers);
+  const projects = renderProjectRows(activity, config, projectStart, mobile, covers, animated);
   const openStart = projectStart + projects.height + (projects.height ? (mobile ? 26 : 24) : 0);
   const open = renderOpenSource(activity, config, openStart, mobile, animated);
   const commitY = openStart + open.height + (mobile ? 61 : 50);
@@ -249,7 +249,7 @@ export function renderProfile(activity, config, {mobile = false, animated = true
   foot += text(x, bottom + 53, 'Development VALID only · Final TEST remains independent', mobile ? 11 : 12, '#8b9baa');
   const height = bottom + (mobile ? 75 : 70);
   const art = svg;
-  const motion = animated ? `<style>${sampledParticleMotion}
+  const motion = animated ? `<style>${particleMotion}
 @keyframes orbit-flow{to{stroke-dashoffset:-190}}
 .flow{animation:orbit-flow 32s linear infinite;stroke-linecap:round}
 @media(prefers-reduced-motion:reduce){.flow{animation:none!important}}
