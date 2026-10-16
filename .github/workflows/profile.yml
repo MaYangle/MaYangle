@@ -10,6 +10,7 @@ on:
     paths:
       - 'profile.config.json'
       - 'scripts/**'
+      - 'assets/art/**'
       - 'tests/**'
       - 'package.json'
       - '.github/workflows/profile.yml'
