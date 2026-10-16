@@ -203,7 +203,7 @@ export function renderProfile(activity, config, {mobile = false, animated = true
   let svg = '<svg xmlns="http://www.w3.org/2000/svg" width="'+width+'" height="'+heroHeight+'" viewBox="0 0 '+width+' '+heroHeight+'"><rect width="'+width+'" height="'+heroHeight+'" fill="#fff"/>';
   svg += renderParticleArtwork('hero',0,0,width,mobile?480:heroHeight,{animated,fadeBottom:true,fit:'xMidYMid slice'});
   const mast = label(margin, mobile ? 48 : 48, 'AI ENGINEERING / MULTIMODAL LEARNING', mobile);
-  svg += mast + text(right, mobile ? 48 : 48, `@${activity.username}`, mobile ? 13 : 13, mid, {anchor: 'end'});
+  svg += mast + text(right, mobile ? 48 : 48, `@${activity.username}`, mobile ? 13 : 13, '#d8e8f3', {anchor: 'end'});
   const title = mobile ? 60 : 96;
   svg += text(margin, mobile ? 137 : 205, config.name, title, ink, {weight: 600, spacing: mobile ? -3.2 : -5.2});
   svg += text(margin + 2, mobile ? 184 : 265, 'Multimodal learning.', mobile ? 23 : 30, '#627e96', {weight: 300, spacing: -.7});

@@ -1,6 +1,6 @@
 # Maintaining this profile
 
-The public profile is one responsive SVG canvas. The current art direction is an abstract scientific illustration: an ice-blue particle sphere, tilted orbital currents, a layered wave field and three modalities flowing into a fusion core. It preserves the white, open cosmic palette while prioritizing lively continuous movement. Text, counters, project metadata and contribution records are generated independently from current public GitHub data.
+The public profile is one responsive SVG canvas. The current art direction combines abstract scientific particles with a cinematic cosmic atmosphere: a dark blue celestial body, ice-white gravitational arcs, restrained gold accretion currents, a layered mist field and three modalities flowing into a shaded fusion core. The page stays white and open while the celestial silhouettes establish depth. Text, counters, project metadata and contribution records are generated independently from current public GitHub data.
 
 ## Artwork and motion
 
