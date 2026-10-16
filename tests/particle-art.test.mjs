@@ -28,6 +28,8 @@ test('all scenes reconstruct from self-contained vector particles',()=>{
     assert.match(svg,/<path fill="none" stroke="#[a-f0-9]{6}"/);
     assert.doesNotMatch(svg,/<image|data:image|<script|foreignObject|https?:\/\//);
     assert.ok(particleRegionStats(name).particles>3000);
+    assert.match(svg, /<animateMotion path="M[^\"]+" dur="\d+s" begin="-[\d.]+s" repeatCount="indefinite"/,
+      'Every scene must have particles moving along visible trajectories');
   }
 });
 test('static art does not introduce a live stream or a second visual source',()=>{

@@ -9,7 +9,7 @@ The public profile is one responsive SVG canvas. Its cinematic artwork is recons
 - `scripts/prepare-particle-art.mjs`: a one-time preparation tool that uses Sharp to sample an approved reference. Regular profile rendering does not need Sharp or any other runtime package.
 - `scripts/canvas.mjs`: composes the sampled scenes, live text and automatic project rows into desktop and mobile canvases. The canvas grows with the number of projects.
 
-The sampled scenes use roughly 113,000 vector points for the current complete profile. Points are grouped by colour and motion phase to keep the SVG DOM manageable. Small asynchronous shifts preserve the source's shape; visible light currents travel through the disk and multimodal streams. Visitors who prefer reduced motion receive an identical static composition. Motion is decorative, not a live activity signal.
+The sampled scenes use roughly 113,000 vector points for the current complete profile. Points are grouped by colour and motion phase to keep the SVG DOM manageable. Small asynchronous shifts preserve the source's shape. An additional 219 moving particles follow the gravitational rim, disk, clouds, multimodal streams and landscape panels, using SVG animateMotion with staggered phases and opacity envelopes. The fusion core emits an expanding light pulse. This motion runs inside an embedded SVG image without JavaScript. Visitors who prefer reduced motion receive an identical static composition through the README picture sources. Motion is decorative, not a live activity signal.
 
 The cosmic landscape panels are illustrations rather than repository screenshots. A project may instead provide its own cover; source links remain in the text version.
 
