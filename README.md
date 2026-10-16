@@ -1,6 +1,6 @@
 <!-- Generated: one continuous profile canvas, with native evidence links below. -->
 
-<p><picture><source media="(prefers-reduced-motion: reduce) and (max-width: 600px)" srcset="assets/generated/profile-mobile-still.ca4b78f47d82.svg"><source media="(prefers-reduced-motion: reduce)" srcset="assets/generated/profile-still.05ba4e952395.svg"><source media="(max-width: 600px)" srcset="assets/generated/profile-mobile.a6c297307bfd.svg"><img src="assets/generated/profile.ba3b10c8d8d1.svg" width="100%" alt="Yangle Ma — AI engineering and multimodal research; 6 merged upstream PRs, 2 open PRs. Full research, experiment and contribution record; text and links below."></picture></p>
+<p><picture><source media="(prefers-reduced-motion: reduce) and (max-width: 600px)" srcset="assets/generated/profile-mobile-still.74afbba420f8.svg"><source media="(prefers-reduced-motion: reduce)" srcset="assets/generated/profile-still.bd029b4a6451.svg"><source media="(max-width: 600px)" srcset="assets/generated/profile-mobile.ef78edc456d2.svg"><img src="assets/generated/profile.4b1388f55af2.svg" width="100%" alt="Yangle Ma — AI engineering and multimodal research; 6 merged upstream PRs, 2 open PRs. Full research, experiment and contribution record; text and links below."></picture></p>
 
 [Multimodal Sentiment Fusion](https://github.com/MaYangle/Multimodal-Sentiment-Fusion) · [Architecture](https://github.com/MaYangle/Multimodal-Sentiment-Fusion/blob/main/docs/ARCHITECTURE.md) · [Experiments](https://github.com/MaYangle/Multimodal-Sentiment-Fusion/blob/main/docs/EXPERIMENTS.md) · [Reproduce](https://github.com/MaYangle/Multimodal-Sentiment-Fusion/blob/main/docs/REPRODUCING.md) · [Upstream PRs](https://github.com/search?q=author%3AMaYangle%20is%3Apr%20is%3Apublic%20-user%3AMaYangle&type=pullrequests)
 
@@ -23,9 +23,11 @@ I build and evaluate multimodal learning systems, from text/audio/vision pipelin
 
 ## Research & engineering
 
-### [Multimodal Sentiment Fusion](https://github.com/MaYangle/Multimodal-Sentiment-Fusion)
+### [Multimodal-Sentiment-Fusion](https://github.com/MaYangle/Multimodal-Sentiment-Fusion)
 
-A Python/PyTorch research codebase for native continuous sentiment prediction on CH-SIMS v2.0 and CMU-MOSEI, with sequence fusion, matched controls, resumable training and independent evaluation.
+Research on multimodal sentiment analysis and fusion algorithms with native CH-SIMS v2 and CMU-MOSEI evaluation protocols.
+
+*Python · default branch: main · updated: 2026-10-14*
 
 [Architecture](https://github.com/MaYangle/Multimodal-Sentiment-Fusion/blob/main/docs/ARCHITECTURE.md) · [Experiments](https://github.com/MaYangle/Multimodal-Sentiment-Fusion/blob/main/docs/EXPERIMENTS.md) · [Reproduce](https://github.com/MaYangle/Multimodal-Sentiment-Fusion/blob/main/docs/REPRODUCING.md)
 
@@ -78,7 +80,7 @@ Fixed missing-face features, single-sample output handling and non-finite predic
 
 - 2026-10-14 · [MaYangle/Multimodal-Sentiment-Fusion](https://github.com/MaYangle/Multimodal-Sentiment-Fusion) · [Record verified Linux CI and explain scientific audit gate failures](https://github.com/MaYangle/Multimodal-Sentiment-Fusion/commit/74608094ea55b6f9aaa896831796105e3eee3c18)
 
-*GitHub data refreshed: 2026-10-15 14:39 UTC. Checked every 6 hours; the date changes when public data changes.*
+*GitHub data refreshed: 2026-10-16 15:36 UTC. Checked every 6 hours; the date changes when public data changes.*
 
 *Upstream PRs exclude my own repositories. Public projects exclude forks, empty/archived repositories and this profile. Particle and orbit motion illustrate the research workflow; they are not live activity signals.*
 

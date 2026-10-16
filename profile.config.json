@@ -45,6 +45,10 @@
     "Email": "mailto:yanglema44@gmail.com"
   },
   "username": "MaYangle",
+  "discovery": {
+    "enabled": true,
+    "exclude": []
+  },
   "research": {
     "directions": [
       {
@@ -93,5 +97,9 @@
       "19376357/Bilingual-Multimodal-Sentiment-Analysis#5": "English and Chinese documentation"
     },
     "recentLimit": 5
+  },
+  "discovery": {
+    "exclude": [],
+    "enabled": true
   }
 }

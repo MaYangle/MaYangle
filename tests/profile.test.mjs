@@ -65,7 +65,7 @@ test('SVGs stay self-contained and reduced-motion variants remove animation', ()
     assert.match(animated, /SELECTED RESEARCH/);
     assert.match(animated, /UPSTREAM CONTRIBUTIONS/);
     assert.match(animated, /0\.378497/);
-    assert.match(animated, /CLOSED WITHOUT MERGE/);
+    assert.match(animated, /closed without merge/i);
     assert.match(still, /width="(?:600|1200)"/);
   }
 });

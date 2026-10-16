@@ -123,11 +123,16 @@
   "projects": [
     {
       "repo": "MaYangle/Multimodal-Sentiment-Fusion",
+      "name": "Multimodal-Sentiment-Fusion",
+      "description": "Research on multimodal sentiment analysis and fusion algorithms with native CH-SIMS v2 and CMU-MOSEI evaluation protocols.",
       "url": "https://github.com/MaYangle/Multimodal-Sentiment-Fusion",
       "pushedAt": "2026-10-14T11:47:14Z",
       "stars": 1,
       "forks": 0,
       "language": "Python",
+      "topics": [],
+      "defaultBranch": "main",
+      "coverPath": null,
       "latestCommit": {
         "sha": "74608094ea55b6f9aaa896831796105e3eee3c18",
         "url": "https://github.com/MaYangle/Multimodal-Sentiment-Fusion/commit/74608094ea55b6f9aaa896831796105e3eee3c18",
@@ -136,5 +141,6 @@
       }
     }
   ],
-  "updatedAt": "2026-10-15T14:39:39.882Z"
+  "projectCovers": [],
+  "updatedAt": "2026-10-16T15:36:32.141Z"
 }

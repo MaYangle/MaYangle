@@ -1,280 +1,355 @@
-const esc = (value) => String(value ?? '').replaceAll('&', '&amp;').replaceAll('<', '&lt;').replaceAll('>', '&gt;').replaceAll('"', '&quot;').replaceAll("'", '&apos;');
-const ink = '#26313d', muted = '#788795', pale = '#e7edf2', blue = '#788fae', violet = '#aca8c6';
-const text = (x, y, value, size = 17, color = ink, extra = '') => `<text x="${x}" y="${y}" font-size="${size}" fill="${color}" ${extra}>${esc(value)}</text>`;
-const rule = (x, y, x2, y2, color = pale, extra = '') => `<path d="M${x} ${y}L${x2} ${y2}" fill="none" stroke="${color}" ${extra}/>`;
-const label = (x, y, value, size = 12) => text(x, y, value.toUpperCase(), size, muted, 'font-weight="600" letter-spacing="1.55"');
+const esc = value => String(value ?? '').replaceAll('&', '&amp;').replaceAll('<', '&lt;').replaceAll('>', '&gt;').replaceAll('"', '&quot;').replaceAll("'", '&apos;');
+const ink = '#172c40';
+const mid = '#637d95';
+const mist = '#cfdfed';
+const ice = '#93bbde';
+const gold = '#fff3de';
 
-function wrapLines(value, maxWidth, size) {
-  const words = String(value ?? '').split(/\s+/).filter(Boolean);
-  const maxChars = Math.max(12, Math.floor(maxWidth / (size * 0.53)));
+function wrap(value, width, size, limit = 4) {
+  const words = String(value ?? '').trim().split(/\s+/).filter(Boolean);
+  const capacity = Math.max(10, Math.floor(width / (size * .51)));
   const lines = [];
   let line = '';
   for (const word of words) {
-    const next = line ? `${line} ${word}` : word;
-    if (next.length > maxChars && line) { lines.push(line); line = word; }
-    else line = next;
+    const candidate = line ? `${line} ${word}` : word;
+    if (candidate.length > capacity && line) { lines.push(line); line = word; }
+    else line = candidate;
   }
   if (line) lines.push(line);
+  if (lines.length > limit) {
+    const visible = lines.slice(0, limit);
+    visible[limit - 1] = `${visible[limit - 1].slice(0, Math.max(1, capacity - 1))}…`;
+    return visible;
+  }
   return lines;
 }
-
-function paragraph(x, y, value, width, size = 17, color = muted, leading = size * 1.5) {
-  const lines = wrapLines(value, width, size);
-  return { svg: lines.map((line, i) => text(x, y + i * leading, line, size, color)).join(''), bottom: y + Math.max(0, lines.length - 1) * leading, lines };
+function text(x, y, value, size = 18, color = ink, options = {}) {
+  const {weight = 400, anchor = 'start', spacing = 0, className = '', href = ''} = options;
+  const node = `<text x="${x}" y="${y}" font-family="Inter,Arial,Helvetica,sans-serif" font-size="${size}" font-weight="${weight}" text-anchor="${anchor}" letter-spacing="${spacing}" fill="${color}"${className ? ` class="${className}"` : ''}>${esc(value)}</text>`;
+  return href ? `<a href="${esc(href)}" target="_top">${node}</a>` : node;
 }
-
-function dateUtc(value) {
-  if (!value || !Number.isFinite(Date.parse(value))) return 'DATE UNAVAILABLE';
-  return new Date(value).toISOString().slice(0, 10) + ' UTC';
+function paragraph(x, y, value, width, size, color = mid, leading = size * 1.46, maxLines = 4) {
+  const lines = wrap(value, width, size, maxLines);
+  return {svg: lines.map((line, i) => text(x, y + i * leading, line, size, color)).join(''), bottom: y + Math.max(0, lines.length - 1) * leading, lines};
 }
-
-function orbit(x, y, width, animated) {
-  const d = `M${x} ${y + 10} C${x + width * .23} ${y - 22} ${x + width * .47} ${y + 27} ${x + width * .7} ${y + 4} S${x + width * .9} ${y - 13} ${x + width} ${y + 8}`;
-  let svg = `<path d="${d}" fill="none" stroke="${blue}" stroke-opacity=".12" stroke-width="1.2"/><path d="${d}" fill="none" stroke="${violet}" stroke-opacity=".52" stroke-width="1" stroke-dasharray="1 13" stroke-linecap="round" ${animated ? 'class="drift"' : ''}/>`;
-  for (let i = 0; i < 34; i++) {
-    const px = x + width * i / 33;
-    const py = y + 6 + Math.sin(i * .31) * 12;
-    svg += `<circle cx="${px.toFixed(1)}" cy="${py.toFixed(1)}" r="${i % 7 === 0 ? 1.5 : .8}" fill="${i % 2 ? blue : violet}" opacity="${i % 3 ? '.24' : '.42'}"/>`;
+function link(x, y, label, url, size = 17, color = mid, options = {}) {
+  return text(x, y, label, size, color, {...options, href: url});
+}
+function flowingLink(x, y, value, href, width, size, color = ink, leading = size * 1.38, maxLines = 3) {
+  const lines = wrap(value, width, size, maxLines);
+  const safeHref = esc(href);
+  const tspans = lines.map((line, index) => `<tspan x="${x}" dy="${index ? leading : 0}">${esc(line)}</tspan>`).join('');
+  return `<a href="${safeHref}" target="_top"><text x="${x}" y="${y}" font-family="Inter,Arial,Helvetica,sans-serif" font-size="${size}" fill="${color}">${tspans}</text></a>`;
+}
+function safeDate(value) {
+  if (typeof value !== 'string' || !Number.isFinite(Date.parse(value))) return 'DATE UNAVAILABLE';
+  return new Date(value).toISOString().slice(0, 10);
+}
+function label(x, y, value, mobile = false) {
+  return text(x, y, String(value).toUpperCase(), mobile ? 12 : 11, mid, {weight: 600, spacing: mobile ? 2 : 2.4});
+}
+function stars(width, height, count = 118) {
+  let out = '';
+  for (let i = 0; i < count; i++) {
+    const x = ((i * 193.37 + 31) % width).toFixed(2);
+    const y = ((i * i * 43.77 + i * 17 + 29) % height).toFixed(2);
+    const r = i % 13 === 0 ? 1.7 : i % 5 === 0 ? 1.2 : .7;
+    const delay = -((i * .73) % 9).toFixed(2);
+    const opacity = i % 4 === 0 ? '.64' : '.30';
+    out += `<circle cx="${x}" cy="${y}" r="${r}" fill="${i % 3 ? '#b9ccde' : '#819cb8'}" opacity="${opacity}" class="spark" style="animation-delay:${delay}s"/>`;
   }
-  return svg;
+  return out;
 }
-
-function contributionGauge(x, y, count, radius, mobile, animated) {
-  const r = radius;
-  const number = String(count).padStart(2, '0');
-  return `<circle cx="${x}" cy="${y}" r="${r}" fill="#fbfcff" fill-opacity=".6" stroke="#e8edf3" stroke-width="1"/><circle cx="${x}" cy="${y}" r="${r}" fill="none" stroke="${blue}" stroke-opacity=".52" stroke-width="1.4" stroke-dasharray="${r * 4.85} ${r * 1.5}" transform="rotate(130 ${x} ${y})"/>${animated ? `<circle cx="${x}" cy="${y}" r="${r + 8}" fill="none" stroke="${violet}" stroke-opacity=".3" stroke-width="1" stroke-dasharray="2 17" class="orbit"/>` : ''}${text(x, y + (mobile ? 23 : 29), number, mobile ? 88 : 116, blue, 'text-anchor="middle" font-weight="400" letter-spacing="-5"')}${text(x, y + (mobile ? 49 : 70), 'MERGED UPSTREAM PRS', mobile ? 11 : 12, muted, 'text-anchor="middle" letter-spacing="1.1"')}`;
+function planet(x, y, radius) {
+  return `<defs><clipPath id="planet-clip"><circle cx="${x}" cy="${y}" r="${radius}"/></clipPath></defs><g class="world-drift">
+<ellipse cx="${x}" cy="${y}" rx="${radius * 1.1}" ry="${radius * .26}" transform="rotate(-18 ${x} ${y})" fill="none" stroke="#b9cce0" stroke-opacity=".21" stroke-width=".8"/>
+<ellipse cx="${x}" cy="${y}" rx="${radius * 1.02}" ry="${radius * .23}" transform="rotate(-18 ${x} ${y})" fill="none" stroke="#a7c2dc" stroke-opacity=".48" stroke-width="1.1" stroke-dasharray="1 9" class="flow"/>
+<circle cx="${x}" cy="${y}" r="${radius}" fill="url(#world)"/>
+<g clip-path="url(#planet-clip)"><path d="M${x - radius} ${y - 28}Q${x - radius * .31} ${y - radius * .68} ${x + radius} ${y - radius * .56}M${x - radius} ${y + radius * .25}Q${x - 20} ${y - 9} ${x + radius} ${y + radius * .19}M${x - radius * .88} ${y + radius * .62}Q${x + 12} ${y + radius * .28} ${x + radius} ${y + radius * .59}" fill="none" stroke="#eff7fd" stroke-opacity=".15" stroke-width="${Math.max(9, radius * .065)}" class="cloud-flow"/><path d="M${x - radius * .9} ${y - radius * .41}Q${x} ${y - radius * .73} ${x + radius * .91} ${y - radius * .35}M${x - radius * .92} ${y + radius * .53}Q${x - 25} ${y + radius * .24} ${x + radius * .9} ${y + radius * .48}" fill="none" stroke="#314c64" stroke-opacity=".14" stroke-width="${Math.max(6, radius * .04)}"/></g>
+<path d="M${x - radius * .87} ${y - radius * .52} A${radius} ${radius} 0 0 1 ${x + radius * .65} ${y - radius * .76}" fill="none" stroke="url(#rim)" stroke-width="4" opacity=".82"/>
+<path d="M${x - radius * .94} ${y + radius * .14} A${radius} ${radius} 0 0 0 ${x + radius * .6} ${y + radius * .79}" fill="none" stroke="#e7f3ff" stroke-width="1.1" stroke-opacity=".42"/>
+<ellipse cx="${x}" cy="${y}" rx="${radius * 1.1}" ry="${radius * .26}" transform="rotate(-18 ${x} ${y})" fill="none" stroke="#f2dfc4" stroke-opacity=".7" stroke-width="2.2"/>
+<ellipse cx="${x}" cy="${y}" rx="${radius * 1.1}" ry="${radius * .26}" transform="rotate(-18 ${x} ${y})" fill="none" stroke="#fff8ea" stroke-opacity=".55" stroke-width=".8" stroke-dasharray="2 22" class="flow"/>
+</g>`;
 }
-
-function externalLink(x, y, title, href, size, maxWidth, color = ink, weight = '400') {
-  const safe = /^https:\/\//.test(href ?? '') ? esc(href) : '#';
-  const p = paragraph(x, y, title, maxWidth, size, color);
-  const lines = p.lines.map((line, i) => `<text x="${x}" y="${y + i * size * 1.5}" font-size="${size}" fill="${color}" font-weight="${weight}"><a href="${safe}">${esc(line)}</a></text>`).join('');
-  return { svg: lines, bottom: p.bottom };
-}
-
-function recentStatus(status) {
-  return status === 'merged' ? 'MERGED' : status === 'open' ? 'OPEN' : 'CLOSED WITHOUT MERGE';
-}
-
-function projectSection(config, data, x, y, width, mobile, animated) {
-  const project = config.projects?.[0];
-  let svg = label(x, y, 'Selected research');
-  if (!project) return { svg: svg + text(x, y + 38, 'No project configured.', mobile ? 19 : 17, muted), bottom: y + 50 };
-  const title = externalLink(x, y + 44, project.name, project.url, mobile ? 25 : 23, width, ink, '600');
-  svg += title.svg;
-  const desc = paragraph(x, title.bottom + 35, project.description, width, mobile ? 19 : 17, muted, mobile ? 29 : 26);
-  svg += desc.svg;
-  let cursor = desc.bottom + 43;
-  const flowY = cursor;
-  svg += label(x, flowY, 'Research flow');
-  cursor += 28;
-  const flowSize = mobile ? 19 : 17;
-  const jointX = x + width * .59, jointY = cursor + 30, endX = x + width - 4;
-  ['TEXT', 'AUDIO', 'VISION'].forEach((name, i) => {
-    const py = cursor + i * 30;
-    svg += text(x, py, name, flowSize - 2, muted, 'letter-spacing=".8"');
-    svg += '<path d="M' + (x + 87) + ' ' + (py - 5) + 'C' + (jointX - 75) + ' ' + (py - 5) + ' ' + (jointX - 45) + ' ' + jointY + ' ' + jointX + ' ' + jointY + '" fill="none" stroke="' + blue + '" stroke-opacity=".32"/>';
-  });
-  svg += '<circle cx="' + jointX + '" cy="' + jointY + '" r="4" fill="' + blue + '"/>';
-  svg += text(jointX, jointY + 34, 'FUSION', flowSize - 2, blue, 'text-anchor="middle"');
-  svg += '<path d="M' + (jointX + 9) + ' ' + jointY + 'H' + endX + '" fill="none" stroke="' + blue + '" stroke-opacity=".4" ' + (animated ? 'stroke-dasharray="2 11" class="drift"' : '') + '/>';
-  svg += text(endX, jointY - 16, 'SENTIMENT', flowSize - 2, muted, 'text-anchor="end"');
-  cursor += 105;
-  const snapshot = config.research?.snapshot;
-  if (snapshot) {
-    cursor += 6;
-    svg += rule(x, cursor, x + width, cursor); cursor += 34;
-    svg += label(x, cursor, `VALID study · ${dateUtc(snapshot.asOf)}`); cursor += 31;
-    const summary = paragraph(x, cursor, snapshot.summary, width, mobile ? 19 : 17, ink, mobile ? 29 : 26);
-    svg += summary.svg; cursor = summary.bottom + 34;
-    for (const metric of snapshot.metrics ?? []) {
-      const row = paragraph(x, cursor, metric.name, width, mobile ? 19 : 17, muted, mobile ? 28 : 25);
-      svg += row.svg;
-      svg += text(x, row.bottom + 34, metric.score, mobile ? 28 : 26, blue, 'font-weight="400" letter-spacing=".2"');
-      cursor = row.bottom + 74;
-    }
-    cursor += 13;
-    const protocol = paragraph(x, cursor, snapshot.protocol, width, mobile ? 18 : 16, muted, mobile ? 27 : 24);
-    svg += protocol.svg; cursor = protocol.bottom + 32;
-    const conclusion = paragraph(x, cursor, snapshot.conclusion, width, mobile ? 18 : 16, ink, mobile ? 27 : 24);
-    svg += conclusion.svg; cursor = conclusion.bottom + 30;
-    const pending = paragraph(x, cursor, snapshot.pending, width, mobile ? 16 : 14, muted, mobile ? 23 : 20);
-    svg += pending.svg; cursor = pending.bottom + 10;
+function heroClouds(width, endY) {
+  let out = `<g class="cloud-bank"><path d="M0 ${endY - 260}Q${width * .09} ${endY - 323} ${width * .21} ${endY - 252}T${width * .43} ${endY - 266}T${width * .7} ${endY - 250}T${width} ${endY - 278}V${endY}H0Z" fill="url(#cloudback)"/>
+<path d="M0 ${endY - 209}Q${width * .1} ${endY - 258} ${width * .21} ${endY - 210}T${width * .45} ${endY - 203}T${width * .72} ${endY - 214}T${width} ${endY - 208}V${endY}H0Z" fill="#f8fbfe" fill-opacity=".49"/>
+<path d="M0 ${endY - 195}Q${width * .17} ${endY - 255} ${width * .3} ${endY - 183}T${width * .57} ${endY - 192}T${width * .82} ${endY - 175}T${width} ${endY - 213}V${endY}H0Z" fill="url(#cloudfront)"/>
+<path d="M0 ${endY - 150}Q${width * .1} ${endY - 198} ${width * .23} ${endY - 151}T${width * .51} ${endY - 148}T${width * .79} ${endY - 157}T${width} ${endY - 151}V${endY}H0Z" fill="#fff" fill-opacity=".65"/>
+<path d="M0 ${endY - 117}Q${width * .13} ${endY - 173} ${width * .25} ${endY - 113}T${width * .5} ${endY - 129}T${width * .75} ${endY - 107}T${width} ${endY - 140}V${endY}H0Z" fill="#fff" fill-opacity=".74"/>
+<path d="M0 ${endY - 230}Q${width * .12} ${endY - 282} ${width * .24} ${endY - 230}T${width * .47} ${endY - 236}T${width * .71} ${endY - 221}T${width} ${endY - 246}" fill="none" stroke="#f2f7fc" stroke-width="13" stroke-opacity=".35" class="cloud-flow"/>`;
+  for (let i = 0; i < 39; i++) {
+    const x = ((i * 117.23 + 20) % width).toFixed(1);
+    const y = (endY - 253 + (i % 8) * 13 + (i % 3) * 2).toFixed(1);
+    const rx = (11 + (i % 5) * 4).toFixed(1);
+    const ry = (2.4 + (i % 3) * .8).toFixed(1);
+    out += `<ellipse cx="${x}" cy="${y}" rx="${rx}" ry="${ry}" fill="#fff" opacity="${i % 4 === 0 ? '.35' : '.18'}" class="cloud-flow" style="animation-delay:-${(i * .84 % 18).toFixed(2)}s"/>`;
   }
-  return { svg, bottom: cursor };
+  return out + '</g>';
 }
-
-function contributionSection(config, data, x, y, width, mobile) {
-  let svg = label(x, y, 'Upstream contributions');
-  let cursor = y + 43;
-  for (const contribution of config.contributions ?? []) {
-    const repo = data.repositories?.find(item => item.repo.toLowerCase() === contribution.url.replace('https://github.com/', '').toLowerCase());
-    const title = externalLink(x, cursor, contribution.repo, contribution.url, mobile ? 23 : 21, width, ink, '600');
-    svg += title.svg; cursor = title.bottom + 32;
-    if (!repo || !['merged', 'open', 'closed'].every(key => Number.isSafeInteger(repo[key]) && repo[key] >= 0)) throw new Error(`Missing verified pull request counts for ${contribution.repo}`);
-    svg += text(x, cursor, `${repo.merged} merged · ${repo.open} open · ${repo.closed} closed without merge`, mobile ? 18 : 16, blue, 'font-weight="600"'); cursor += 29;
-    const summary = paragraph(x, cursor, contribution.summary, width, mobile ? 19 : 17, muted, mobile ? 28 : 25);
-    svg += summary.svg; cursor = summary.bottom + 31;
-    for (const pr of contribution.prs ?? []) {
-      const record = data.pullRequests?.find(item => item.url === pr.url);
-      if (!record || record.status !== 'merged') throw new Error(`Selected contribution is not verified merged: ${pr.url}`);
-      const linked = externalLink(x + 18, cursor, `${pr.label} · ${dateUtc(record.eventAt)}`, pr.url, mobile ? 18 : 16, width - 18, ink);
-      svg += `<circle cx="${x + 3}" cy="${cursor - 5}" r="2.5" fill="${blue}"/>${linked.svg}`;
-      cursor = linked.bottom + (mobile ? 32 : 28);
-    }
+function horizonParticles(x, y, width, mobile = false) {
+  let out = '';
+  for (let i = 0; i < 78; i++) {
+    const px = (x + ((i * 37.71) % width)).toFixed(1);
+    const py = (y + Math.sin(i * .46) * (mobile ? 8 : 11) + (i % 4) * 3).toFixed(1);
+    const r = i % 11 === 0 ? 1.65 : .8;
+    out += `<circle cx="${px}" cy="${py}" r="${r}" fill="${i % 4 ? '#93abc3' : '#c5a978'}" opacity=".48" class="spark" style="animation-delay:-${(i * .41 % 9).toFixed(2)}s"/>`;
   }
-  const selected = new Set((config.contributions ?? []).map(item => item.url.toLowerCase()));
-  for (const repo of data.repositories ?? []) {
-    if (selected.has(repo.url.toLowerCase())) continue;
-    cursor += 30;
-    const name = config.activity?.repositoryLabels?.[repo.repo] ?? repo.repo;
-    const title = externalLink(x, cursor, name, repo.url, mobile ? 23 : 21, width, ink, '600');
-    svg += title.svg;
-    const states = paragraph(x, title.bottom + 32, `${repo.merged} merged · ${repo.open} open · ${repo.closed} closed without merge`, width, mobile ? 18 : 16, blue);
-    svg += states.svg;
-    cursor = states.bottom + 24;
-  }
-  const recent = (data.pullRequests ?? []).slice(0, 3);
-  if (recent.length) {
-    cursor += 15; svg += rule(x, cursor, x + width, cursor); cursor += 34;
-    svg += label(x, cursor, 'Recent upstream activity'); cursor += 33;
-    for (const pr of recent) {
-      const repoName = config.activity?.repositoryLabels?.[pr.repo] ?? pr.repo;
-      svg += text(x, cursor, `${dateUtc(pr.updatedAt)}  ·  ${recentStatus(pr.status)}`, mobile ? 13 : 12, muted, 'letter-spacing=".35"'); cursor += mobile ? 27 : 23;
-      const item = externalLink(x, cursor, `${repoName} #${pr.number} — ${pr.title}`, pr.url, mobile ? 19 : 17, width, ink);
-      svg += item.svg; cursor = item.bottom + (mobile ? 25 : 20);
-    }
-  }
-  return { svg, bottom: cursor };
+  return out;
 }
-
-function statsStrip(data, x, y, width, mobile) {
-  const stats = [
-    ['Open upstream PRs', data.counts.open],
-    ['Merged repositories', data.counts.mergedRepositories],
-    ['Public projects', data.counts.publicProjects],
+function researchFlow(mobile, y) {
+  const left = mobile ? 46 : 624;
+  const right = mobile ? 550 : 1154;
+  const center = mobile ? 383 : 958;
+  const top = y;
+  const textSize = mobile ? 17 : 14;
+  const names = ['TEXT', 'AUDIO', 'VISION'];
+  const ys = [top, top + (mobile ? 55 : 49), top + (mobile ? 110 : 98)];
+  let out = `<defs><radialGradient id="fusion"><stop stop-color="#b7d7f0" stop-opacity=".78"/><stop offset="1" stop-color="#d9e8f6" stop-opacity="0"/></radialGradient></defs><circle cx="${center}" cy="${top + (mobile ? 56 : 49)}" r="${mobile ? 83 : 76}" fill="url(#fusion)"/>`;
+  for (let i = 0; i < names.length; i++) {
+    const start = mobile ? left + 89 : left + 73;
+    const path = `M${start} ${ys[i]} C${center - 139} ${ys[i]} ${center - 117} ${top + (mobile ? 56 : 49)} ${center} ${top + (mobile ? 56 : 49)} S${right - 99} ${top + (mobile ? 56 : 49)} ${right} ${top + (mobile ? 56 : 49)}`;
+    out += text(left, ys[i] + 5, names[i], textSize, '#738ca5', {spacing: 1.4});
+    out += `<path d="${path}" fill="none" stroke="#d1dfec" stroke-width="1.2" stroke-opacity=".85"/>
+<path d="${path}" fill="none" stroke="${i === 1 ? '#83b5df' : '#afc3d8'}" stroke-width="1.3" stroke-linecap="round" stroke-dasharray="1 15" class="flow" style="animation-delay:-${i * 2.8}s"/>`;
+  }
+  out += `<circle cx="${center}" cy="${top + (mobile ? 56 : 49)}" r="4" fill="#83a8cc" class="pulse"/>
+${text(center, top + (mobile ? 87 : 77), 'FUSION', mobile ? 12 : 10, '#71879c', {anchor: 'middle', spacing: 1.8})}
+${text(right, top + (mobile ? 62 : 55), 'SENTIMENT', textSize, '#71879c', {anchor: 'end', spacing: 1.4})}`;
+  return out;
+}
+function coverImage(cover, project, x, y, width, height) {
+  if (!cover?.uri) return '';
+  return `<svg x="${x}" y="${y}" width="${width}" height="${height}" viewBox="0 0 ${width} ${height}" preserveAspectRatio="xMidYMid slice"><image data-cover-repo="${esc(project.repo)}" data-cover-path="${esc(cover.path)}" data-cover-sha="${esc(cover.sha)}" href="${cover.uri}" width="${width}" height="${height}" preserveAspectRatio="xMidYMid slice"/></svg>`;
+}
+function miniOrbit(x, y, width, mobile, index) {
+  const top = y + 29;
+  return `<path d="M${x} ${top + 10} Q${x + width * .48} ${top - 2} ${x + width} ${top + 10}" fill="none" stroke="#dce8f2" stroke-width=".8"/>
+<path d="M${x} ${top + 10} Q${x + width * .48} ${top - 2} ${x + width} ${top + 10}" fill="none" stroke="#a7c4df" stroke-width="1" stroke-dasharray="1 15" class="flow" style="animation-delay:-${(index * 3.3).toFixed(1)}s"/>
+${horizonParticles(x, top + 4, width, mobile)}`;
+}
+function featureSection(config, activity, mobile, animated) {
+  const width = mobile ? 600 : 1200;
+  const left = mobile ? 38 : 60;
+  const right = mobile ? 562 : 1140;
+  let y = mobile ? 705 : 705;
+  let out = label(left, y, '01 / SELECTED RESEARCH', mobile);
+  out += `<path d="M${mobile ? 38 : 293} ${y - (mobile ? 4 : 5)}H${right}" fill="none" stroke="#d8e2eb" stroke-width="1"/>`;
+  y += mobile ? 57 : 71;
+  const titleSize = mobile ? 32 : 40;
+  out += text(left, y, config.projects[0]?.name ?? 'Multimodal Sentiment Fusion', titleSize, ink, {weight: 600, spacing: -1.6});
+  const titleBottom = y;
+  const description = 'Text, audio and vision. Controlled experiments, native evaluation and reproducible training.';
+  const descriptionWidth = mobile ? 520 : 500;
+  const desc = paragraph(left, y + (mobile ? 43 : 48), description, descriptionWidth, mobile ? 20 : 19, mid, mobile ? 29 : 29, 3);
+  out += desc.svg;
+  const flowY = mobile ? desc.bottom + 58 : y + 45;
+  const flowX = mobile ? left : 620;
+  const flowGraphic = researchFlow(mobile, flowY);
+  if (mobile) out += flowGraphic;
+  else out += flowGraphic;
+  const metricsY = mobile ? flowY + 183 : flowY + 186;
+  const metricGap = mobile ? 159 : 180;
+  const features = [
+    ['27', 'COMPLETED FITS'],
+    ['3', 'SEEDS'],
+    ['VALID', 'DEVELOPMENT SPLIT']
   ];
-  let svg = rule(x, y, x + width, y);
-  const slot = width / stats.length;
-  stats.forEach(([name, value], i) => {
-    const px = x + i * slot + (mobile ? 0 : 8);
-    svg += text(px, y + (mobile ? 44 : 47), String(value), mobile ? 31 : 34, ink, 'font-weight="400"');
-    svg += text(px, y + (mobile ? 69 : 74), name, mobile ? 14 : 14, muted);
-    if (i) svg += rule(x + i * slot - 20, y + 17, x + i * slot - 20, y + 83, pale);
-  });
-  svg += rule(x, y + 98, x + width, y + 98);
-  return { svg, bottom: y + 98 };
-}
-
-function spaceField(width, heroTop, animated) {
-  const cx = width * .79, cy = heroTop + 87;
-  let result = `<ellipse cx="${cx}" cy="${cy}" rx="${width * .55}" ry="220" fill="url(#mist)" opacity=".44"/>`;
-  result += `<g transform="translate(${cx} ${cy}) rotate(-18)" fill="none" stroke="#c3d0df" stroke-width=".8" opacity=".18">`;
-  for (let i = 0; i < 4; i++) result += `<ellipse rx="${width * (.26 + i * .035)}" ry="${70 + i * 17}"/>`;
-  result += '</g>';
-  for (let i = 0; i < 37; i++) {
-    const x = 24 + (i * 137.51) % (width - 48);
-    const y = 26 + (i * i * 31.7) % (heroTop + 268);
-    result += `<circle cx="${x.toFixed(1)}" cy="${y.toFixed(1)}" r="${i % 8 === 0 ? 1.5 : .8}" fill="#9daec5" opacity=".2"/>`;
+  for (let i = 0; i < features.length; i++) {
+    const x = left + i * metricGap;
+    out += text(x, metricsY, features[i][0], mobile ? 30 : 33, i === 2 ? '#527ca7' : ink, {weight: 400, spacing: -.7});
+    out += text(x, metricsY + (mobile ? 21 : 23), features[i][1], mobile ? 9 : 10, mid, {spacing: 1.1});
   }
-  result += `<path d="M${width * .04} ${heroTop + 310}Q${width * .5} ${heroTop + 260} ${width * .96} ${heroTop + 310}" fill="none" stroke="#ccd7e6" stroke-opacity=".23" ${animated ? 'class="drift" stroke-dasharray="1 19"' : ''}/>`;
-  return result;
+  const noteY = metricsY + (mobile ? 51 : 53);
+  out += text(left, noteY, 'Routing gain not established against matched controls.', mobile ? 15 : 14, mid);
+  out += text(left, noteY + (mobile ? 24 : 23), 'CH-SIMS v2.0 · 14 Oct 2026 · Final TEST remains independent.', mobile ? 13 : 12, '#8797a7');
+  const metrics = config.research.snapshot.metrics.map(metric => `${metric.name}: MAE ${metric.score}`);
+  let metricsBottom = noteY + (mobile ? 48 : 47);
+  for (const item of metrics) {
+    const row = paragraph(left, metricsBottom, item, mobile ? 520 : 500, 12, '#627e96', 17, 2);
+    out += row.svg;
+    metricsBottom = row.bottom + 18;
+  }
+  const linksY = Math.max(noteY + (mobile ? 61 : 56), metricsBottom + 2);
+  const project = config.projects[0];
+  const codeLink = link(left, linksY, 'CODE', project.url, mobile ? 13 : 12, '#5688b7', {spacing: 1.1});
+  const architecture = link(left + (mobile ? 97 : 88), linksY, 'ARCHITECTURE', project.links[0].url, mobile ? 13 : 12, '#5688b7', {spacing: 1.1});
+  const experiment = link(left + (mobile ? 250 : 228), linksY, 'EXPERIMENTS', project.links[1].url, mobile ? 13 : 12, '#5688b7', {spacing: 1.1});
+  out += codeLink + architecture + experiment;
+  const bottom = linksY + (mobile ? 42 : 34);
+  out += `<path d="M${left} ${bottom}H${right}" fill="none" stroke="#e5ebf1" stroke-width="1"/>`;
+  return {svg: out, bottom, firstY: titleBottom, flowX};
 }
-
-export function renderProfile(activity, config, { mobile = false, animated = true } = {}) {
-  if (!activity || !config || !activity.counts || !Array.isArray(config.projects) || !Array.isArray(config.contributions)) throw new TypeError('activity and profile config are required');
+function renderProjectRows(activity, config, y0, mobile, covers = {}) {
+  const projects = activity.projects.filter(item => !config.projects.some(project => project.url.toLowerCase() === item.url.toLowerCase()));
+  if (!projects.length) return {svg: '', height: 0};
+  const w = mobile ? 600 : 1200;
+  const x = mobile ? 38 : 60;
+  const right = mobile ? 562 : 1140;
+  const rowHeight = mobile ? 205 : 164;
+  let svg = '';
+  svg += label(x, y0 + 4, '02 / MORE PUBLIC PROJECTS', mobile);
+  let y = y0 + 32;
+  for (let i = 0; i < projects.length; i++) {
+    const project = projects[i];
+    const rowTop = y + i * rowHeight;
+    const imageW = mobile ? 522 : 338;
+    const imageH = mobile ? 96 : 111;
+    const art = covers[project.repo] ? coverImage(covers[project.repo], project, x, rowTop + 12, imageW, imageH) : '';
+    svg += art || miniOrbit(x, rowTop + 20, imageW, mobile, i);
+    const tx = mobile ? x : x + imageW + 32;
+    const tw = mobile ? 520 : 700;
+    const titleY = mobile ? rowTop + imageH + 36 : rowTop + 43;
+    const name = project.name || project.repo.split('/')[1].replaceAll('-', ' ');
+    const target = project.url;
+    svg += link(tx, titleY, name, target, mobile ? 21 : 22, ink, {weight: 550, spacing: -.45});
+    const description = project.description || 'Public repository.';
+    const desc = paragraph(tx, titleY + (mobile ? 25 : 31), description, tw, mobile ? 16 : 15, mid, mobile ? 22 : 21, mobile ? 2 : 2);
+    svg += desc.svg;
+    const metaY = Math.max(desc.bottom + 24, mobile ? rowTop + rowHeight - 18 : rowTop + 119);
+    const meta = [project.language, `${safeDate(project.pushedAt)} · UPDATED`].filter(Boolean).join('   ·   ');
+    svg += text(tx, metaY, meta, mobile ? 12 : 11, '#8798a8', {spacing: .5});
+    if (i < projects.length - 1) svg += `<path d="M${x} ${rowTop + rowHeight - 1}H${right}" stroke="#e8edf2" fill="none"/>`;
+  }
+  const height = 32 + projects.length * rowHeight;
+  svg += `<path d="M${x} ${y0 + height}H${right}" stroke="#e5ebf1" fill="none"/>`;
+  return {svg, height};
+}
+function renderOpenSource(activity, config, y0, mobile) {
+  const x = mobile ? 38 : 60;
+  const right = mobile ? 562 : 1140;
+  const projects = activity.repositories ?? [];
+  const rows = activity.pullRequests ?? [];
+  const primary = projects.slice(0, 6);
+  const rowHeight = mobile ? 90 : 67;
+  const hasAdditionalProjects = activity.projects.some(item => !config.projects.some(project => project.url.toLowerCase() === item.url.toLowerCase()));
+  let out = label(x, y0 + 4, `${hasAdditionalProjects ? '03' : '02'} / UPSTREAM CONTRIBUTIONS`, mobile);
+  let y = y0 + 50;
+  for (let i = 0; i < primary.length; i++) {
+    const repo = primary[i];
+    const name = config.activity?.repositoryLabels?.[repo.repo] ?? repo.repo.split('/')[1].replaceAll('-', ' ');
+    const primaryStatus = repo.merged > 0 ? `${repo.merged} merged` : repo.open > 0 ? `${repo.open} open` : `${repo.closed} closed without merge`;
+    const secondary = repo.merged > 0 ? `${repo.open} open · ${repo.closed} closed without merge` : '';
+    out += link(x, y + 1, name, repo.url, mobile ? 17 : 19, ink, {weight: 500});
+    if (mobile) {
+      out += text(x, y + 26, `${repo.merged} merged · ${repo.open} open · ${repo.closed} closed without merge`, 12, repo.open > 0 && repo.merged === 0 ? '#648c76' : '#8293a3');
+    } else {
+      const statusX = right - 104;
+      out += text(statusX, y, primaryStatus, 16, repo.open > 0 && repo.merged === 0 ? '#6e9b84' : '#6685a2', {anchor: 'end'});
+      if (secondary) out += text(x, y + 25, secondary, 12, '#8998a6');
+    }
+    y += rowHeight;
+    if (i < primary.length - 1) out += `<path d="M${x} ${y - 17}H${right}" fill="none" stroke="#edf1f5"/>`;
+  }
+  const recent = rows.filter(p => p.status === 'open').slice(0, 1).concat(rows.filter(p => p.status === 'merged').slice(0, 1));
+  const height = 50 + primary.length * rowHeight + 14;
+  let activityY = y0 + height;
+  out += text(x, activityY, 'RECENT ACTIVITY', mobile ? 11 : 11, '#8393a2', {spacing: 1.3});
+  let activityX = x + (mobile ? 137 : 152);
+  for (const pr of recent) {
+    const state = pr.status === 'merged' ? 'MERGED' : 'OPEN';
+    const color = pr.status === 'merged' ? '#5984ad' : '#648f7c';
+    const repoLabel = config.activity?.repositoryLabels?.[pr.repo] ?? pr.repo.split('/')[1];
+    const itemText = `PR #${pr.number} · ${state}`;
+    const href = pr.url;
+    out += `<circle cx="${activityX}" cy="${activityY - 4}" r="3" fill="${color}"/>`;
+    activityX += 11;
+    out += link(activityX, activityY, itemText, href, mobile ? 12 : 12, color);
+    activityX += mobile ? 141 : 150;
+  }
+  return {svg: out, height: height + 37};
+}
+function verifyActivity(activity, config) {
+  if (!activity || !config || activity.username !== config.username || !activity.counts) throw new TypeError('Activity and profile config are required');
   for (const key of ['merged', 'open', 'closed', 'mergedRepositories', 'publicProjects']) {
     if (!Number.isSafeInteger(activity.counts[key]) || activity.counts[key] < 0) throw new TypeError(`Invalid activity.counts.${key}`);
   }
+  if (!Array.isArray(activity.projects) || !Array.isArray(activity.repositories) || !Array.isArray(activity.pullRequests)) throw new TypeError('Incomplete activity snapshot');
+  for (const pr of activity.pullRequests) if (!['merged', 'open', 'closed'].includes(pr.status)) throw new TypeError('Invalid upstream PR state');
+  for (const repo of activity.repositories) for (const key of ['merged', 'open', 'closed']) if (!Number.isSafeInteger(repo[key]) || repo[key] < 0) throw new TypeError(`Invalid ${key} repository PR count`);
+  if (!config.research?.snapshot || !Array.isArray(config.research.directions)) throw new TypeError('Research snapshot is required');
+}
+export function renderProfile(activity, config, {mobile = false, animated = true, covers = {}} = {}) {
+  verifyActivity(activity, config);
+  if (!config.projects?.length) throw new TypeError('Select at least one featured project');
   const width = mobile ? 600 : 1200;
-  const margin = mobile ? 30 : 56;
-  const inner = width - margin * 2;
-  const updated = dateUtc(activity.updatedAt);
-  let svg = `<rect width="${width}" height="1" fill="#fff"/>`;
-  svg += label(margin, 48, 'Public builder profile') + text(width - margin, 48, `@${activity.username}`, 12, muted, 'text-anchor="end" letter-spacing=".8"');
-  svg += text(margin, mobile ? 119 : 126, config.name.toUpperCase(), mobile ? 49 : 64, ink, 'font-weight="600" letter-spacing="-1.8"');
-  svg += text(margin, mobile ? 158 : 168, '', mobile ? 20 : 22, blue);
-  const tagline = paragraph(margin, mobile ? 158 : 168, config.tagline, inner, mobile ? 21 : 22, blue, mobile ? 30 : 32);
-  svg += tagline.svg;
-  const bio = paragraph(margin, tagline.bottom + 42, config.bio, inner, mobile ? 19 : 17, muted, mobile ? 28 : 25);
-  svg += bio.svg;
-  let y = bio.bottom + (mobile ? 46 : 52);
-  svg += rule(margin, y, width - margin, y);
-  const heroTop = y + 43;
-  svg += label(margin, heroTop, 'Contribution record');
-  let afterHero;
-  if (mobile) {
-    const gaugeX = width / 2;
-    const gaugeY = heroTop + 139;
-    svg += contributionGauge(gaugeX, gaugeY, activity.counts.merged, 81, true, animated);
-    svg += orbit(margin, heroTop + 239, inner, animated);
-    let dy = heroTop + 330;
-    svg += label(margin, dy, 'Current research directions'); dy += 37;
-    for (const direction of config.research?.directions ?? []) {
-      const heading = externalLink(margin, dy, direction.name, direction.url, 20, inner, ink, '600');
-      svg += heading.svg;
-      const body = paragraph(margin, heading.bottom + 27, direction.summary, inner, 19, muted, 28);
-      svg += body.svg; dy = body.bottom + 34;
-    }
-    const stat = statsStrip(activity, margin, dy + 10, inner, true); svg += stat.svg;
-    afterHero = stat.bottom + 48;
-  } else {
-    const gaugeX = margin + 166;
-    const gaugeY = heroTop + 166;
-    svg += contributionGauge(gaugeX, gaugeY, activity.counts.merged, 106, false, animated);
-    svg += orbit(margin, heroTop + 293, 520, animated);
-    const dx = 660;
-    let dy = heroTop + 3;
-    svg += label(dx, dy, 'Current research directions'); dy += 43;
-    for (const direction of config.research?.directions ?? []) {
-      const heading = externalLink(dx, dy, direction.name, direction.url, 18, 475, ink, '600');
-      svg += heading.svg;
-      const body = paragraph(dx, heading.bottom + 28, direction.summary, 475, 17, muted, 25);
-      svg += body.svg; dy = body.bottom + 31;
-    }
-    const stripY = Math.max(heroTop + 337, dy + 10);
-    const stat = statsStrip(activity, margin, stripY, inner, false); svg += stat.svg;
-    afterHero = stat.bottom + 52;
+  const margin = mobile ? 38 : 60;
+  const right = width - margin;
+  let y = mobile ? 617 : 670;
+  const heroHeight = mobile ? 640 : 690;
+  let svg = `<svg xmlns="http://www.w3.org/2000/svg" width="${width}" height="${heroHeight}" viewBox="0 0 ${width} ${heroHeight}" preserveAspectRatio="xMidYMid slice"><rect width="${width}" height="${heroHeight}" fill="#f7fbff"/>
+<defs><linearGradient id="world" x1=".12" y1=".12" x2=".91" y2=".89"><stop stop-color="#ddeaf6"/><stop offset=".48" stop-color="#a8bed2"/><stop offset="1" stop-color="#334b62"/></linearGradient><linearGradient id="rim"><stop stop-color="#fff" stop-opacity=".1"/><stop offset=".45" stop-color="#fff8ec"/><stop offset="1" stop-color="#d5e7f8" stop-opacity=".1"/></linearGradient><linearGradient id="cloudback" x2="0" y2="1"><stop stop-color="#fff" stop-opacity=".04"/><stop offset="1" stop-color="#dce8f3" stop-opacity=".77"/></linearGradient><linearGradient id="cloudfront" x2="0" y2="1"><stop stop-color="#edf4fb" stop-opacity=".08"/><stop offset="1" stop-color="#fff" stop-opacity=".96"/></linearGradient><linearGradient id="sky" x2="0" y2="1"><stop stop-color="#f8fbff"/><stop offset=".6" stop-color="#fff"/><stop offset="1" stop-color="#fff"/></linearGradient></defs><rect width="${width}" height="${heroHeight}" fill="url(#sky)"/>`;
+  svg += stars(width, heroHeight - 88, mobile ? 76 : 118);
+  const pX = mobile ? 452 : 930, pY = mobile ? 207 : 196, pR = mobile ? 143 : 203;
+  svg += planet(pX, pY, pR);
+  svg += heroClouds(width, heroHeight - 5);
+  svg += `<path d="M${margin} ${heroHeight - 57} Q${width * .5} ${heroHeight - 37} ${right} ${heroHeight - 58}" fill="none" stroke="#ccd9e6" stroke-width="1"/><path d="M${margin} ${heroHeight - 57} Q${width * .5} ${heroHeight - 37} ${right} ${heroHeight - 58}" fill="none" stroke="#a4bad0" stroke-width="1" stroke-dasharray="1 17" class="flow"/>`;
+  const mast = label(margin, mobile ? 48 : 48, 'AI ENGINEERING / MULTIMODAL LEARNING', mobile);
+  svg += mast + text(right, mobile ? 48 : 48, `@${activity.username}`, mobile ? 13 : 13, mid, {anchor: 'end'});
+  const title = mobile ? 60 : 96;
+  svg += text(margin, mobile ? 137 : 205, config.name, title, ink, {weight: 600, spacing: mobile ? -3.2 : -5.2});
+  svg += text(margin + 2, mobile ? 184 : 265, 'Multimodal learning.', mobile ? 23 : 30, '#627e96', {weight: 300, spacing: -.7});
+  svg += text(margin + 2, mobile ? 216 : 302, 'Reproducible systems.', mobile ? 23 : 30, '#627e96', {weight: 300, spacing: -.7});
+  const statY = mobile ? 495 : 606;
+  const stats = [
+    [String(activity.counts.merged), 'Merged upstream PRs'],
+    [String(activity.counts.open), 'Open upstream PRs'],
+    [String(activity.counts.publicProjects), 'Public projects']
+  ];
+  const gap = mobile ? 178 : 232;
+  for (let i = 0; i < stats.length; i++) {
+    const x = margin + i * gap;
+    svg += text(x, statY, stats[i][0], mobile ? 36 : 46, ink, {weight: 400, spacing: -1.3});
+    svg += text(x, statY + (mobile ? 24 : 27), stats[i][1], mobile ? 12 : 13, '#62778b');
+    if (i > 0) svg += `<path d="M${x - 18} ${statY - 31}V${statY + (mobile ? 38 : 41)}" fill="none" stroke="#d8e2eb" stroke-width="1"/>`;
   }
-
-  let left, right, bottom;
-  if (mobile) {
-    left = projectSection(config, activity, margin, afterHero, inner, true, animated);
-    let next = left.bottom + 50;
-    svg += rule(margin, next - 22, width - margin, next - 22);
-    right = contributionSection(config, activity, margin, next, inner, true);
-    bottom = right.bottom;
-  } else {
-    const gap = 84;
-    const col = (inner - gap) / 2;
-    left = projectSection(config, activity, margin, afterHero, col, false, animated);
-    svg += rule(margin + col + gap / 2, afterHero, margin + col + gap / 2, Math.max(left.bottom, afterHero + 500), '#edf0f4');
-    right = contributionSection(config, activity, margin + col + gap, afterHero, col, false);
-    bottom = Math.max(left.bottom, right.bottom);
+  const stripBottom = mobile ? 540 : 653;
+  svg += `<path d="M${margin} ${stripBottom}H${right}" fill="none" stroke="#edf1f5"/>`;
+  svg += '</svg>';
+  const research = featureSection(config, activity, mobile, animated);
+  const projectStart = research.bottom + (mobile ? 47 : 42);
+  const projects = renderProjectRows(activity, config, projectStart, mobile, covers);
+  const openStart = projectStart + projects.height + (projects.height ? (mobile ? 26 : 24) : 0);
+  const open = renderOpenSource(activity, config, openStart, mobile);
+  const commitY = openStart + open.height + (mobile ? 61 : 50);
+  const x = margin;
+  const ruleTo = right;
+  let foot = `<path d="M${x} ${commitY - 30}H${ruleTo}" fill="none" stroke="#e6ecf2"/>`;
+  foot += label(x, commitY, 'Latest project activity', mobile);
+  const commit = activity.projects.find(p => p.latestCommit)?.latestCommit;
+  let bottom = commitY + 43;
+  if (commit) {
+    const project = activity.projects.find(p => p.latestCommit)?.name ?? 'Recent project update';
+    const commitLines = wrap(`${safeDate(commit.date)} · ${project} · ${commit.message}`, width - margin * 2, mobile ? 13 : 14, 2);
+    foot += flowingLink(x, bottom, `${safeDate(commit.date)} · ${project} · ${commit.message}`, commit.url, width - margin * 2, mobile ? 13 : 14, mid, mobile ? 19 : 20, 2);
+    bottom += commitLines.length * (mobile ? 19 : 20) + (mobile ? 24 : 20);
   }
-  svg += left.svg + right.svg;
-
-  let footerY = bottom + (mobile ? 46 : 52);
-  if (activity.projects?.length) {
-    svg += rule(margin, footerY - 22, width - margin, footerY - 22);
-    svg += label(margin, footerY, 'Latest project commit');
-    let cy = footerY + 32;
-    for (const project of activity.projects) {
-      if (!project.latestCommit) continue;
-      const repoLabel = project.repo;
-      const commitLine = `${dateUtc(project.latestCommit.date)} · ${repoLabel} · ${project.latestCommit.message}`;
-      const link = externalLink(margin, cy, commitLine, project.latestCommit.url, mobile ? 16 : 14, inner, muted);
-      svg += link.svg; cy = link.bottom + (mobile ? 24 : 20);
-    }
-    footerY = cy + 12;
-  }
-  const height = footerY + (mobile ? 126 : 88);
-  svg += '<path d="M' + margin + ' ' + footerY + 'Q' + (width / 2) + ' ' + (footerY - 28) + ' ' + (width - margin) + ' ' + footerY + '" fill="none" stroke="#dfe7ee"/>';
-  svg += text(margin, footerY + 30, 'PUBLIC GITHUB DATA / REFRESHED EVERY 6 HOURS', mobile ? 12 : 11, muted, 'letter-spacing=".55"');
-  svg += text(mobile ? margin : width - margin, footerY + (mobile ? 55 : 30), 'UPDATED ' + updated, mobile ? 12 : 11, muted, mobile ? '' : 'text-anchor="end"');
-  svg += text(margin, footerY + (mobile ? 81 : 56), 'VALID is development-only; final TEST remains independent.', mobile ? 13 : 12, muted);
-  svg += text(margin, footerY + (mobile ? 104 : 76), 'Upstream excludes own repositories. Motion is illustrative.', mobile ? 12 : 11, muted);
-
-  const css = animated ? '<style>text{font-family:Inter,Arial,Helvetica,sans-serif}.drift,.orbit{animation:drift 28s linear infinite}@keyframes drift{to{stroke-dashoffset:-80}}@media(prefers-reduced-motion:reduce){.drift,.orbit{animation:none}}</style>' : '<style>text{font-family:Inter,Arial,Helvetica,sans-serif}</style>';
-  return `<svg xmlns="http://www.w3.org/2000/svg" width="${width}" height="${height}" viewBox="0 0 ${width} ${height}" role="img" aria-labelledby="profile-title profile-desc"><title id="profile-title">${esc(config.name)} — multimodal research and public work</title><desc id="profile-desc">${esc(config.bio)} ${activity.counts.merged} merged upstream pull requests, ${activity.counts.open} open upstream pull requests, ${activity.counts.mergedRepositories} repositories with merged contributions, and ${activity.counts.publicProjects} public projects.</desc>${css}<defs><linearGradient id="paper" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#fff"/><stop offset=".54" stop-color="#fcfdff"/><stop offset="1" stop-color="#fff"/></linearGradient><radialGradient id="mist"><stop stop-color="#eef1f9"/><stop offset="1" stop-color="#fff" stop-opacity="0"/></radialGradient></defs><rect width="${width}" height="${height}" fill="url(#paper)"/>${spaceField(width, heroTop, animated)}${svg}</svg>\n`;
+  const updated = safeDate(activity.updatedAt);
+  bottom += mobile ? 18 : 13;
+  foot += `<path d="M${x} ${bottom} Q${width / 2} ${bottom - 25} ${right} ${bottom}" fill="none" stroke="#dce6ef"/><path d="M${x} ${bottom} Q${width / 2} ${bottom - 25} ${right} ${bottom}" fill="none" stroke="#a7bed4" stroke-dasharray="1 14" class="flow"/>`;
+  foot += text(x, bottom + 31, `GITHUB PUBLIC DATA · REFRESHED EVERY 6 HOURS · ${updated}`, mobile ? 10 : 11, '#8697a7', {spacing: .55});
+  foot += text(x, bottom + 53, 'Development VALID only · Final TEST remains independent', mobile ? 11 : 12, '#8b9baa');
+  const height = bottom + (mobile ? 75 : 70);
+  const dots = animated ? `<style>@keyframes current-line{to{stroke-dashoffset:-100}}.streak{animation:current-line 18s linear infinite}</style>` : '';
+  const art = `${svg.slice(0, svg.lastIndexOf('</svg>'))}${dots}${svg.slice(svg.lastIndexOf('</svg>'))}`;
+  const motion = animated ? `<style>
+@keyframes orbit-flow{to{stroke-dashoffset:-190}}
+@keyframes particle-shimmer{0%,100%{opacity:.18}40%{opacity:.78}70%{opacity:.38}}
+@keyframes cloud-drift{0%,100%{transform:translateX(0)}50%{transform:translateX(7px)}}
+@keyframes focal-breathe{0%,100%{opacity:.68}50%{opacity:1}}
+@keyframes world-drift{0%,100%{transform:translateY(0)}50%{transform:translateY(4px)}}
+.flow,.current{animation:orbit-flow 32s linear infinite;stroke-linecap:round}
+.spark{animation:particle-shimmer 8s ease-in-out infinite}
+.cloud-flow{animation:cloud-drift 54s ease-in-out infinite;transform-box:fill-box;transform-origin:center}
+.pulse{animation:focal-breathe 8s ease-in-out infinite}
+ .world-drift{animation:world-drift 76s ease-in-out infinite;transform-box:fill-box;transform-origin:center}
+@media(prefers-reduced-motion:reduce){.flow,.current,.spark,.cloud-flow,.pulse,.world-drift{animation:none!important}}
+</style>` : '';
+  return `<svg xmlns="http://www.w3.org/2000/svg" width="${width}" height="${height}" viewBox="0 0 ${width} ${height}" role="img" aria-labelledby="profile-title profile-desc">
+<title id="profile-title">${esc(config.name)} — multimodal learning and reproducible systems</title>
+<desc id="profile-desc">${esc(config.bio)} ${activity.counts.merged} merged upstream pull requests and ${activity.counts.open} open. Research studies multimodal fusion on CH-SIMS v2.0. The full text version below includes live links and experiment limits.</desc>
+<defs><linearGradient id="paper" x1="0" y1="0" x2=".92" y2="1"><stop stop-color="#f9fbfe"/><stop offset=".45" stop-color="#fff"/><stop offset="1" stop-color="#fbfdff"/></linearGradient><radialGradient id="nebula"><stop stop-color="#dceaf7" stop-opacity=".53"/><stop offset="1" stop-color="#fff" stop-opacity="0"/></radialGradient></defs>
+${motion}<rect width="${width}" height="${height}" fill="url(#paper)"/><ellipse cx="${width * .66}" cy="${mobile ? 1170 : 1110}" rx="${width * .54}" ry="270" fill="url(#nebula)" opacity=".2"/>
+${art}<g>${research.svg}</g>${projects.svg}<g>${open.svg}</g><g>${foot}</g></svg>\n`;
 }

@@ -30,7 +30,7 @@ export function renderTextVersion(config, activity) {
   if (!config || typeof config !== 'object') throw new Error('Invalid profile');
   const name = text(config.name, 'name');
   const lines = [`# ${name}`];
-  if (!Array.isArray(config.projects) || !config.projects.length) throw new Error('Invalid projects');
+  if (!Array.isArray(config.projects) || !config.projects.length || !Array.isArray(activity.projects)) throw new Error('Invalid projects');
   if (!config.links || typeof config.links !== 'object' || Array.isArray(config.links) || !Object.keys(config.links).length) throw new Error('Invalid contact links');
   if (!activity || activity.username !== config.username) throw new Error('Activity snapshot does not match profile');
   const {counts} = activity;
@@ -43,8 +43,13 @@ export function renderTextVersion(config, activity) {
   lines.push('', '## Public activity', '',
     `${link(`${counts.merged} merged upstream PRs`, queryLink(activity.queries.merged), 'merged query')} · ${counts.open} open PRs · ${counts.closed} closed without merge · ${counts.mergedRepositories} upstream repositories with merges · ${counts.publicProjects} public projects.`);
   lines.push('', '## Research & engineering');
-  for (const project of config.projects) {
-    lines.push('', `### ${link(project.name, project.url, 'project')}`, '', text(project.description, 'description'), '', links(project.links, 'project links'));
+  for (const project of activity.projects) {
+    lines.push('', `### ${link(project.name || project.repo, project.url, 'project')}`, '', text(project.description || 'Public repository.', 'description'));
+    const meta = [project.language, project.defaultBranch && `default branch: ${project.defaultBranch}`, project.pushedAt && `updated: ${date(project.pushedAt)}`].filter(Boolean);
+    if (meta.length) lines.push('', `*${text(meta.join(' · '), 'project details')}*`);
+    const featured = config.projects.find(item => item.url.toLowerCase() === project.url.toLowerCase());
+    if (featured) lines.push('', links(featured.links, 'project links'));
+    if (project.coverPath) lines.push('', link(`Project artwork (${project.coverPath})`, `${project.url}/blob/${encodeURIComponent(project.defaultBranch)}/${project.coverPath.split('/').map(encodeURIComponent).join('/')}`, 'project artwork'));
   }
   const research = config.research;
   if (!Array.isArray(research?.directions) || !research.directions.length) throw new Error('Invalid research directions');

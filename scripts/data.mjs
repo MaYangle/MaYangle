@@ -20,7 +20,9 @@ export function createApi({ token = process.env.GITHUB_TOKEN } = {}) {
       }
       if (response.ok) return response.json();
       if (response.status >= 500 && attempt < 2) continue;
-      throw new Error(`GitHub API returned ${response.status} for ${endpoint.split('?')[0]}`);
+      const error = new Error(`GitHub API returned ${response.status} for ${endpoint.split('?')[0]}`);
+      error.status = response.status;
+      throw error;
     }
     throw new Error(`GitHub API request failed for ${endpoint.split('?')[0]}`);
   };
@@ -83,8 +85,10 @@ function validatePrItem(item, username) {
   return { repo, number: item.number, title: item.title, url: item.html_url, updatedAt: item.updated_at };
 }
 
-async function listPublicProjects(api, username) {
+async function listPublicProjects(api, username, discovery = {}) {
   const repos = [];
+  if (discovery.exclude !== undefined && (!Array.isArray(discovery.exclude) || discovery.exclude.some(item => typeof item !== 'string'))) throw new Error('Project discovery exclude must be an array of repository names');
+  const excluded = new Set((discovery.exclude ?? []).map(value => String(value).toLowerCase()));
   for (let page = 1; page <= 20; page++) {
     const batch = await api(`users/${encodeURIComponent(username)}/repos?type=owner&sort=pushed&per_page=100&page=${page}`);
     if (!Array.isArray(batch)) throw new Error('Invalid GitHub repository list');
@@ -94,11 +98,70 @@ async function listPublicProjects(api, username) {
       requireInteger(repo.size, 'repository size');
       if (repo.full_name.toLowerCase() === `${username}/${username}`.toLowerCase()) continue;
       if (repo.full_name.split('/')[0].toLowerCase() !== username.toLowerCase()) throw new Error('GitHub repository list included a non-owner repository');
-      if (!repo.private && !repo.fork && !repo.archived && !repo.disabled && repo.size > 0) repos.push(repo);
+      const shortName = repo.full_name.split('/')[1].toLowerCase();
+      if (!repo.private && !repo.fork && !repo.archived && !repo.disabled && repo.size > 0 && !excluded.has(shortName) && !excluded.has(repo.full_name.toLowerCase())) {
+        requireString(repo.pushed_at, 'repository update time');
+        repos.push(repo);
+      }
     }
     if (batch.length < 100) return repos;
   }
   throw new Error('GitHub repository pagination exceeded the supported limit');
+}
+
+const COVER_PATHS = ['.github/profile-cover.png', '.github/profile-cover.jpg', 'assets/profile-cover.png', 'assets/profile-cover.jpg'];
+
+function isImageBase64(content, extension) {
+  if (typeof content !== 'string' || !content.trim()) return false;
+  const normalized = content.replace(/\s/g, '');
+  if (!/^(?:[A-Za-z0-9+/]{4})*(?:[A-Za-z0-9+/]{2}==|[A-Za-z0-9+/]{3}=)?$/.test(normalized)) return false;
+  const bytes = Buffer.from(normalized, 'base64');
+  if (bytes.toString('base64').replace(/=+$/, '') !== normalized.replace(/=+$/, '')) return false;
+  if (extension === 'png') return bytes.length >= 8 && bytes.subarray(0, 8).equals(Buffer.from([137, 80, 78, 71, 13, 10, 26, 10]));
+  return extension === 'jpg' && bytes.length >= 3 && bytes[0] === 0xff && bytes[1] === 0xd8 && bytes[2] === 0xff;
+}
+
+async function findCoverPath(api, repo) {
+  for (const path of COVER_PATHS) {
+    let item;
+    try {
+      item = await api(`repos/${repo}/contents/${path.split('/').map(encodeURIComponent).join('/')}`);
+    } catch (error) {
+      if (error?.status === 404) continue;
+      throw error;
+    }
+    if (item?.type === 'file' && item.encoding === 'base64' && isImageBase64(item.content, path.endsWith('.png') ? 'png' : 'jpg')) return path;
+  }
+  return null;
+}
+
+function selectProjectRepos(config, ownedRepos) {
+  const selected = new Map();
+  for (const project of config.projects ?? []) {
+    const repo = parseRepoUrl(project.url);
+    const match = ownedRepos.find(item => item.full_name.toLowerCase() === repo.toLowerCase());
+    selected.set(repo.toLowerCase(), match ?? { full_name: repo, pushed_at: null, curated: true });
+  }
+  if (config.discovery?.enabled === true) {
+    const discovered = ownedRepos.filter(item => !selected.has(item.full_name.toLowerCase()))
+      .sort((a, b) => b.pushed_at.localeCompare(a.pushed_at) || a.full_name.localeCompare(b.full_name));
+    for (const repo of discovered) selected.set(repo.full_name.toLowerCase(), repo);
+  }
+  return [...selected.values()];
+}
+
+async function mapLimit(items, limit, mapper) {
+  const result = new Array(items.length);
+  let next = 0;
+  async function worker() {
+    while (true) {
+      const index = next++;
+      if (index >= items.length) return;
+      result[index] = await mapper(items[index], index);
+    }
+  }
+  await Promise.all(Array.from({ length: Math.min(limit, items.length) }, worker));
+  return result;
 }
 
 export async function collectActivity(config, api) {
@@ -113,7 +176,7 @@ export async function collectActivity(config, api) {
   };
   const [buckets, ownedRepos] = await Promise.all([
     Promise.all(Object.entries(queries).map(async ([status, query]) => [status, await searchAll(api, query)])),
-    listPublicProjects(api, username)
+    listPublicProjects(api, username, config.discovery)
   ]);
   const results = Object.fromEntries(buckets);
   const records = new Map();
@@ -147,8 +210,9 @@ export async function collectActivity(config, api) {
     if (!byRepo.has(pr.repo)) byRepo.set(pr.repo, { repo: pr.repo, url: `https://github.com/${pr.repo}`, merged: 0, open: 0, closed: 0 });
     byRepo.get(pr.repo)[pr.status]++;
   }
-  const projects = await Promise.all((config.projects ?? []).map(async project => {
-    const repo = parseRepoUrl(project.url);
+  const projectRepos = selectProjectRepos(config, ownedRepos);
+  const projects = await mapLimit(projectRepos, 4, async listed => {
+    const repo = listed.full_name;
     const [meta, commits] = await Promise.all([
       api(`repos/${repo}`),
       api(`repos/${repo}/commits?per_page=1`)
@@ -157,6 +221,13 @@ export async function collectActivity(config, api) {
     requireString(meta.pushed_at, 'project update time');
     requireInteger(meta.stargazers_count, 'project stars');
     requireInteger(meta.forks_count, 'project forks');
+    const name = requireString(meta.name, 'project name');
+    const description = typeof meta.description === 'string' && meta.description.trim() ? meta.description : 'Public repository.';
+    const topics = meta.topics === undefined ? [] : meta.topics;
+    if (!Array.isArray(topics) || topics.some(topic => typeof topic !== 'string')) throw new Error(`Invalid GitHub topics for ${repo}`);
+    const defaultBranch = requireString(meta.default_branch, 'default branch');
+    const pushedAt = meta.pushed_at || listed.pushed_at;
+    requireString(pushedAt, 'project update time');
     if (!Array.isArray(commits)) throw new Error(`Invalid latest commit response for ${repo}`);
     let latestCommit = null;
     if (commits.length) {
@@ -167,8 +238,9 @@ export async function collectActivity(config, api) {
       requireString(date, 'commit date');
       latestCommit = { sha, url: `https://github.com/${repo}/commit/${sha}`, message, date };
     }
-    return { repo, url: `https://github.com/${repo}`, pushedAt: meta.pushed_at, stars: meta.stargazers_count, forks: meta.forks_count, language: meta.language ?? null, latestCommit };
-  }));
+    const coverPath = await findCoverPath(api, repo);
+    return { repo, name, description, url: `https://github.com/${repo}`, pushedAt, stars: meta.stargazers_count, forks: meta.forks_count, language: meta.language ?? null, topics, defaultBranch, coverPath, latestCommit };
+  });
 
   return {
     username,

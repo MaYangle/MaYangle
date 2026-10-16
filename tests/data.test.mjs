@@ -13,7 +13,7 @@ const pr = (number, repo = '19376357/model', status = 'merged') => ({
   state: status === 'open' ? 'open' : 'closed'
 });
 const response = items => ({ total_count: items.length, incomplete_results: false, items });
-const repo = full_name => ({ full_name, private: false, fork: false, archived: false, disabled: false, size: 10 });
+const repo = (full_name, more = {}) => ({ full_name, private: false, fork: false, archived: false, disabled: false, size: 10, pushed_at: '2026-10-14T10:00:00Z', ...more });
 const commit = { sha: 'a'.repeat(40), commit: { message: 'Add reproducible evaluation\n\nDetails', committer: { date: '2026-10-14T10:00:00Z' } } };
 
 function fixture({ merged = [], open = [], closed = [], projectRepos = [repo('MaYangle/Multimodal-Sentiment-Fusion')], details = {} } = {}) {
@@ -29,8 +29,16 @@ function fixture({ merged = [], open = [], closed = [], projectRepos = [repo('Ma
     if (endpoint.startsWith('users/')) return projectRepos;
     const detail = endpoint.match(/^repos\/(.+)\/pulls\/(\d+)$/);
     if (detail) return details[`${detail[1]}#${detail[2]}`] ?? { state: 'closed', merged: true, merged_at: '2026-10-14T12:00:00Z', closed_at: '2026-10-14T12:00:00Z', updated_at: '2026-10-14T12:00:00Z' };
-    if (endpoint === 'repos/MaYangle/Multimodal-Sentiment-Fusion') return { private: false, fork: false, pushed_at: '2026-10-14T10:00:00Z', stargazers_count: 2, forks_count: 1, language: 'Python' };
-    if (endpoint === 'repos/MaYangle/Multimodal-Sentiment-Fusion/commits?per_page=1') return [commit];
+    if (/^repos\/.+\/commits\?per_page=1$/.test(endpoint)) return [commit];
+    if (/^repos\/[^/]+\/[^/]+$/.test(endpoint)) {
+      const [, owner, name] = endpoint.match(/^repos\/([^/]+)\/([^/]+)$/);
+      return { name, description: null, private: false, fork: false, pushed_at: '2026-10-14T10:00:00Z', stargazers_count: 2, forks_count: 1, language: 'Python', topics: ['multimodal'], default_branch: 'main' };
+    }
+    if (endpoint.includes('/contents/')) {
+      const error = new Error('GitHub API returned 404');
+      error.status = 404;
+      throw error;
+    }
     throw new Error(`Unexpected API endpoint: ${endpoint}`);
   };
   return { api, calls };
@@ -52,6 +60,8 @@ test('collects public pull request states and recent project metadata', async ()
   assert.deepEqual(data.repositories.map(item => [item.merged, item.open, item.closed]), [[1, 0, 0], [0, 1, 0], [0, 0, 1]]);
   assert.equal(data.projects[0].latestCommit.message, 'Add reproducible evaluation');
   assert.equal(data.projects[0].latestCommit.url, `https://github.com/MaYangle/Multimodal-Sentiment-Fusion/commit/${commit.sha}`);
+  assert.deepEqual(data.projects[0].topics, ['multimodal']);
+  assert.equal(data.projects[0].coverPath, null);
 });
 
 test('search queries exclude own repositories and request public PRs only', async () => {
@@ -128,4 +138,70 @@ test('rejects excess search items and result counts beyond the complete paginati
   for (const result of [{total_count: 0, incomplete_results: false, items: [pr(7)]}, {total_count: 1001, incomplete_results: false, items: []}]) {
     await assert.rejects(collectActivity(config, endpoint => endpoint.startsWith('search/issues?') ? Promise.resolve(result) : api(endpoint)), /more records|1000-result/);
   }
+});
+
+test('auto-discovers eligible original repositories after curated projects, newest first, with direct metadata', async () => {
+  const discoveryConfig = { ...config, discovery: { enabled: true, exclude: [] } };
+  const repositories = [
+    repo('MaYangle/Multimodal-Sentiment-Fusion', { pushed_at: '2026-10-11T00:00:00Z' }),
+    repo('MaYangle/newer', { pushed_at: '2026-10-14T00:00:00Z' }),
+    repo('MaYangle/older', { pushed_at: '2026-10-12T00:00:00Z' }),
+    { ...repo('MaYangle/fork'), fork: true },
+    { ...repo('MaYangle/private'), private: true },
+    { ...repo('MaYangle/empty'), size: 0 },
+    repo('MaYangle/MaYangle')
+  ];
+  const { api } = fixture({ projectRepos: repositories });
+  const data = await collectActivity(discoveryConfig, api);
+  assert.deepEqual(data.projects.map(item => item.repo), [
+    'MaYangle/Multimodal-Sentiment-Fusion', 'MaYangle/newer', 'MaYangle/older'
+  ]);
+  assert.equal(data.counts.publicProjects, 3);
+  assert.equal(data.projects[1].name, 'newer');
+  assert.equal(data.projects[1].description, 'Public repository.');
+  assert.equal(data.projects[1].defaultBranch, 'main');
+});
+
+test('discovery exclusions remove automatic projects but curated projects remain first and deduplicated', async () => {
+  const discoveryConfig = {
+    ...config,
+    projects: [
+      { url: 'https://github.com/MaYangle/older' },
+      { url: 'https://github.com/MaYangle/newer' }
+    ],
+    discovery: { enabled: true, exclude: ['hidden'] }
+  };
+  const { api } = fixture({ projectRepos: [
+    repo('MaYangle/newer', { pushed_at: '2026-10-14T00:00:00Z' }),
+    repo('MaYangle/older', { pushed_at: '2026-10-12T00:00:00Z' }),
+    repo('MaYangle/hidden', { pushed_at: '2026-10-15T00:00:00Z' }),
+    repo('MaYangle/automatic', { pushed_at: '2026-10-13T00:00:00Z' })
+  ] });
+  const data = await collectActivity(discoveryConfig, api);
+  assert.deepEqual(data.projects.map(item => item.repo), ['MaYangle/older', 'MaYangle/newer', 'MaYangle/automatic']);
+});
+
+test('cover lookup treats only 404 as missing and returns path without storing image content', async () => {
+  const { api } = fixture();
+  const calls = [];
+  const result = await collectActivity(config, async endpoint => {
+    calls.push(endpoint);
+    if (endpoint.endsWith('/contents/.github/profile-cover.png')) {
+      const error = new Error('Not found'); error.status = 404; throw error;
+    }
+    if (endpoint.endsWith('/contents/.github/profile-cover.jpg')) return { type: 'file', encoding: 'base64', content: Buffer.from([0xff, 0xd8, 0xff, 0xd9]).toString('base64') };
+    return api(endpoint);
+  });
+  assert.equal(result.projects[0].coverPath, '.github/profile-cover.jpg');
+  assert.equal(JSON.stringify(result).includes(Buffer.from([0xff, 0xd8, 0xff, 0xd9]).toString('base64')), false);
+  assert.ok(calls.some(endpoint => endpoint.endsWith('/contents/.github/profile-cover.png')));
+  assert.ok(calls.some(endpoint => endpoint.endsWith('/contents/.github/profile-cover.jpg')));
+});
+
+test('cover lookup fails closed for non-404 API errors', async () => {
+  const { api } = fixture();
+  await assert.rejects(collectActivity(config, async endpoint => {
+    if (endpoint.includes('/contents/')) { const error = new Error('Rate limited'); error.status = 403; throw error; }
+    return api(endpoint);
+  }), /Rate limited/);
 });
