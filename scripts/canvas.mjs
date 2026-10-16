@@ -1,9 +1,7 @@
 const esc = value => String(value ?? '').replaceAll('&', '&amp;').replaceAll('<', '&lt;').replaceAll('>', '&gt;').replaceAll('"', '&quot;').replaceAll("'", '&apos;');
 const ink = '#172c40';
 const mid = '#637d95';
-const mist = '#cfdfed';
-const ice = '#93bbde';
-const gold = '#fff3de';
+const random01 = seed => {const value = Math.sin(seed * 127.1 + 311.7) * 43758.5453123; return value - Math.floor(value);};
 
 function wrap(value, width, size, limit = 4) {
   const words = String(value ?? '').trim().split(/\s+/).filter(Boolean);
@@ -61,13 +59,47 @@ function stars(width, height, count = 118) {
   return out;
 }
 function planet(x, y, radius) {
+  let surface = '<g clip-path="url(#planet-clip)">';
+  for (let row = -2; row <= 2; row++) {
+    const base = y + row * radius * .29;
+    const a = Math.sin(row * 1.47 + .4) * radius * .13;
+    const b = Math.cos(row * 1.12 + .8) * radius * .13;
+    surface += `<path d="M${x - radius * 1.1} ${(base - radius * .12).toFixed(2)} C${x - radius * .57} ${(base + a).toFixed(2)} ${x + radius * .32} ${(base - b).toFixed(2)} ${x + radius * 1.1} ${(base + radius * .08).toFixed(2)}" fill="none" stroke="${row % 2 ? '#f2f7fc' : '#344c64'}" stroke-opacity="${row % 2 ? '.085' : '.09'}" stroke-width="${(radius * (row === 0 ? .075 : .045)).toFixed(2)}" class="world-cloudline"/>`;
+  }
+  for (let i = 0; i < 288; i++) {
+    const angle = random01(i + 9) * Math.PI * 2;
+    const distance = radius * .89 * Math.sqrt(random01(i + 71));
+    const px = x + Math.cos(angle) * distance;
+    const py = y + Math.sin(angle) * distance;
+    const seed = random01(i + 193);
+    const r = .52 + seed * 1.35;
+    const color = i % 7 === 0 ? '#f5f8fb' : i % 4 === 0 ? '#526d88' : '#dce8f3';
+    const opacity = (.08 + seed * .24).toFixed(2);
+    const delay = (-seed * 14).toFixed(2);
+    surface += `<circle cx="${px.toFixed(2)}" cy="${py.toFixed(2)}" r="${r.toFixed(2)}" fill="${color}" opacity="${opacity}" class="world-dust spark" style="animation-delay:${delay}s"/>`;
+  }
+  surface += '</g>';
+  let ringDust = '';
+  const tilt = -.315, outerX = radius * 1.11, outerY = radius * .26;
+  for (let i = 0; i < 420; i++) {
+    const angle = (i / 420) * Math.PI * 2 + random01(i + 997) * .018;
+    const distance = .87 + random01(i * 5 + 211) * .29;
+    const px = x + Math.cos(angle) * outerX * distance * Math.cos(tilt) - Math.sin(angle) * outerY * distance * Math.sin(tilt);
+    const py = y + Math.cos(angle) * outerX * distance * Math.sin(tilt) + Math.sin(angle) * outerY * distance * Math.cos(tilt);
+    const seed = random01(i * 7 + 79);
+    const size = .34 + seed * 1.1;
+    const delay = (-seed * 16).toFixed(2);
+    const tint = i % 23 === 0 ? '#fff1d9' : i % 3 === 0 ? '#91adc9' : '#eef6ff';
+    ringDust += `<circle cx="${px.toFixed(2)}" cy="${py.toFixed(2)}" r="${size.toFixed(2)}" fill="${tint}" opacity="${(.16 + seed * .54).toFixed(2)}" class="ring-dust spark" style="animation-delay:${delay}s"/>`;
+  }
   return `<defs><clipPath id="planet-clip"><circle cx="${x}" cy="${y}" r="${radius}"/></clipPath></defs><g class="world-drift">
 <ellipse cx="${x}" cy="${y}" rx="${radius * 1.1}" ry="${radius * .26}" transform="rotate(-18 ${x} ${y})" fill="none" stroke="#b9cce0" stroke-opacity=".21" stroke-width=".8"/>
 <ellipse cx="${x}" cy="${y}" rx="${radius * 1.02}" ry="${radius * .23}" transform="rotate(-18 ${x} ${y})" fill="none" stroke="#a7c2dc" stroke-opacity=".48" stroke-width="1.1" stroke-dasharray="1 9" class="flow"/>
 <circle cx="${x}" cy="${y}" r="${radius}" fill="url(#world)"/>
-<g clip-path="url(#planet-clip)"><path d="M${x - radius} ${y - 28}Q${x - radius * .31} ${y - radius * .68} ${x + radius} ${y - radius * .56}M${x - radius} ${y + radius * .25}Q${x - 20} ${y - 9} ${x + radius} ${y + radius * .19}M${x - radius * .88} ${y + radius * .62}Q${x + 12} ${y + radius * .28} ${x + radius} ${y + radius * .59}" fill="none" stroke="#eff7fd" stroke-opacity=".15" stroke-width="${Math.max(9, radius * .065)}" class="cloud-flow"/><path d="M${x - radius * .9} ${y - radius * .41}Q${x} ${y - radius * .73} ${x + radius * .91} ${y - radius * .35}M${x - radius * .92} ${y + radius * .53}Q${x - 25} ${y + radius * .24} ${x + radius * .9} ${y + radius * .48}" fill="none" stroke="#314c64" stroke-opacity=".14" stroke-width="${Math.max(6, radius * .04)}"/></g>
+${surface}
 <path d="M${x - radius * .87} ${y - radius * .52} A${radius} ${radius} 0 0 1 ${x + radius * .65} ${y - radius * .76}" fill="none" stroke="url(#rim)" stroke-width="4" opacity=".82"/>
 <path d="M${x - radius * .94} ${y + radius * .14} A${radius} ${radius} 0 0 0 ${x + radius * .6} ${y + radius * .79}" fill="none" stroke="#e7f3ff" stroke-width="1.1" stroke-opacity=".42"/>
+${ringDust}
 <ellipse cx="${x}" cy="${y}" rx="${radius * 1.1}" ry="${radius * .26}" transform="rotate(-18 ${x} ${y})" fill="none" stroke="#f2dfc4" stroke-opacity=".7" stroke-width="2.2"/>
 <ellipse cx="${x}" cy="${y}" rx="${radius * 1.1}" ry="${radius * .26}" transform="rotate(-18 ${x} ${y})" fill="none" stroke="#fff8ea" stroke-opacity=".55" stroke-width=".8" stroke-dasharray="2 22" class="flow"/>
 </g>`;
@@ -79,14 +111,32 @@ function heroClouds(width, endY) {
 <path d="M0 ${endY - 150}Q${width * .1} ${endY - 198} ${width * .23} ${endY - 151}T${width * .51} ${endY - 148}T${width * .79} ${endY - 157}T${width} ${endY - 151}V${endY}H0Z" fill="#fff" fill-opacity=".65"/>
 <path d="M0 ${endY - 117}Q${width * .13} ${endY - 173} ${width * .25} ${endY - 113}T${width * .5} ${endY - 129}T${width * .75} ${endY - 107}T${width} ${endY - 140}V${endY}H0Z" fill="#fff" fill-opacity=".74"/>
 <path d="M0 ${endY - 230}Q${width * .12} ${endY - 282} ${width * .24} ${endY - 230}T${width * .47} ${endY - 236}T${width * .71} ${endY - 221}T${width} ${endY - 246}" fill="none" stroke="#f2f7fc" stroke-width="13" stroke-opacity=".35" class="cloud-flow"/>`;
-  for (let i = 0; i < 39; i++) {
-    const x = ((i * 117.23 + 20) % width).toFixed(1);
-    const y = (endY - 253 + (i % 8) * 13 + (i % 3) * 2).toFixed(1);
-    const rx = (11 + (i % 5) * 4).toFixed(1);
-    const ry = (2.4 + (i % 3) * .8).toFixed(1);
-    out += `<ellipse cx="${x}" cy="${y}" rx="${rx}" ry="${ry}" fill="#fff" opacity="${i % 4 === 0 ? '.35' : '.18'}" class="cloud-flow" style="animation-delay:-${(i * .84 % 18).toFixed(2)}s"/>`;
+  for (let i = 0; i < 510; i++) {
+    const t = random01(i * 3 + 37);
+    const layer = Math.floor(random01(i * 9 + 71) * 3);
+    const x = 16 + t * (width - 32);
+    const centerline = endY - 233 + layer * 44 + Math.sin(t * 6.283 + layer * 1.9) * 25;
+    const noise = (random01(i * 17 + 3) - random01(i * 19 + 5)) * 58;
+    const py = centerline + noise;
+    const glow = random01(i * 29 + 7);
+    const rx = .56 + glow * (i % 17 === 0 ? 3.2 : 1.75);
+    const ry = .7 + glow * (i % 17 === 0 ? 1.65 : .95);
+    const delay = (-(random01(i * 43 + 13) * 26)).toFixed(2);
+    out += `<ellipse cx="${x.toFixed(2)}" cy="${py.toFixed(2)}" rx="${rx.toFixed(2)}" ry="${ry.toFixed(2)}" fill="${i % 11 === 0 ? '#fff' : i % 5 === 0 ? '#bad0e3' : '#e5eff8'}" opacity="${(.11 + glow * .38).toFixed(2)}" class="cloud-flow spark" style="animation-delay:${delay}s"/>`;
   }
   return out + '</g>';
+}
+function mountainSea(width, endY) {
+  const base = endY - 186;
+  return `<g transform="scale(${width / 1200} 1)"><g class="mountain-haze">
+<path d="M0 ${base + 28}L38 ${base + 6}L58 ${base + 2}L79 ${base + 15}L107 ${base - 88}L121 ${base - 38}L143 ${base - 62}L163 ${base - 22}L184 ${base - 44}L207 ${base + 6}L243 ${base - 111}L259 ${base - 82}L278 ${base - 30}L299 ${base - 91}L321 ${base - 19}L349 ${base - 73}L382 ${base - 42}L406 ${base - 53}L435 ${base + 4}L472 ${base - 56}L498 ${base - 22}L524 ${base - 31}L553 ${base + 9}L573 ${base + 10}V${endY}H0Z" fill="#d8e3ed" fill-opacity=".24"/>
+<path d="M91 ${base - 68}L107 ${base - 88}L121 ${base - 38}L134 ${base - 57}L124 ${base - 46}L116 ${base - 58}L109 ${base - 49}Z M226 ${base - 82}L243 ${base - 111}L259 ${base - 82}L272 ${base - 53}L254 ${base - 79}L245 ${base - 89}L237 ${base - 75}Z M286 ${base - 68}L299 ${base - 91}L321 ${base - 19}L305 ${base - 56}L299 ${base - 70}L294 ${base - 53}Z M330 ${base - 54}L349 ${base - 73}L382 ${base - 42}L360 ${base - 58}L348 ${base - 50}Z" fill="#f8fbfe" fill-opacity=".36"/>
+<path d="M0 ${endY - 151}Q${width * .09} ${endY - 193} ${width * .2} ${endY - 150}T${width * .39} ${endY - 159}T${width * .58} ${endY - 146}T${width * .79} ${endY - 158}T${width} ${endY - 149}V${endY}H0Z" fill="#eef3f7" fill-opacity=".48"/>
+</g></g>`;
+}
+function explorer(x, y) {
+  return `<g transform="translate(${x} ${y})" fill="#384f64" stroke="#f4f8fc" stroke-width="1.15" stroke-linecap="round" stroke-linejoin="round" opacity=".8">
+<circle cx="0" cy="0" r="5.6" fill="#405870"/><path d="M-5 -1Q-4 -7 1 -6Q6 -4 5 1L2 3L-4 2Z" fill="#71889e"/><path d="M-7 8Q-5 5 0 5Q5 6 7 9L6 24L4 27L-4 26L-7 22Z" fill="#e7eff6"/><path d="M-6 11L-12 19L-9 22L-3 16M6 11L11 18L8 21L3 16" fill="none"/><path d="M-4 25L-5 38L-9 47L-5 49L0 39L2 26M3 26L4 38L9 47L6 49L0 40" fill="#d9e4ee"/><path d="M-7 10L-12 11L-15 17M7 10L12 11L15 17" fill="none"/><rect x="5" y="7" width="5" height="13" rx="2" fill="#8ca2b6" stroke="#e8eff6"/><path d="M-5 1H5" fill="none" stroke="#fff" stroke-width="1.5"/></g>`;
 }
 function horizonParticles(x, y, width, mobile = false) {
   let out = '';
@@ -283,7 +333,9 @@ export function renderProfile(activity, config, {mobile = false, animated = true
   svg += stars(width, heroHeight - 88, mobile ? 76 : 118);
   const pX = mobile ? 452 : 930, pY = mobile ? 207 : 196, pR = mobile ? 143 : 203;
   svg += planet(pX, pY, pR);
+  svg += mountainSea(width, heroHeight - 5);
   svg += heroClouds(width, heroHeight - 5);
+  if (!mobile) svg += explorer(148, heroHeight - 288);
   svg += `<path d="M${margin} ${heroHeight - 57} Q${width * .5} ${heroHeight - 37} ${right} ${heroHeight - 58}" fill="none" stroke="#ccd9e6" stroke-width="1"/><path d="M${margin} ${heroHeight - 57} Q${width * .5} ${heroHeight - 37} ${right} ${heroHeight - 58}" fill="none" stroke="#a4bad0" stroke-width="1" stroke-dasharray="1 17" class="flow"/>`;
   const mast = label(margin, mobile ? 48 : 48, 'AI ENGINEERING / MULTIMODAL LEARNING', mobile);
   svg += mast + text(right, mobile ? 48 : 48, `@${activity.username}`, mobile ? 13 : 13, mid, {anchor: 'end'});
@@ -339,12 +391,15 @@ export function renderProfile(activity, config, {mobile = false, animated = true
 @keyframes cloud-drift{0%,100%{transform:translateX(0)}50%{transform:translateX(7px)}}
 @keyframes focal-breathe{0%,100%{opacity:.68}50%{opacity:1}}
 @keyframes world-drift{0%,100%{transform:translateY(0)}50%{transform:translateY(4px)}}
+@keyframes mountain-drift{0%,100%{transform:translateX(0)}50%{transform:translateX(3px)}}
 .flow,.current{animation:orbit-flow 32s linear infinite;stroke-linecap:round}
 .spark{animation:particle-shimmer 8s ease-in-out infinite}
 .cloud-flow{animation:cloud-drift 54s ease-in-out infinite;transform-box:fill-box;transform-origin:center}
+.cloud-bank{animation:cloud-drift 86s ease-in-out infinite}
+.mountain-haze{animation:mountain-drift 96s ease-in-out infinite}
 .pulse{animation:focal-breathe 8s ease-in-out infinite}
  .world-drift{animation:world-drift 76s ease-in-out infinite;transform-box:fill-box;transform-origin:center}
-@media(prefers-reduced-motion:reduce){.flow,.current,.spark,.cloud-flow,.pulse,.world-drift{animation:none!important}}
+@media(prefers-reduced-motion:reduce){.flow,.current,.spark,.cloud-flow,.cloud-bank,.mountain-haze,.pulse,.world-drift{animation:none!important}}
 </style>` : '';
   return `<svg xmlns="http://www.w3.org/2000/svg" width="${width}" height="${height}" viewBox="0 0 ${width} ${height}" role="img" aria-labelledby="profile-title profile-desc">
 <title id="profile-title">${esc(config.name)} — multimodal learning and reproducible systems</title>
