@@ -29,7 +29,7 @@ const withDate = () => ({...fixture(), updatedAt: '2026-10-15T00:00:00.000Z'});
 test('profile exposes research evidence, PR states, dates and accessible image alternatives', () => {
   const output = renderReadme(config, withDate(), assets);
   assert.equal((output.match(/<picture>/g) ?? []).length, 1);
-  assert.equal((output.match(/<img /g) ?? []).length, 2);
+  assert.equal((output.match(/<img /g) ?? []).length, 5);
   assert.ok(output.indexOf('## Featured research') < output.indexOf('## Open-source contributions'));
   assert.match(output, /Featured research/);
   assert.match(output, /Latest project activity/);
