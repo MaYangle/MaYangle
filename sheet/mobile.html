@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+<meta charset="utf-8">
+<title>Yangle Ma — profile sheet (mobile)</title>
+<style>
+  :root{
+    --paper:#f5f3ec; --grid:#e2ded1; --grid-strong:#cbc5b3;
+    --ink:#15171c; --muted:#6e7280; --rule:#c9c4b4;
+    --blue:#2440c4; --accent:#b8321f;
+  }
+  html[data-theme="dark"]{
+    --paper:#0e1116; --grid:#181d24; --grid-strong:#2a323c;
+    --ink:#e9ebef; --muted:#828a96; --rule:#2b333d;
+    --blue:#7d95ff; --accent:#ff6f57;
+  }
+  *{box-sizing:border-box;margin:0;padding:0;}
+  html,body{background:var(--paper);}
+  body{
+    width:380px;height:1150px;
+    font-family:Consolas,"Cascadia Mono",Menlo,monospace;
+    color:var(--ink);position:relative;overflow:hidden;
+    -webkit-font-smoothing:antialiased;
+  }
+  body::before{
+    content:"";position:absolute;inset:0;
+    background-image:
+      linear-gradient(var(--grid) 1px, transparent 1px),
+      linear-gradient(90deg, var(--grid) 1px, transparent 1px);
+    background-size:18px 18px;
+  }
+  .sheet{position:relative;height:100%;padding:22px 22px 18px;display:flex;flex-direction:column;}
+
+  .fig-no{font-size:9px;letter-spacing:.14em;color:var(--blue);font-weight:bold;}
+  .fig-t{font-size:10px;font-weight:bold;letter-spacing:.05em;margin-top:5px;}
+  .sec{padding-top:20px;}
+
+  header .name{font-size:30px;font-weight:bold;letter-spacing:.02em;line-height:1;}
+  header .role{margin-top:9px;font-size:11px;line-height:1.5;}
+  header .role span{color:var(--muted);}
+  header .meta{margin-top:10px;font-size:8.5px;letter-spacing:.12em;color:var(--muted);text-transform:uppercase;}
+  .rule{height:1px;background:var(--rule);margin-top:16px;}
+
+  /* forest rows */
+  .arm{padding:8px 0 0;}
+  .arm .top{display:flex;justify-content:space-between;align-items:baseline;gap:10px;}
+  .arm .nm{display:flex;align-items:center;gap:8px;font-size:10.5px;line-height:1.3;}
+  .arm .nm i{flex:0 0 11px;height:2px;}
+  .arm .val{font-size:9.5px;color:var(--muted);white-space:nowrap;}
+  .arm.cand .nm{font-weight:bold;}
+  .arm.cand .val{color:var(--accent);font-weight:bold;}
+  .track{position:relative;height:18px;margin-top:1px;}
+  .whisk{position:absolute;top:50%;height:1px;transform:translateY(-50%);}
+  .cap{position:absolute;top:50%;width:1px;height:9px;transform:translateY(-50%);}
+  .dot{position:absolute;top:50%;width:7px;height:7px;border-radius:50%;transform:translate(-50%,-50%);}
+  .refline{position:absolute;top:0;bottom:0;border-left:1px dashed var(--muted);opacity:.4;}
+
+  .ticks{position:relative;height:26px;margin-top:6px;}
+  .axisbase{position:absolute;top:0;left:0;right:0;height:1px;background:var(--rule);}
+  .tick{position:absolute;top:0;width:1px;height:4px;background:var(--rule);}
+  .tick span{position:absolute;top:7px;left:50%;transform:translateX(-50%);font-size:8.5px;color:var(--muted);}
+
+  .caption{margin-top:10px;font-size:9px;color:var(--muted);line-height:1.7;}
+  .caption b{color:var(--accent);}
+  .caption em{font-style:normal;color:var(--ink);}
+
+  /* stacked pipeline */
+  .step{border:1px solid var(--rule);padding:8px 10px;display:flex;justify-content:space-between;align-items:center;gap:10px;}
+  .step .k{font-size:8px;letter-spacing:.13em;color:var(--muted);text-transform:uppercase;}
+  .step .v{font-size:10px;text-align:right;line-height:1.4;}
+  .step.hi{border-color:var(--blue);}
+  .step.hi .v{color:var(--blue);}
+  .join{height:14px;display:flex;align-items:center;justify-content:center;color:var(--muted);font-size:9px;}
+
+  /* contributions */
+  .contrib{padding-top:9px;}
+  .contrib .repo{font-size:10px;font-weight:bold;line-height:1.35;}
+  .contrib .det{margin-top:4px;font-size:9px;color:var(--muted);line-height:1.65;}
+  .contrib .num{margin-top:5px;font-size:8px;letter-spacing:.12em;color:var(--muted);text-transform:uppercase;}
+  .contrib .num b{color:var(--ink);font-size:9.5px;}
+
+  .tools{display:flex;flex-wrap:wrap;gap:5px;}
+  .tools span{border:1px solid var(--rule);padding:3px 7px;font-size:9px;letter-spacing:.04em;}
+
+  footer{margin-top:auto;padding-top:12px;border-top:1px solid var(--rule);font-size:8px;letter-spacing:.11em;color:var(--muted);text-transform:uppercase;line-height:1.9;}
+  footer b{color:var(--accent);}
+</style>
+</head>
+<body>
+<div class="sheet">
+
+  <header>
+    <div class="name">YANGLE MA</div>
+    <div class="role">Applied AI/ML <span>·</span> multimodal learning <span>·</span> industrial AI <span>·</span> Mettler Toledo</div>
+    <div class="meta">FIG 001–004 / PROFILE · JIANGSU, CN · 17 OCT 2026</div>
+    <div class="rule"></div>
+  </header>
+
+  <section class="sec">
+    <div class="fig-no">FIG 001</div><div class="fig-t">MATCHED-ARM COMPARISON</div>
+    <div id="plot"></div>
+    <div class="caption">
+      CH-SIMS v2.0 native VALID, 647 clips, MAE ↓, mean ± sample SD over seeds 13/42/2026.
+      <em>The candidate does not clear the best control; every interval overlaps.</em>
+      Preregistered all-seed gain requirement <b>not met</b>.
+    </div>
+  </section>
+
+  <section class="sec">
+    <div class="fig-no">FIG 002</div><div class="fig-t">FUSION PATHWAY</div>
+    <div class="step"><div class="k">Inputs (frozen)</div><div class="v">MacBERT · WavLM · DINOv2</div></div>
+    <div class="join">↓</div>
+    <div class="step"><div class="k">Branches</div><div class="v">Masked pretrained channel stacks</div></div>
+    <div class="join">↓</div>
+    <div class="step hi"><div class="k">Fusion</div><div class="v">8-query multi-key cross-attention ×3</div></div>
+    <div class="join">↓</div>
+    <div class="step"><div class="k">Output</div><div class="v">Post-norm routing → native scalar</div></div>
+    <div class="meta" style="margin-top:8px;font-size:8px;letter-spacing:.11em;color:var(--muted);text-transform:uppercase;">
+      2,084,871 trainable params · distillation ← TRAIN-only teacher
+    </div>
+  </section>
+
+  <section class="sec">
+    <div class="fig-no">FIG 003</div><div class="fig-t">UPSTREAM CONTRIBUTIONS</div>
+    <div class="contrib">
+      <div class="repo">19376357/Bilingual-Multimodal-Sentiment-Analysis</div>
+      <div class="det">Training and inference reliability: dtype and single-sample output shapes,
+      NaN/Inf handling, missing-face feature shapes, cross-platform result loading. Plus bilingual
+      documentation and a licensing pass.</div>
+      <div class="num"><b>6 MERGED</b></div>
+    </div>
+    <div class="contrib">
+      <div class="repo">rohitg00/ai-engineering-from-scratch</div>
+      <div class="det">150 lesson quizzes backfilled · README i18n audited across 12 translations ·
+      research links for 7 lessons.</div>
+      <div class="num"><b>3 PULL REQUESTS</b></div>
+    </div>
+  </section>
+
+  <section class="sec">
+    <div class="fig-no">FIG 004</div><div class="fig-t">TOOLING</div>
+    <div class="tools" style="margin-top:8px;">
+      <span>PYTHON</span><span>PYTORCH</span><span>HUGGING FACE</span><span>WavLM</span>
+      <span>MacBERT</span><span>DINOv2</span><span>WHISPER</span><span>pytest</span><span>GITHUB ACTIONS</span>
+    </div>
+  </section>
+
+  <footer>
+    SOURCE / github.com/MaYangle/Multimodal-Sentiment-Fusion<br>
+    GATE: PREREGISTERED PROMOTION — <b>NOT MET</b>
+  </footer>
+
+</div>
+
+<script>
+const ARMS = [
+  {name:"Teacher post-norm control",     m:0.378011, sd:0.008966, c:"muted"},
+  {name:"Distilled-static aux control",  m:0.378253, sd:0.008851, c:"muted"},
+  {name:"Distilled post-norm candidate", m:0.378497, sd:0.007455, c:"accent", cand:true},
+  {name:"Static sequence fusion",        m:0.378832, sd:0.007309, c:"muted"},
+  {name:"Learned post-norm, no KL",      m:0.379303, sd:0.007723, c:"muted"},
+];
+const LO = 0.3680, HI = 0.3900, REF = 0.378011;
+const pct = v => ((v - LO) / (HI - LO)) * 100;
+const plot = document.getElementById('plot');
+
+ARMS.forEach(a => {
+  const arm = document.createElement('div');
+  arm.className = 'arm' + (a.cand ? ' cand' : '');
+
+  const top = document.createElement('div');
+  top.className = 'top';
+  top.innerHTML = `<div class="nm"><i style="background:var(--${a.c})"></i><span>${a.name}</span></div>
+                   <div class="val">${a.m.toFixed(4)} ± ${a.sd.toFixed(4)}</div>`;
+
+  const track = document.createElement('div');
+  track.className = 'track';
+
+  const ref = document.createElement('div');
+  ref.className = 'refline';
+  ref.style.left = pct(REF) + '%';
+  track.appendChild(ref);
+
+  const l = pct(a.m - a.sd), r = pct(a.m + a.sd);
+  const w = document.createElement('div');
+  w.className = 'whisk';
+  w.style.left = l + '%'; w.style.width = (r - l) + '%';
+  w.style.backgroundColor = `var(--${a.c})`;
+  w.style.opacity = a.cand ? 1 : .5;
+
+  [l, r].forEach(x => {
+    const c = document.createElement('div');
+    c.className = 'cap';
+    c.style.left = x + '%';
+    c.style.backgroundColor = `var(--${a.c})`;
+    c.style.opacity = a.cand ? 1 : .5;
+    track.appendChild(c);
+  });
+
+  const dot = document.createElement('div');
+  dot.className = 'dot';
+  dot.style.left = pct(a.m) + '%';
+  dot.style.backgroundColor = `var(--${a.c})`;
+
+  track.appendChild(w); track.appendChild(dot);
+  arm.append(top, track);
+  plot.appendChild(arm);
+});
+
+const ticks = document.createElement('div');
+ticks.className = 'ticks';
+ticks.innerHTML = '<div class="axisbase"></div>';
+[0.370,0.375,0.380,0.385,0.390].forEach(t => {
+  const d = document.createElement('div');
+  d.className = 'tick';
+  d.style.left = pct(t) + '%';
+  d.innerHTML = `<span>${t.toFixed(3)}</span>`;
+  ticks.appendChild(d);
+});
+plot.appendChild(ticks);
+</script>
+</body>
+</html>
