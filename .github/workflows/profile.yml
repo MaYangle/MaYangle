@@ -11,9 +11,11 @@ on:
       - 'profile.config.json'
       - 'scripts/**'
       - 'assets/art/**'
+      - 'assets/profile-cosmos.*'
       - 'tests/**'
       - 'package.json'
       - '.github/workflows/profile.yml'
+      - '.github/workflows/contribution-graph.yml'
 
 permissions:
   contents: read

@@ -104,15 +104,84 @@ export function renderTextVersion(config, activity) {
 }
 
 export function renderReadme(config, activity, assets) {
-  const body = renderTextVersion(config, activity);
-  for (const key of ['desktop', 'mobile', 'still', 'mobileStill']) {
-    if (!/^assets\/generated\/profile(?:-mobile)?(?:-still)?\.[a-f0-9]{12}\.svg$/.test(assets?.[key] ?? '')) throw new Error('Invalid unified profile asset');
+  if (!activity || activity.username !== config.username) throw new Error('Activity snapshot does not match profile');
+  const username = config.username;
+  const badges = [
+    `<a href="${queryLink(`author:${username} is:pr is:public -user:${username} is:merged`)}"><img src="https://img.shields.io/badge/upstream%20merged-${activity.counts.merged}-2ea44f?style=flat-square&logo=github" alt="${activity.counts.merged} merged upstream pull requests"/></a>`,
+    `<a href="${queryLink(`author:${username} is:pr is:public -user:${username} is:open`)}"><img src="https://img.shields.io/badge/open%20PRs-${activity.counts.open}-5479bd?style=flat-square&logo=github" alt="${activity.counts.open} open pull requests"/></a>`,
+    `<a href="${activity.projects[0]?.url ?? `https://github.com/${username}?tab=repositories`}"><img src="https://img.shields.io/badge/public%20projects-${activity.counts.publicProjects}-8997a5?style=flat-square&logo=github" alt="${activity.counts.publicProjects} public projects"/></a>`
+  ].join('&nbsp; ');
+  const nav = Object.entries(config.links).map(([label,target])=>`<a href="${url(target,'contact',true)}">${text(label,'contact label')}</a>`).join(' · ');
+  const out = [
+    '<p align="center"><img src="assets/profile-particles.svg" width="100%" alt="Animated interstellar particle banner"/></p>',
+    `<h1 align="center">${text(config.name,'name')}</h1>`,
+    '<p align="center"><b>Multimodal AI · Open Source · Reproducible Research</b></p>',
+    `<p align="center">${badges}</p>`,
+    `<p align="center">${nav}</p>`,
+    '',
+    'I build multimodal learning systems and study how text, audio, and vision combine under careful, reproducible evaluation. I value controlled comparisons, honest results, and practical reliability fixes in the open-source projects I use.',
+    '',
+    '---',
+    '',
+    '## Featured research',
+    ''
+  ];
+  const featuredUrl=config.projects[0].url;
+  const featuredActivity=activity.projects.find(project=>project.url.toLowerCase()===featuredUrl.toLowerCase());
+  out.push(`### ${link(config.projects[0].name,featuredUrl,'featured project')}`,'',
+    text(featuredActivity?.description ?? config.projects[0].description,'project description'),'');
+  out.push('Text · Audio · Vision  →  **Multimodal fusion**  →  Sentiment prediction','',
+    links(config.projects[0].links,'research links'),'');
+  for(const project of activity.projects){
+    if(config.projects.some(item=>item.url.toLowerCase()===project.url.toLowerCase()))continue;
+    const meta=[project.language,project.pushedAt&&`updated ${date(project.pushedAt)}`,Number.isInteger(project.stars)&&`${project.stars} stars`].filter(Boolean).join(' · ');
+    out.push(`### ${link(project.name||project.repo,project.url,'public project')}`,'',
+      text(project.description||'Public repository.','project description'),meta?`\n*${text(meta,'project details')}*`:'','');
   }
-  const xml = value => String(value).replaceAll('&', '&amp;').replaceAll('<', '&lt;').replaceAll('>', '&gt;').replaceAll('"', '&quot;');
-  const alt = xml(`${config.name} — AI engineering and multimodal research; ${activity.counts.merged} merged upstream PRs, ${activity.counts.open} open PRs. Full research, experiment and contribution record; text and links below.`);
-  const picture = `<picture><source media="(prefers-reduced-motion: reduce) and (max-width: 600px)" srcset="${assets.mobileStill}"><source media="(prefers-reduced-motion: reduce)" srcset="${assets.still}"><source media="(max-width: 600px)" srcset="${assets.mobile}"><img src="${assets.desktop}" width="100%" alt="${alt}"></picture>`;
-  const navigation = config.projects.flatMap(project => [{label: project.name, url: project.url}, ...project.links]);
-  navigation.push({label: 'Upstream PRs', url: queryLink(`author:${config.username} is:pr is:public -user:${config.username}`)});
-  const contacts = Object.entries(config.links).map(([label, target]) => link(label, target, 'contact', true)).join(' · ');
-  return `<!-- Generated: one continuous profile canvas, with native evidence links below. -->\n\n<p>${picture}</p>\n\n${links(navigation, 'navigation')}\n\n${contacts}\n\n<details>\n<summary>Text version, sources & contribution links</summary>\n\n${body}\n</details>\n`;
+  const snapshot=config.research.snapshot;
+  out.push('## Research snapshot','',
+    `**${date(snapshot.asOf)} · CH-SIMS v2.0 · ${/(\d+)\/\d+ fits/.exec(snapshot.summary)?.[1]??'—'} completed fits · 3 seeds**`,'',
+    text(snapshot.summary,'research snapshot'),'',
+    '| Validation arm | VALID MAE ↓ |','| --- | ---: |');
+  for(const metric of snapshot.metrics)out.push(`| ${text(metric.name,'arm')} | ${text(metric.score,'score')} |`);
+  out.push('',text(snapshot.protocol,'evaluation protocol'),'',
+    `${text(snapshot.conclusion,'research conclusion')} ${link('Methods and full results',snapshot.url,'results')}.`,'',
+    `**Next:** ${text(snapshot.pending,'next research steps')}`,'');
+  out.push('## What I work on','',
+    '| Area | Current focus |','| --- | --- |');
+  for(const direction of config.research.directions)out.push(`| ${link(direction.name,direction.url,'research direction')} | ${text(direction.summary,'research summary')} |`);
+  out.push('', '## Open-source contributions','');
+  for(const contribution of config.contributions){
+    const verified=contribution.prs.map(pr=>{
+      const record=activity.pullRequests.find(item=>item.url===pr.url);
+      if(!record||record.status!=='merged')throw new Error(`Selected contribution is no longer verified merged: ${pr.url}`);
+      return pr;
+    });
+    out.push(`**${link(contribution.repo,contribution.url,'upstream project')}** — ${text(contribution.summary,'contribution summary')}`,
+      '',links(verified,'merged pull requests'),'');
+  }
+  const recent=activity.pullRequests.slice(0,6);
+  out.push('### Recent pull requests','',
+    '| Updated | Pull request | Status |','| --- | --- | --- |');
+  for(const pr of recent){
+    const label=config.activity?.pullRequestLabels?.[`${pr.repo}#${pr.number}`]??pr.title;
+    const state={merged:'Merged',open:'Open',closed:'Closed without merge'}[pr.status];
+    out.push(`| ${date(pr.updatedAt)} | ${link(`${pr.repo} #${pr.number} — ${shortened(label,72)}`,pr.url,'pull request')} | ${state} |`);
+  }
+  if(!recent.length)out.push('| — | No public upstream pull requests yet | — |');
+  out.push('', '## Latest project activity','');
+  for(const project of activity.projects){
+    const commit=project.latestCommit;
+    if(commit)out.push(`- ${date(commit.date)} · ${link(project.repo,project.url,'project')} · ${link(shortened(commit.message),commit.url,'latest commit')}`);
+  }
+  out.push('', '## Contribution graph','',
+    '<picture>',
+    '  <source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/MaYangle/MaYangle/output/contribution-snake-dark.svg"/>',
+    '  <source media="(prefers-color-scheme: light)" srcset="https://raw.githubusercontent.com/MaYangle/MaYangle/output/contribution-snake.svg"/>',
+    '  <img alt="Animated GitHub contribution graph" src="https://raw.githubusercontent.com/MaYangle/MaYangle/output/contribution-snake.svg" width="100%"/>',
+    '</picture>','',
+    '<sub>Public GitHub activity is collected every six hours. The contribution animation is rebuilt daily.</sub>','');
+  const refreshed=new Date(activity.updatedAt).toISOString().replace('T',' ').replace(/:\d{2}\.\d{3}Z$/,' UTC');
+  out.push(`*Profile data last changed ${refreshed}. Upstream PR counts exclude repositories owned by ${username}.*`,'');
+  return out.join('\n').trimEnd()+'\n';
 }
