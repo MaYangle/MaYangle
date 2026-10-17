@@ -1,0 +1,294 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+<meta charset="utf-8">
+<title>Yangle Ma — profile sheet</title>
+<style>
+  :root{
+    --paper:#f5f3ec;
+    --grid:#e2ded1;
+    --grid-strong:#cbc5b3;
+    --ink:#15171c;
+    --muted:#6e7280;
+    --rule:#c9c4b4;
+    --blue:#2440c4;
+    --accent:#b8321f;
+  }
+  html[data-theme="dark"]{
+    --paper:#0e1116;
+    --grid:#181d24;
+    --grid-strong:#2a323c;
+    --ink:#e9ebef;
+    --muted:#828a96;
+    --rule:#2b333d;
+    --blue:#7d95ff;
+    --accent:#ff6f57;
+  }
+
+  *{box-sizing:border-box;margin:0;padding:0;}
+  html,body{background:var(--paper);}
+  body{
+    width:920px;height:962px;
+    font-family:Consolas,"Cascadia Mono",Menlo,monospace;
+    color:var(--ink);
+    -webkit-font-smoothing:antialiased;
+    position:relative;
+    overflow:hidden;
+  }
+  body::before{
+    content:"";position:absolute;inset:0;
+    background-image:
+      linear-gradient(var(--grid) 1px, transparent 1px),
+      linear-gradient(90deg, var(--grid) 1px, transparent 1px);
+    background-size:26px 26px;
+  }
+  .sheet{position:relative;height:100%;padding:38px 44px 26px;display:flex;flex-direction:column;}
+
+  .lbl{font-size:9.5px;letter-spacing:.16em;text-transform:uppercase;color:var(--muted);}
+  .fig-no{font-size:10.5px;letter-spacing:.14em;color:var(--blue);font-weight:bold;}
+
+  /* header */
+  header{display:flex;justify-content:space-between;align-items:flex-start;}
+  .name{font-size:48px;font-weight:bold;letter-spacing:.02em;line-height:1;}
+  .role{margin-top:11px;font-size:14.5px;letter-spacing:.01em;}
+  .role span{color:var(--muted);}
+  .idright .code{font-size:10.5px;letter-spacing:.14em;color:var(--muted);line-height:1.9;text-align:right;}
+  .idright b{color:var(--ink);font-weight:bold;}
+  .rule{height:1px;background:var(--rule);margin-top:20px;}
+
+  /* section grid: 132 | 1fr */
+  .sec{display:grid;grid-template-columns:118px 1fr;gap:22px;padding-top:22px;}
+  .sec-head .t{margin-top:6px;font-size:12px;font-weight:bold;letter-spacing:.05em;line-height:1.5;}
+
+  /* ---------- forest plot ---------- */
+  .row{display:grid;grid-template-columns:236px 1fr 128px;align-items:center;height:37px;}
+  .row .nm{display:flex;align-items:center;gap:9px;font-size:12.5px;line-height:1.25;}
+  .row .nm i{flex:0 0 13px;height:2px;display:block;}
+  .row .val{text-align:right;font-size:11.5px;letter-spacing:0;}
+
+  .track{position:relative;height:37px;}
+  .whisk{position:absolute;top:50%;height:1px;transform:translateY(-50%);}
+  .cap{position:absolute;top:50%;width:1px;height:11px;transform:translateY(-50%);}
+  .whisk::before{left:0;} .whisk::after{right:0;}
+  .dot{position:absolute;top:50%;width:8px;height:8px;border-radius:50%;transform:translate(-50%,-50%);}
+  .refline{position:absolute;top:0;bottom:0;border-left:1px dashed var(--muted);opacity:.45;}
+
+  .cand .nm{font-weight:bold;}
+  .cand .val{font-weight:bold;color:var(--accent);}
+
+  .axisrow{display:grid;grid-template-columns:236px 1fr 128px;align-items:start;}
+  .ticks{position:relative;height:30px;margin-top:5px;}
+  .axisbase{position:absolute;top:0;left:0;right:0;height:1px;background:var(--rule);}
+  .tick{position:absolute;top:0;width:1px;height:5px;background:var(--rule);}
+  .tick span{position:absolute;top:9px;left:50%;transform:translateX(-50%);font-size:10.5px;color:var(--muted);}
+  .axiscap{font-size:10px;letter-spacing:.13em;color:var(--muted);text-align:right;padding-top:22px;}
+
+  .caption{margin-top:13px;max-width:650px;font-size:11px;color:var(--muted);line-height:1.75;letter-spacing:.015em;}
+  .caption b{color:var(--accent);font-weight:bold;}
+  .caption em{font-style:normal;color:var(--ink);}
+
+  /* ---------- pipeline ---------- */
+  .pipe{display:grid;grid-template-columns:1fr 24px 1fr 24px 1fr 24px 1fr;align-items:stretch;}
+  .node{border:1px solid var(--rule);padding:10px 11px 11px;}
+  .node .nt{font-size:9.5px;letter-spacing:.14em;color:var(--muted);text-transform:uppercase;}
+  .node .nb{margin-top:7px;font-size:12px;line-height:1.45;}
+  .arrow{display:flex;align-items:center;justify-content:center;color:var(--muted);font-size:12px;}
+  .node.hi{border-color:var(--blue);}
+  .node.hi .nb{color:var(--blue);}
+  .pipe-note{display:flex;justify-content:space-between;margin-top:10px;font-size:10.5px;letter-spacing:.05em;color:var(--muted);}
+  .pipe-note b{color:var(--ink);}
+
+  /* ---------- contributions ---------- */
+  .contrib{display:grid;grid-template-columns:1fr 82px;gap:20px;padding:11px 0 12px;border-top:1px solid var(--grid-strong);}
+  .contrib:first-child{border-top:0;padding-top:0;}
+  .contrib .repo{font-size:13.5px;font-weight:bold;}
+  .contrib .det{margin-top:6px;max-width:600px;font-size:11px;color:var(--muted);line-height:1.65;}
+  .contrib .num{text-align:right;}
+  .contrib .num b{font-size:20px;font-weight:bold;display:block;line-height:1;}
+  .contrib .num span{display:block;margin-top:5px;font-size:8.5px;letter-spacing:.13em;color:var(--muted);}
+
+  /* ---------- tooling ---------- */
+  .tools{display:flex;flex-wrap:wrap;gap:6px;}
+  .tools span{border:1px solid var(--rule);padding:4px 8px;font-size:11px;letter-spacing:.05em;}
+
+  footer{margin-top:auto;padding-top:16px;border-top:1px solid var(--rule);display:flex;justify-content:space-between;align-items:flex-end;font-size:9.5px;letter-spacing:.13em;color:var(--muted);text-transform:uppercase;}
+  footer b{color:var(--accent);}
+</style>
+</head>
+<body>
+<div class="sheet">
+
+  <header>
+    <div>
+      <div class="name">YANGLE MA</div>
+      <div class="role">Applied AI/ML <span>·</span> multimodal learning <span>·</span> industrial AI <span>·</span> Mettler Toledo</div>
+    </div>
+    <div class="idright">
+      <div class="code">
+        JIANGSU, CN<br>
+        <b>FIG 001–004</b> / PROFILE<br>
+        17 OCT 2026
+      </div>
+    </div>
+  </header>
+  <div class="rule"></div>
+
+  <section class="sec">
+    <div class="sec-head"><div class="fig-no">FIG 001</div><div class="t">MATCHED-ARM<br>COMPARISON</div></div>
+    <div>
+      <div id="plot"></div>
+      <div class="caption">
+        CH-SIMS v2.0 native VALID, 647 clips, native clipped MAE ↓, mean ± sample SD over seeds
+        13/42/2026. All arms share identical features, branch pretraining, initialisation and a
+        50-epoch budget; seven arms were run and five are shown. <em>The candidate does not clear the
+        best control, and every interval overlaps every other one.</em> Preregistered all-seed gain
+        requirement <b>not met</b>. Out of range: M-only standardised ALMT 0.408680 ± 0.006690.
+      </div>
+    </div>
+  </section>
+
+  <section class="sec">
+    <div class="sec-head"><div class="fig-no">FIG 002</div><div class="t">FUSION<br>PATHWAY</div></div>
+    <div>
+      <div class="pipe">
+        <div class="node"><div class="nt">Inputs (frozen)</div><div class="nb">MacBERT<br>WavLM<br>DINOv2</div></div>
+        <div class="arrow">→</div>
+        <div class="node"><div class="nt">Branches</div><div class="nb">Masked pretrained<br>channel stacks</div></div>
+        <div class="arrow">→</div>
+        <div class="node hi"><div class="nt">Fusion</div><div class="nb">8-query multi-key<br>cross-attention ×3</div></div>
+        <div class="arrow">→</div>
+        <div class="node"><div class="nt">Output</div><div class="nb">Post-norm routing<br>→ native scalar</div></div>
+      </div>
+      <div class="pipe-note">
+        <div>DISTILLATION ← TRAIN-ONLY SCORE-ERROR TEACHER</div>
+        <div><b>2,084,871</b> TRAINABLE PARAMS</div>
+      </div>
+    </div>
+  </section>
+
+  <section class="sec">
+    <div class="sec-head"><div class="fig-no">FIG 003</div><div class="t">UPSTREAM<br>CONTRIBUTIONS</div></div>
+    <div>
+      <div class="contrib">
+        <div>
+          <div class="repo">19376357/Bilingual-Multimodal-Sentiment-Analysis</div>
+          <div class="det">Training and inference reliability: dtype and single-sample output shapes,
+          NaN/Inf prediction handling, missing-face feature shapes, cross-platform result loading.
+          Followed by bilingual documentation and a licensing pass.</div>
+        </div>
+        <div class="num"><b>6</b><span>MERGED</span></div>
+      </div>
+      <div class="contrib">
+        <div>
+          <div class="repo">rohitg00/ai-engineering-from-scratch</div>
+          <div class="det">150 missing lesson quizzes backfilled · README i18n audited across 12
+          translations · research links for 7 lessons.</div>
+        </div>
+        <div class="num"><b>3</b><span>PULL REQ</span></div>
+      </div>
+    </div>
+  </section>
+
+  <section class="sec">
+    <div class="sec-head"><div class="fig-no">FIG 004</div><div class="t">TOOLING</div></div>
+    <div>
+      <div class="tools">
+        <span>PYTHON</span><span>PYTORCH</span><span>HUGGING FACE</span><span>WavLM</span>
+        <span>MacBERT</span><span>DINOv2</span><span>WHISPER</span><span>pytest</span><span>GITHUB ACTIONS</span>
+      </div>
+    </div>
+  </section>
+
+  <footer>
+    <div>SOURCE / github.com/MaYangle/Multimodal-Sentiment-Fusion</div>
+    <div>GATE: PREREGISTERED PROMOTION — <b>NOT MET</b></div>
+  </footer>
+
+</div>
+
+<script>
+const ARMS = [
+  {name:"Teacher post-norm control",     m:0.378011, sd:0.008966, c:"muted"},
+  {name:"Distilled-static aux control",  m:0.378253, sd:0.008851, c:"muted"},
+  {name:"Distilled post-norm candidate", m:0.378497, sd:0.007455, c:"accent", cand:true},
+  {name:"Static sequence fusion",        m:0.378832, sd:0.007309, c:"muted"},
+  {name:"Learned post-norm, no KL",      m:0.379303, sd:0.007723, c:"muted"},
+];
+const LO = 0.3680, HI = 0.3900;
+const pct = v => ((v - LO) / (HI - LO)) * 100;
+const REF = 0.378011;   // best control
+
+const plot = document.getElementById('plot');
+
+ARMS.forEach(a => {
+  const row = document.createElement('div');
+  row.className = 'row' + (a.cand ? ' cand' : '');
+
+  const nm = document.createElement('div');
+  nm.className = 'nm';
+  nm.innerHTML = `<i style="background:var(--${a.c})"></i><span>${a.name}</span>`;
+
+  const track = document.createElement('div');
+  track.className = 'track';
+
+  const ref = document.createElement('div');
+  ref.className = 'refline';
+  ref.style.left = pct(REF) + '%';
+  track.appendChild(ref);
+
+  const l = pct(a.m - a.sd), r = pct(a.m + a.sd);
+  const w = document.createElement('div');
+  w.className = 'whisk';
+  w.style.left = l + '%';
+  w.style.width = (r - l) + '%';
+  w.style.backgroundColor = `var(--${a.c})`;
+  w.style.opacity = a.cand ? 1 : .5;
+
+  const dot = document.createElement('div');
+  dot.className = 'dot';
+  dot.style.left = pct(a.m) + '%';
+  dot.style.backgroundColor = `var(--${a.c})`;
+
+  const caps = [l, r].map(x => {
+    const c = document.createElement('div');
+    c.className = 'cap';
+    c.style.left = x + '%';
+    c.style.backgroundColor = `var(--${a.c})`;
+    c.style.opacity = a.cand ? 1 : .5;
+    return c;
+  });
+
+  track.appendChild(w);
+  caps.forEach(c => track.appendChild(c));
+  track.appendChild(dot);
+
+  const val = document.createElement('div');
+  val.className = 'val';
+  val.textContent = a.m.toFixed(6) + ' ± ' + a.sd.toFixed(6);
+
+  row.append(nm, track, val);
+  plot.appendChild(row);
+});
+
+// axis row shares the same column geometry as the data rows
+const axRow = document.createElement('div');
+axRow.className = 'axisrow';
+const spacerL = document.createElement('div');
+const ticks = document.createElement('div');
+ticks.className = 'ticks';
+ticks.innerHTML = '<div class="axisbase"></div>';
+[0.370,0.375,0.380,0.385,0.390].forEach(t => {
+  const d = document.createElement('div');
+  d.className = 'tick';
+  d.style.left = pct(t) + '%';
+  d.innerHTML = `<span>${t.toFixed(3)}</span>`;
+  ticks.appendChild(d);
+});
+const cap = document.createElement('div');
+cap.className = 'axiscap';
+cap.textContent = 'MAE ↓';
+axRow.append(spacerL, ticks, cap);
+plot.appendChild(axRow);
+</script>
+</body>
+</html>
