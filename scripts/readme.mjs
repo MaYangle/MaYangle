@@ -131,7 +131,8 @@ export function renderReadme(config, activity, assets) {
   out.push(`### ${link(config.projects[0].name,featuredUrl,'featured project')}`,'',
     text(featuredActivity?.description ?? config.projects[0].description,'project description'),'');
   out.push('Text · Audio · Vision  →  **Multimodal fusion**  →  Sentiment prediction','',
-    links(config.projects[0].links,'research links'),'');
+    links(config.projects[0].links,'research links'),'',
+    '<sub>New public, non-fork repositories with content are discovered automatically on the next six-hour refresh.</sub>','');
   for(const project of activity.projects){
     if(config.projects.some(item=>item.url.toLowerCase()===project.url.toLowerCase()))continue;
     const meta=[project.language,project.pushedAt&&`updated ${date(project.pushedAt)}`,Number.isInteger(project.stars)&&`${project.stars} stars`].filter(Boolean).join(' · ');

@@ -18,6 +18,8 @@ Text · Audio · Vision  →  **Multimodal fusion**  →  Sentiment prediction
 
 [Architecture](https://github.com/MaYangle/Multimodal-Sentiment-Fusion/blob/main/docs/ARCHITECTURE.md) · [Experiments](https://github.com/MaYangle/Multimodal-Sentiment-Fusion/blob/main/docs/EXPERIMENTS.md) · [Reproduce](https://github.com/MaYangle/Multimodal-Sentiment-Fusion/blob/main/docs/REPRODUCING.md)
 
+<sub>New public, non-fork repositories with content are discovered automatically on the next six-hour refresh.</sub>
+
 ## Research snapshot
 
 **2026-10-14 · CH-SIMS v2.0 · 27 completed fits · 3 seeds**
