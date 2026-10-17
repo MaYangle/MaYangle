@@ -1,6 +1,6 @@
-<picture>
+<a href="https://github.com/MaYangle/Multimodal-Sentiment-Fusion"><picture>
   <source media="(max-width: 600px)" srcset="assets/sheet-mobile.svg">
   <img src="assets/sheet.svg" width="100%" alt="Profile sheet for Yangle Ma, four figures on a beige blueprint grid. Figure 001: matched-arm comparison of the fusion arms on CH-SIMS v2 native validation, drawn as means with error bars; the distilled post-normalisation candidate is highlighted in red and sits inside the range of the controls. Figure 002: fusion pathway from frozen MacBERT, WavLM and DINOv2 encoders through masked branches and eight-query multi-key cross-attention to post-normalisation routing and a native sentiment scalar. Figure 003: upstream pull requests. Figure 004: tooling.">
-</picture>
+</picture></a>
 
 <sub>[FIG 001 · Multimodal-Sentiment-Fusion](https://github.com/MaYangle/Multimodal-Sentiment-Fusion) · [FIG 002 · architecture](https://github.com/MaYangle/Multimodal-Sentiment-Fusion/blob/main/docs/ARCHITECTURE.md) · [FIG 003 · Bilingual-Multimodal-Sentiment-Analysis](https://github.com/19376357/Bilingual-Multimodal-Sentiment-Analysis) · [FIG 003 · AI Engineering from Scratch](https://github.com/rohitg00/ai-engineering-from-scratch) · [LinkedIn](https://www.linkedin.com/in/yangle-ma-84877a294/) · [Email](mailto:yanglema44@gmail.com)</sub>
