@@ -1,16 +1,22 @@
 /**
  * Renders the profile sheet as a standalone SVG.
  * Beige paper only: the sheet is a printed datasheet, not a theme.
+ *
+ * Palette and type scale follow the measured conventions of a printed
+ * technical plate: one electric blue carrying all emphasis, a neutral warm
+ * grey for everything secondary, and a single coral reserved for the arm
+ * that failed its gate.
  */
 
 const PAL = {
-  paper: '#f5f3ec',
-  grid: '#e2ded1',
-  ink: '#15171c',
-  muted: '#6e7280',
-  rule: '#c9c4b4',
-  blue: '#2440c4',
-  accent: '#b8321f',
+  paper: '#fafaf6',
+  grid: '#edede7',
+  ink: '#1a1a1a',
+  muted: '#747472',
+  rule: '#c8c8c4',
+  blue: '#3553ff',
+  blueTint: '#e9ecfd',
+  accent: '#e8402a',
 };
 
 const MONO = "ui-monospace, SFMono-Regular, Menlo, Consolas, 'DejaVu Sans Mono', monospace";
@@ -118,37 +124,52 @@ function desktop(data, s) {
   const W = 920;
   const PAD = 44;
   const RIGHT = W - PAD;
-  const CONTENT = RIGHT - PAD;
+  const BAND = 40;
 
   s.w = W;
 
-  /* header */
-  s.text(PAD, 84, data.name, { size: 48, weight: 700, ls: 1 });
-  s.text(PAD, 110, data.role, { size: 15 });
-  s.text(RIGHT, 52, data.location, { size: 10.5, fill: PAL.muted, ls: 1.4, anchor: 'end', upper: true });
-  s.text(RIGHT, 72, `FIG 001–00${data.figCount} / PROFILE`, { size: 10.5, weight: 700, ls: 1.4, anchor: 'end', upper: true });
-  s.text(RIGHT, 92, data.revised, { size: 10.5, fill: PAL.muted, ls: 1.4, anchor: 'end', upper: true });
-  s.line(PAD, 134, RIGHT, 134);
+  /* masthead band */
+  s.rect(0, 0, W, BAND, { fill: PAL.blue, stroke: 'none' });
+  s.text(PAD, 25, `FIG 001–00${data.figCount} / PROFILE SHEET`, {
+    size: 10, fill: '#ffffff', weight: 700, ls: 1.7, upper: true,
+  });
+  s.text(RIGHT, 25, 'github.com/MaYangle', {
+    size: 10, fill: '#ffffff', ls: 1.7, anchor: 'end',
+  });
 
-  let y = 134;
+  /* identity */
+  s.text(PAD, BAND + 66, data.name, { size: 60, weight: 700, ls: 1.2 });
+  s.text(PAD, BAND + 94, data.role, { size: 17, weight: 700 });
+  s.text(PAD, BAND + 116, `${data.company} · ${data.location} · ${data.revised}`, {
+    size: 10.5, fill: PAL.muted, ls: 1.6, upper: true,
+  });
+  s.line(PAD, BAND + 134, RIGHT, BAND + 134);
 
-  /* ---- FIG 001 ---- */
+  let y = BAND + 134;
+
   const labelX = PAD;
-  const figTitle = (cy, no, lines) => {
-    s.text(labelX, cy, no, { size: 11, weight: 700, fill: PAL.blue, ls: 1.2 });
-    lines.forEach((l, i) => s.text(labelX, cy + 18 + i * 16, l, { size: 12, weight: 700, ls: 0.6 }));
+  const labelW = 132;
+  const nameX = labelX + labelW + 22;
+  const valueW = 136;
+  const valueX = RIGHT;
+
+  /** section header: blue figure number, bold title, hairline beneath */
+  const head = (cy, no, lines) => {
+    s.text(labelX, cy, no, { size: 12, weight: 700, fill: PAL.blue, ls: 1.3 });
+    lines.forEach((l, i) => s.text(labelX, cy + 21 + i * 18, l, { size: 14, weight: 700, ls: 0.3 }));
+    const underlineY = cy + 21 + (lines.length - 1) * 18 + 11;
+    s.line(PAD, underlineY, RIGHT, underlineY, { stroke: PAL.rule });
   };
 
-  y += 26;
-  figTitle(y, 'FIG 001', ['MATCHED-ARM', 'COMPARISON']);
+  /* ---- FIG 001 ---- */
+  y += 30;
+  head(y, 'FIG 001', ['MATCHED-ARM', 'COMPARISON']);
 
-  const plotTop = y + 36;
-  const nameX = PAD + 140;
+  const plotTop = y + 62;
   const nameW = 236;
   const trackX = nameX + nameW;
-  const trackW = 328;
-  const valueX = RIGHT;
-  const rowH = 37;
+  const trackW = valueX - valueW - trackX;
+  const rowH = 38;
 
   const arms = data.arms;
   const extremes = arms.flatMap((a) => [a.mean - a.sd, a.mean + a.sd]);
@@ -156,131 +177,147 @@ function desktop(data, s) {
   const lo = Math.floor(Math.min(...extremes) / step) * step;
   const hi = Math.ceil(Math.max(...extremes) / step) * step;
   const xOf = (v) => trackX + ((v - lo) / (hi - lo)) * trackW;
-
   const best = Math.min(...arms.map((a) => a.mean));
 
   arms.forEach((a, i) => {
-    const cy = plotTop + 18 + i * rowH;
+    const cy = plotTop + 17 + i * rowH;
     const col = a.candidate ? PAL.accent : PAL.muted;
-    const op = a.candidate ? 1 : 0.55;
+    const op = a.candidate ? 1 : 0.6;
 
-    s.line(nameX, cy, nameX + 13, cy, { stroke: col, w: 2, opacity: op });
-    s.text(nameX + 22, cy + 4, a.name, { size: 12.5, weight: a.candidate ? 700 : 400 });
-
-    s.line(xOf(a.mean - a.sd), cy, xOf(a.mean + a.sd), cy, { stroke: col, opacity: op });
-    for (const v of [a.mean - a.sd, a.mean + a.sd]) {
-      s.line(xOf(v), cy - 5.5, xOf(v), cy + 5.5, { stroke: col, opacity: op });
+    if (a.candidate) {
+      s.rect(nameX - 8, cy - 16, valueX - nameX + 8, 32, { fill: '#fdeeeb', stroke: 'none' });
     }
-    s.circle(xOf(a.mean), cy, 4, col);
 
-    s.text(valueX, cy + 4, `${fmt(a.mean)} ± ${fmt(a.sd)}`, {
+    s.line(nameX, cy, nameX + 14, cy, { stroke: col, w: 2.5, opacity: op });
+    s.text(nameX + 23, cy + 4.5, a.name, {
+      size: 13, weight: a.candidate ? 700 : 400,
+      fill: a.candidate ? PAL.accent : PAL.ink,
+    });
+
+    s.line(xOf(a.mean - a.sd), cy, xOf(a.mean + a.sd), cy, { stroke: col, w: 1.5, opacity: op });
+    for (const v of [a.mean - a.sd, a.mean + a.sd]) {
+      s.line(xOf(v), cy - 6, xOf(v), cy + 6, { stroke: col, w: 1.5, opacity: op });
+    }
+    s.circle(xOf(a.mean), cy, 4.5, col);
+
+    s.text(valueX, cy + 4.5, `${fmt(a.mean)} ± ${fmt(a.sd)}`, {
       size: 11.5, anchor: 'end',
       fill: a.candidate ? PAL.accent : PAL.ink,
       weight: a.candidate ? 700 : 400,
     });
   });
 
-  const axisY = plotTop + arms.length * rowH + 4;
+  const axisY = plotTop + arms.length * rowH + 6;
 
-  // reference line at the best control, behind nothing else
-  s.line(xOf(best), plotTop, xOf(best), axisY, { stroke: PAL.muted, dash: '3 3', opacity: 0.45 });
+  s.line(xOf(best), plotTop - 2, xOf(best), axisY, { stroke: PAL.blue, dash: '3 3', opacity: 0.55 });
 
-  s.line(trackX, axisY, trackX + trackW, axisY);
+  s.line(trackX, axisY, trackX + trackW, axisY, { stroke: PAL.ink });
   for (let v = lo; v <= hi + 1e-12; v += step) {
     const x = xOf(v);
-    s.line(x, axisY, x, axisY + 5);
-    s.text(x, axisY + 20, v.toFixed(3), { size: 10, fill: PAL.muted, anchor: 'middle' });
+    s.line(x, axisY, x, axisY + 5, { stroke: PAL.ink });
+    s.text(x, axisY + 21, v.toFixed(3), { size: 10.5, fill: PAL.muted, anchor: 'middle' });
   }
-  s.text(valueX, axisY + 20, 'MAE ↓', { size: 10, fill: PAL.muted, anchor: 'end', ls: 1 });
+  s.text(valueX, axisY + 21, 'MAE ↓', {
+    size: 10.5, fill: PAL.blue, weight: 700, anchor: 'end', ls: 1.2,
+  });
 
-  y = axisY + 44;
-  const capW = 650;
+  y = axisY + 46;
+  const capW = 640;
   const lines = wrapWords(data.caption, 11, capW);
   lines.forEach((line, i) => s.text(nameX, y + i * 18, line, { size: 11, fill: PAL.muted }));
 
-  // the gate verdict continues the sentence rather than starting a new line
   const lastY = y + (lines.length - 1) * 18;
-  const lastLen = lines[lines.length - 1].length;
-  const noteX = nameX + lastLen * ch(11) + 6;
+  const lastEnd = nameX + lines[lines.length - 1].length * ch(11);
   const noteW = data.captionNote.length * ch(11);
-  if (noteX + noteW <= RIGHT) {
-    s.text(noteX - 2, lastY, data.captionNote, { size: 11, fill: PAL.accent, weight: 700 });
+  if (lastEnd + noteW + 24 <= RIGHT) {
+    // verdict sits on the right margin, like a stamp on the drawing
+    s.text(RIGHT, lastY, data.captionNote, { size: 11, fill: PAL.accent, weight: 700, anchor: 'end', ls: 0.6 });
   } else {
-    s.text(nameX, lastY + 18, data.captionNote, { size: 11, fill: PAL.accent, weight: 700 });
+    s.text(nameX, lastY + 18, data.captionNote, { size: 11, fill: PAL.accent, weight: 700, ls: 0.6 });
   }
-  y = lastY + 6;
+  y = lastY + 8;
 
   /* ---- FIG 002 ---- */
   y += 34;
-  figTitle(y, 'FIG 002', ['FUSION', 'PATHWAY']);
+  head(y, 'FIG 002', ['FUSION', 'PATHWAY']);
 
-  const boxTop = y + 36;
-  const boxH = 86;
+  const boxTop = y + 62;
+  const boxH = 88;
   const gap = 24;
-  const boxW = (CONTENT - 3 * gap) / 4;
+  const boxW = (RIGHT - PAD - 3 * gap) / 4;
   const nodes = data.pipeline;
 
   nodes.forEach((n, i) => {
     const x = PAD + i * (boxW + gap);
-    const hi_ = n.highlight;
-    s.rect(x, boxTop, boxW, boxH, { stroke: hi_ ? PAL.blue : PAL.rule });
-    s.text(x + 11, boxTop + 20, n.label, { size: 9.5, fill: PAL.muted, ls: 1.2, upper: true });
+    s.rect(x, boxTop, boxW, boxH, {
+      stroke: n.highlight ? PAL.blue : PAL.rule,
+      fill: n.highlight ? PAL.blueTint : 'none',
+      sw: n.highlight ? 1.5 : 1,
+    });
+    s.text(x + 12, boxTop + 22, n.label, {
+      size: 9.5, fill: n.highlight ? PAL.blue : PAL.muted, weight: n.highlight ? 700 : 400,
+      ls: 1.3, upper: true,
+    });
     n.body.forEach((b, j) => {
-      s.text(x + 11, boxTop + 42 + j * 16, b, { size: 12, fill: hi_ ? PAL.blue : PAL.ink });
+      s.text(x + 12, boxTop + 46 + j * 17, b, {
+        size: 12.5, fill: n.highlight ? PAL.blue : PAL.ink,
+        weight: n.highlight ? 700 : 400,
+      });
     });
     if (i < nodes.length - 1) {
-      const ax = x + boxW + gap / 2;
-      s.text(ax, boxTop + boxH / 2 + 4, '→', { size: 12, fill: PAL.muted, anchor: 'middle' });
+      s.text(x + boxW + gap / 2, boxTop + boxH / 2 + 5, '→', {
+        size: 13, fill: PAL.muted, anchor: 'middle',
+      });
     }
   });
 
-  y = boxTop + boxH + 18;
+  y = boxTop + boxH + 20;
   s.text(nameX, y, data.pipelineNote, { size: 10.5, fill: PAL.muted, ls: 0.6, upper: true });
-  s.text(valueX, y, data.params, { size: 10.5, anchor: 'end', ls: 0.6, upper: true });
+  s.text(valueX, y, data.params, { size: 10.5, fill: PAL.blue, weight: 700, anchor: 'end', ls: 0.6, upper: true });
 
   /* ---- FIG 003 ---- */
   y += 34;
-  figTitle(y, 'FIG 003', ['UPSTREAM', 'CONTRIBUTIONS']);
+  head(y, 'FIG 003', ['UPSTREAM', 'CONTRIBUTIONS']);
 
-  y += 36;
+  y += 62;
   let first = true;
   for (const c of data.contributions) {
-    if (!first) { s.line(nameX, y - 12, RIGHT, y - 12, { stroke: PAL.rule }); }
+    if (!first) s.line(nameX, y - 16, RIGHT, y - 16, { stroke: PAL.rule });
     first = false;
 
-    s.text(nameX, y, c.repo, { size: 13.5, weight: 700 });
-    s.text(RIGHT, y + 2, c.count, { size: 20, weight: 700, anchor: 'end' });
-    s.text(RIGHT, y + 20, c.countLabel, { size: 8.5, fill: PAL.muted, ls: 1.3, anchor: 'end', upper: true });
+    s.text(nameX, y, c.repo, { size: 14, weight: 700 });
+    s.text(RIGHT, y + 4, c.count, { size: 34, weight: 700, anchor: 'end', fill: PAL.blue });
+    s.text(RIGHT, y + 22, c.countLabel, { size: 9, fill: PAL.muted, ls: 1.4, anchor: 'end', upper: true });
 
-    let dy = y + 20;
+    let dy = y + 22;
     for (const line of wrapWords(c.detail, 11, 600)) {
       s.text(nameX, dy, line, { size: 11, fill: PAL.muted });
       dy += 17;
     }
-    y = dy + 14;
+    y = dy + 18;
   }
 
   /* ---- FIG 004 ---- */
-  y += 20;
-  figTitle(y, 'FIG 004', ['TOOLING']);
+  y += 22;
+  head(y, 'FIG 004', ['TOOLING']);
+  y += 48;
 
-  y += 38;
   let cx = nameX;
   for (const t of data.tooling) {
-    const w = t.length * ch(11) + 16;
-    if (cx + w > RIGHT) { cx = nameX; y += 30; }
-    s.rect(cx, y - 13, w, 24, { stroke: PAL.rule });
-    s.text(cx + 8, y + 3, t, { size: 11, ls: 0.5 });
-    cx += w + 6;
+    const w = t.length * ch(12) + 20;
+    if (cx + w > RIGHT) { cx = nameX; y += 34; }
+    s.rect(cx, y - 15, w, 28, { stroke: PAL.blue });
+    s.text(cx + 10, y + 4.5, t, { size: 12, fill: PAL.blue, ls: 0.4 });
+    cx += w + 8;
   }
 
   /* ---- footer ---- */
-  y += 46;
+  y += 52;
   s.line(PAD, y, RIGHT, y);
-  s.text(PAD, y + 18, data.footerLeft, { size: 9.5, fill: PAL.muted, ls: 1.2, upper: true });
-  s.text(RIGHT, y + 18, data.footerRight, { size: 9.5, fill: PAL.muted, ls: 1.2, anchor: 'end', upper: true });
+  s.text(PAD, y + 19, data.footerLeft, { size: 9.5, fill: PAL.muted, ls: 1.3, upper: true });
+  s.text(RIGHT, y + 19, data.footerRight, { size: 9.5, fill: PAL.muted, ls: 1.3, anchor: 'end', upper: true });
 
-  s.h = y + 18 + 34;
+  s.h = y + 19 + 32;
 }
 
 /* ------------------------------------------------------------------ */
@@ -292,24 +329,38 @@ function mobile(data, s) {
   const PAD = 22;
   const RIGHT = W - PAD;
   const CONTENT = RIGHT - PAD;
+  const BAND = 30;
 
   s.w = W;
 
-  s.text(PAD, 50, data.name, { size: 30, weight: 700, ls: 0.6 });
-  let y = 70;
-  for (const line of wrapWords(data.role, 11.5, CONTENT)) {
-    s.text(PAD, y, line, { size: 11.5 });
+  s.rect(0, 0, W, BAND, { fill: PAL.blue, stroke: 'none' });
+  s.text(PAD, 19, `FIG 001–00${data.figCount} / PROFILE`, {
+    size: 7.5, fill: '#ffffff', weight: 700, ls: 1.3, upper: true,
+  });
+  s.text(RIGHT, 19, 'MaYangle', { size: 7.5, fill: '#ffffff', ls: 1.3, anchor: 'end' });
+
+  s.text(PAD, BAND + 34, data.name, { size: 34, weight: 700, ls: 0.6 });
+  let y = BAND + 56;
+  for (const line of wrapWords(data.role, 12, CONTENT)) {
+    s.text(PAD, y, line, { size: 12, weight: 700 });
     y += 16;
   }
-  s.text(PAD, y + 4, `${data.location} · ${data.revised}`, { size: 8.5, fill: PAL.muted, ls: 1.2, upper: true });
-  y += 18;
+  for (const line of wrapWords(`${data.company} · ${data.location} · ${data.revised}`, 8, CONTENT)) {
+    s.text(PAD, y + 2, line, { size: 8, fill: PAL.muted, ls: 1.2, upper: true });
+    y += 12;
+  }
+  y += 10;
   s.line(PAD, y, RIGHT, y);
 
+  const head = (cy, no, title) => {
+    s.text(PAD, cy, no, { size: 9.5, weight: 700, fill: PAL.blue, ls: 1.2 });
+    s.text(PAD, cy + 16, title, { size: 11, weight: 700, ls: 0.3 });
+    s.line(PAD, cy + 25, RIGHT, cy + 25, { stroke: PAL.rule });
+  };
+
   /* FIG 001 */
-  y += 20;
-  s.text(PAD, y, 'FIG 001', { size: 9, weight: 700, fill: PAL.blue, ls: 1.2 });
-  y += 15;
-  s.text(PAD, y, 'MATCHED-ARM COMPARISON', { size: 10, weight: 700, ls: 0.5 });
+  y += 24;
+  head(y, 'FIG 001', 'MATCHED-ARM COMPARISON');
 
   const arms = data.arms;
   const extremes = arms.flatMap((a) => [a.mean - a.sd, a.mean + a.sd]);
@@ -319,113 +370,121 @@ function mobile(data, s) {
   const xOf = (v) => PAD + ((v - lo) / (hi - lo)) * CONTENT;
   const best = Math.min(...arms.map((a) => a.mean));
 
-  y += 12;
+  y += 38;
   arms.forEach((a) => {
     const col = a.candidate ? PAL.accent : PAL.muted;
-    const op = a.candidate ? 1 : 0.55;
-    s.text(PAD, y + 10, a.name, { size: 10.5, weight: a.candidate ? 700 : 400 });
+    const op = a.candidate ? 1 : 0.6;
+    if (a.candidate) {
+      s.rect(PAD - 5, y - 4, CONTENT + 10, 32, { fill: '#fdeeeb', stroke: 'none' });
+    }
+    s.text(PAD, y + 10, a.name, {
+      size: 10.5, weight: a.candidate ? 700 : 400,
+      fill: a.candidate ? PAL.accent : PAL.ink,
+    });
     s.text(RIGHT, y + 10, `${a.mean.toFixed(4)} ± ${a.sd.toFixed(4)}`, {
       size: 9.5, anchor: 'end',
       fill: a.candidate ? PAL.accent : PAL.muted,
       weight: a.candidate ? 700 : 400,
     });
     const cy = y + 24;
-    s.line(PAD, cy, RIGHT, cy, { stroke: PAL.rule, opacity: 0.5 });
-    s.line(xOf(best), y + 12, xOf(best), cy + 6, { stroke: PAL.muted, dash: '2 3', opacity: 0.45 });
-    s.line(xOf(a.mean - a.sd), cy, xOf(a.mean + a.sd), cy, { stroke: col, opacity: op });
+    s.line(PAD, cy, RIGHT, cy, { stroke: PAL.rule, opacity: 0.55 });
+    s.line(xOf(best), y + 12, xOf(best), cy + 7, { stroke: PAL.blue, dash: '2 3', opacity: 0.55 });
+    s.line(xOf(a.mean - a.sd), cy, xOf(a.mean + a.sd), cy, { stroke: col, w: 1.4, opacity: op });
     for (const v of [a.mean - a.sd, a.mean + a.sd]) {
-      s.line(xOf(v), cy - 4.5, xOf(v), cy + 4.5, { stroke: col, opacity: op });
+      s.line(xOf(v), cy - 5, xOf(v), cy + 5, { stroke: col, w: 1.4, opacity: op });
     }
     s.circle(xOf(a.mean), cy, 3.5, col);
     y += 34;
   });
 
-  const axisY = y + 4;
-  s.line(PAD, axisY, RIGHT, axisY);
+  const axisY = y + 6;
+  s.line(PAD, axisY, RIGHT, axisY, { stroke: PAL.ink });
   for (let v = lo; v <= hi + 1e-12; v += step) {
     const x = xOf(v);
-    s.line(x, axisY, x, axisY + 4);
+    s.line(x, axisY, x, axisY + 4, { stroke: PAL.ink });
     s.text(x, axisY + 17, v.toFixed(3), { size: 8.5, fill: PAL.muted, anchor: 'middle' });
   }
 
-  y = axisY + 32;
+  y = axisY + 34;
   const mLines = wrapWords(data.captionShort, 9, CONTENT);
   mLines.forEach((line, i) => s.text(PAD, y + i * 15, line, { size: 9, fill: PAL.muted }));
   const mLastY = y + (mLines.length - 1) * 15;
-  const mNoteX = PAD + mLines[mLines.length - 1].length * ch(9) + 5;
-  const mNoteW = data.captionNote.length * ch(9);
-  if (mNoteX + mNoteW <= RIGHT) {
+  const mNoteX = PAD + mLines[mLines.length - 1].length * ch(9) - 2;
+  if (mNoteX + data.captionNote.length * ch(9) <= RIGHT) {
     s.text(mNoteX, mLastY, data.captionNote, { size: 9, fill: PAL.accent, weight: 700 });
   } else {
     s.text(PAD, mLastY + 15, data.captionNote, { size: 9, fill: PAL.accent, weight: 700 });
   }
-  y = mLastY + 24;
+  y = mLastY + 10;
 
   /* FIG 002 */
-  y += 22;
-  s.text(PAD, y, 'FIG 002', { size: 9, weight: 700, fill: PAL.blue, ls: 1.2 });
-  y += 15;
-  s.text(PAD, y, 'FUSION PATHWAY', { size: 10, weight: 700, ls: 0.5 });
-  y += 12;
+  y += 24;
+  head(y, 'FIG 002', 'FUSION PATHWAY');
+  y += 38;
 
   data.pipeline.forEach((n, i) => {
-    const h = 30;
-    s.rect(PAD, y, CONTENT, h, { stroke: n.highlight ? PAL.blue : PAL.rule });
-    s.text(PAD + 9, y + 19, n.label, { size: 8, fill: PAL.muted, ls: 1.1, upper: true });
-    s.text(RIGHT - 9, y + 19, n.body.join(' · '), {
+    const h = 32;
+    s.rect(PAD, y, CONTENT, h, {
+      stroke: n.highlight ? PAL.blue : PAL.rule,
+      fill: n.highlight ? PAL.blueTint : 'none',
+      sw: n.highlight ? 1.5 : 1,
+    });
+    s.text(PAD + 9, y + 20, n.label, {
+      size: 8, fill: n.highlight ? PAL.blue : PAL.muted, weight: n.highlight ? 700 : 400,
+      ls: 1.1, upper: true,
+    });
+    s.text(RIGHT - 9, y + 20, n.body.join(' · '), {
       size: 9.5, anchor: 'end', fill: n.highlight ? PAL.blue : PAL.ink,
+      weight: n.highlight ? 700 : 400,
     });
     y += h;
     if (i < data.pipeline.length - 1) {
-      s.text(W / 2, y + 10, '↓', { size: 9, fill: PAL.muted, anchor: 'middle' });
-      y += 14;
+      s.text(W / 2, y + 11, '↓', { size: 9, fill: PAL.muted, anchor: 'middle' });
+      y += 15;
     }
   });
 
-  y += 16;
-  s.text(PAD, y, data.params, { size: 8, fill: PAL.muted, ls: 1.1, upper: true });
-  y += 16;
-
-  /* FIG 003 */
-  y += 22;
-  s.text(PAD, y, 'FIG 003', { size: 9, weight: 700, fill: PAL.blue, ls: 1.2 });
-  y += 15;
-  s.text(PAD, y, 'UPSTREAM CONTRIBUTIONS', { size: 10, weight: 700, ls: 0.5 });
+  y += 18;
+  s.text(PAD, y, data.params, { size: 8, fill: PAL.blue, weight: 700, ls: 1.1, upper: true });
   y += 12;
 
+  /* FIG 003 */
+  y += 24;
+  head(y, 'FIG 003', 'UPSTREAM CONTRIBUTIONS');
+  y += 38;
+
   for (const c of data.contributions) {
-    s.text(PAD, y + 10, c.repo, { size: 9.5, weight: 700 });
-    let dy = y + 24;
+    s.text(PAD, y + 10, c.repo, { size: 10, weight: 700 });
+    s.text(RIGHT, y + 10, c.count, { size: 18, weight: 700, anchor: 'end', fill: PAL.blue });
+    let dy = y + 26;
     for (const line of wrapWords(c.detail, 9, CONTENT)) {
       s.text(PAD, dy, line, { size: 9, fill: PAL.muted });
       dy += 14;
     }
-    s.text(PAD, dy + 2, `${c.count} ${c.countLabel}`, { size: 8, weight: 700, ls: 1.1, upper: true });
-    y = dy + 16;
+    s.text(PAD, dy + 2, `${c.count} ${c.countLabel}`, { size: 8.5, fill: PAL.blue, weight: 700, ls: 1.1, upper: true });
+    y = dy + 18;
   }
 
   /* FIG 004 */
-  y += 18;
-  s.text(PAD, y, 'FIG 004', { size: 9, weight: 700, fill: PAL.blue, ls: 1.2 });
-  y += 15;
-  s.text(PAD, y, 'TOOLING', { size: 10, weight: 700, ls: 0.5 });
+  y += 16;
+  head(y, 'FIG 004', 'TOOLING');
+  y += 34;
 
-  y += 18;
   let cx = PAD;
   for (const t of data.tooling) {
-    const w = t.length * ch(9) + 12;
-    if (cx + w > RIGHT) { cx = PAD; y += 24; }
-    s.rect(cx, y - 11, w, 20, { stroke: PAL.rule });
-    s.text(cx + 6, y + 2, t, { size: 9, ls: 0.3 });
+    const w = t.length * ch(9) + 14;
+    if (cx + w > RIGHT) { cx = PAD; y += 26; }
+    s.rect(cx, y - 12, w, 22, { stroke: PAL.blue });
+    s.text(cx + 7, y + 2, t, { size: 9, fill: PAL.blue, ls: 0.3 });
     cx += w + 5;
   }
 
-  y += 34;
+  y += 40;
   s.line(PAD, y, RIGHT, y);
   s.text(PAD, y + 14, data.footerLeft, { size: 6.8, fill: PAL.muted, ls: 1, upper: true });
   s.text(PAD, y + 26, data.footerRight, { size: 6.8, fill: PAL.muted, ls: 1, upper: true });
 
-  s.h = y + 26 + 20;
+  s.h = y + 26 + 18;
 }
 
 export function renderSheet(data) {

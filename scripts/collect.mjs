@@ -138,7 +138,8 @@ export async function collect() {
 
   return {
     name: 'YANGLE MA',
-    role: 'Applied AI/ML · multimodal learning · industrial AI · Mettler Toledo',
+    role: 'Applied AI/ML · multimodal learning · industrial AI',
+    company: 'Mettler Toledo',
     location: 'Jiangsu, CN',
     revised,
     figCount: 4,
