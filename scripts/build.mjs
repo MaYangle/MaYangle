@@ -18,5 +18,5 @@ await writeFile('assets/sheet-mobile.svg', mobile);
 const kb = (s) => (Buffer.byteLength(s) / 1024).toFixed(1);
 console.log(
   `sheet.svg ${kb(desktop)} KB · sheet-mobile.svg ${kb(mobile)} KB · ` +
-  `${data.arms.length} arms · gate ${data.gate}`
+  `${data.record.length} repos · ${data.record.reduce((n, r) => n + r.merged, 0)} merged`
 );

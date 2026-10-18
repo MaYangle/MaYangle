@@ -1,30 +1,38 @@
 /**
  * Collects everything the sheet prints.
  *
- * Two sources:
- *   1. GitHub's search API for pull-request counts
- *   2. the research repository's README for the measured arms
- *
- * The research README stays the single source of truth for every number in
- * FIG 001, so the sheet follows the research when it moves.
+ * One source: GitHub's search API, for the pull requests this account has
+ * landed in repositories it does not own. Nothing else on the sheet is a
+ * measurement, so nothing else is fetched.
  */
 
 const API = 'https://api.github.com';
 const TOKEN = process.env.GITHUB_TOKEN || process.env.GH_TOKEN || '';
 const USER = 'MaYangle';
-const RESEARCH = 'MaYangle/Multimodal-Sentiment-Fusion';
 
 const UPSTREAM = [
   {
     repo: '19376357/Bilingual-Multimodal-Sentiment-Analysis',
-    label: 'MERGED',
-    tags: 'reliability · i18n · licensing',
+    note: 'training and inference reliability · bilingual docs · licensing',
   },
   {
     repo: 'rohitg00/ai-engineering-from-scratch',
-    label: 'PULL REQUESTS',
-    tags: 'quizzes · i18n audit',
+    note: 'lesson quizzes · README i18n audit · research links',
   },
+];
+
+/**
+ * One entry per merged pull request in the first repository above. Kept as
+ * text rather than fetched, because a commit message is not a summary and the
+ * sheet should not guess what a diff meant.
+ */
+const LANDED = [
+  'dtype and single-sample output shapes',
+  'NaN / Inf prediction handling',
+  'missing-face feature shapes',
+  'cross-platform result loading',
+  'bilingual documentation',
+  'third-party licensing',
 ];
 
 const MONTHS = ['JAN', 'FEB', 'MAR', 'APR', 'MAY', 'JUN', 'JUL', 'AUG', 'SEP', 'OCT', 'NOV', 'DEC'];
@@ -38,80 +46,37 @@ async function gh(path) {
       'User-Agent': 'profile-sheet',
     },
   });
+  if (res.status === 404) return null;
   if (!res.ok) throw new Error(`${path} -> ${res.status} ${res.statusText}`);
   return res.json();
 }
 
-async function prCount(repo, extra = '') {
-  const q = `author:${USER}+repo:${repo}+type:pr${extra}`;
-  const { total_count } = await gh(`/search/issues?q=${q}&per_page=1`);
-  return total_count;
-}
-
-async function researchReadme() {
-  const { content, encoding } = await gh(`/repos/${RESEARCH}/readme`);
-  if (encoding !== 'base64') throw new Error('unexpected readme encoding');
-  return Buffer.from(content, 'base64').toString('utf8');
-}
-
-/** arm rows look like: | **Name** | **0.378497 ± 0.007455** | */
-function parseArms(md) {
-  const arms = [];
-  const re = /^\|\s*\*{0,2}([^|*]+?)\*{0,2}\s*\|\s*\*{0,2}\s*([0-9.]+)\s*±\s*([0-9.]+)\s*\*{0,2}\s*\|/;
-  for (const line of md.split(/\r?\n/)) {
-    const m = line.match(re);
-    if (!m) continue;
-    const name = m[1].trim();
-    if (/^(matched arm|validation arm|arm)$/i.test(name)) continue;
-    arms.push({
-      name,
-      mean: Number(m[2]),
-      sd: Number(m[3]),
-      candidate: /candidate/i.test(name),
-    });
-  }
-  return arms.sort((a, b) => a.mean - b.mean);
+/** returns null when the repository is gone, so one deletion cannot break the sheet */
+async function prCounts(repo) {
+  const q = (extra) =>
+    `/search/issues?q=author:${USER}+repo:${repo}+type:pr${extra}&per_page=1`;
+  const total = await gh(q(''));
+  if (total === null) return null;
+  const merged = await gh(q('+is:merged'));
+  return { total: total.total_count, merged: merged ? merged.total_count : 0 };
 }
 
 export async function collect() {
   if (!TOKEN) throw new Error('GITHUB_TOKEN is required');
 
-  /* --- pull requests --- */
-  const contributions = [];
+  const record = [];
   for (const u of UPSTREAM) {
-    const total = await prCount(u.repo);
-    const merged = await prCount(u.repo, '+is:merged');
-    contributions.push({
-      repo: u.repo,
-      count: String(u.label === 'MERGED' ? merged : total),
-      countLabel: u.label,
-      tags: u.tags,
-    });
+    const counts = await prCounts(u.repo);
+    if (!counts || counts.total === 0) {
+      console.warn(`skip ${u.repo}: no pull requests or repository unavailable`);
+      continue;
+    }
+    record.push({ repo: u.repo, note: u.note, ...counts });
   }
-
-  /* --- research --- */
-  const md = await researchReadme();
-  const arms = parseArms(md);
-  if (arms.length < 2) throw new Error(`parsed ${arms.length} arms; refusing to render a broken plot`);
-
-  const paramsRaw = md.match(/([\d,]{5,})\s+parameters/i);
-  const clips = md.match(/(\d{3})\s+clips/i);
-  const seeds = md.match(/seeds?\s+(\d+(?:\s*\/\s*\d+)+)/i);
-  const gateMet = /passes the preregistered/i.test(md);
-  const gateFailed = /fails the preregistered/i.test(md);
-
-  const best = arms[0];
-  const cand = arms.find((a) => a.candidate) || arms[arms.length - 1];
-
-  const allOverlap = arms.every((a) =>
-    arms.every((b) => a.mean - a.sd <= b.mean + b.sd && b.mean - a.sd <= a.mean + a.sd)
-  );
+  if (!record.length) throw new Error('no upstream pull requests found; refusing to render an empty record');
 
   const now = new Date();
   const revised = `${now.getUTCDate()} ${MONTHS[now.getUTCMonth()]} ${now.getUTCFullYear()}`;
-
-  const seedText = seeds ? seeds[1].replace(/\s+/g, '') : '13/42/2026';
-  const gateText = gateMet ? 'met' : gateFailed ? 'not met' : 'undetermined';
 
   return {
     name: 'YANGLE MA',
@@ -120,30 +85,9 @@ export async function collect() {
     location: 'Jiangsu, CN',
     revised,
 
-    heroLabel: 'candidate MAE · CH-SIMS v2.0 valid',
-    hero: { value: cand.mean.toFixed(4), err: `± ${cand.sd.toFixed(4)}` },
-    control: {
-      label: 'best control',
-      value: best.mean.toFixed(4),
-      err: `± ${best.sd.toFixed(4)}`,
-    },
-    verdict: allOverlap ? 'no statistical separation' : 'arms separate',
-    arms,
-    armsNote:
-      `${arms.length} matched arms shown · identical features, pretraining and budget · ` +
-      `seeds ${seedText} · ${clips ? clips[1] : '647'} clips`,
+    record,
+    landed: LANDED,
 
-    flow: {
-      inputs: 'TEXT · AUDIO · VIDEO',
-      inputsSub: 'MacBERT · WavLM · DINOv2',
-      fusion: '8-QUERY CROSS-ATTENTION ×3',
-      output: 'NATIVE SENTIMENT',
-    },
-    params: `${paramsRaw ? Number(paramsRaw[1].replace(/,/g, '')).toLocaleString('en-US') : '2,084,871'} parameters`,
-
-    contributions,
     tooling: ['Python', 'PyTorch', 'Hugging Face', 'WavLM', 'MacBERT', 'DINOv2', 'Whisper', 'pytest'],
-
-    gate: gateText,
   };
 }
