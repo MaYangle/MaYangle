@@ -11,28 +11,8 @@ const TOKEN = process.env.GITHUB_TOKEN || process.env.GH_TOKEN || '';
 const USER = 'MaYangle';
 
 const UPSTREAM = [
-  {
-    repo: '19376357/Bilingual-Multimodal-Sentiment-Analysis',
-    note: 'training and inference reliability · bilingual docs · licensing',
-  },
-  {
-    repo: 'rohitg00/ai-engineering-from-scratch',
-    note: 'lesson quizzes · README i18n audit · research links',
-  },
-];
-
-/**
- * One entry per merged pull request in the first repository above. Kept as
- * text rather than fetched, because a commit message is not a summary and the
- * sheet should not guess what a diff meant.
- */
-const LANDED = [
-  'dtype and single-sample output shapes',
-  'NaN / Inf prediction handling',
-  'missing-face feature shapes',
-  'cross-platform result loading',
-  'bilingual documentation',
-  'third-party licensing',
+  { repo: '19376357/Bilingual-Multimodal-Sentiment-Analysis' },
+  { repo: 'rohitg00/ai-engineering-from-scratch' },
 ];
 
 const MONTHS = ['JAN', 'FEB', 'MAR', 'APR', 'MAY', 'JUN', 'JUL', 'AUG', 'SEP', 'OCT', 'NOV', 'DEC'];
@@ -79,7 +59,7 @@ export async function collect() {
       continue;
     }
     const meta = await repoMeta(u.repo);
-    record.push({ repo: u.repo, note: u.note, ...counts, ...meta });
+    record.push({ repo: u.repo, ...counts, ...meta });
   }
   if (!record.length) throw new Error('no upstream pull requests found; refusing to render an empty record');
 
@@ -94,8 +74,6 @@ export async function collect() {
     revised,
 
     record,
-    landed: LANDED,
-
     tooling: ['Python', 'PyTorch', 'Hugging Face', 'WavLM', 'MacBERT', 'DINOv2', 'Whisper', 'pytest'],
 
     /**
@@ -103,6 +81,8 @@ export async function collect() {
      * medals cannot be read at build time without scraping something brittle.
      * The tier is stated as identity and the profile link makes it checkable.
      */
-    credentials: [{ label: 'Kaggle Expert', url: 'kaggle.com/yanglema' }],
+    credentials: [
+      { role: 'Data Scientist', label: 'Kaggle Expert', url: 'kaggle.com/yanglema' },
+    ],
   };
 }

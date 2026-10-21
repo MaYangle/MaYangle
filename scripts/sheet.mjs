@@ -1,19 +1,26 @@
 /**
  * Renders the profile sheet as a standalone SVG.
  *
- * There is no headline metric on this sheet, so the name leads and the record
- * carries the second weight. Counts are drawn as one tick per pull request —
- * a unit chart, which stays honest at six and would stay honest at sixty.
+ * A dark metrics panel rather than a printed plate: the projects' own star and
+ * fork counts are the largest things on the page, because that is the number a
+ * reader evaluates before deciding whether to look further. Contributions sit
+ * underneath them at a fraction of the size.
+ *
+ * Type pairing does the work a style sheet would otherwise do: sans for the
+ * display numerals, mono for anything whose width the layout depends on.
  */
 
 const PAL = {
-  paper: '#fafaf6',
-  ink: '#1a1a1a',
-  muted: '#747472',
-  rule: '#c8c8c4',
-  blue: '#3553ff',
+  bg: '#0a0c10',
+  card: '#11141a',
+  border: '#1f242c',
+  ink: '#e8ebf0',
+  muted: '#79818f',
+  gold: '#f0b429',
+  teal: '#38d9c4',
 };
 
+const SANS = "-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif";
 const MONO = "ui-monospace, SFMono-Regular, Menlo, Consolas, 'DejaVu Sans Mono', monospace";
 
 const esc = (s) =>
@@ -23,6 +30,7 @@ const esc = (s) =>
     .replace(/>/g, '&gt;')
     .replace(/"/g, '&quot;');
 
+/** monospace advance, used only where wrapping must be predictable */
 const ch = (size) => size * 0.63;
 
 export function wrapWords(text, size, maxW) {
@@ -46,12 +54,12 @@ class Svg {
   text(x, y, str, o = {}) {
     const {
       size = 10, fill = PAL.ink, weight = 400, anchor = 'start',
-      ls = 0, upper = false,
+      ls = 0, upper = false, font = MONO,
     } = o;
     const body = upper ? String(str).toUpperCase() : String(str);
     const attrs = [
       `x="${x}"`, `y="${y}"`,
-      `font-family="${MONO}"`, `font-size="${size}"`,
+      `font-family="${font}"`, `font-size="${size}"`,
       `fill="${fill}"`,
       weight !== 400 ? `font-weight="${weight}"` : '',
       anchor !== 'start' ? `text-anchor="${anchor}"` : '',
@@ -60,22 +68,17 @@ class Svg {
     return this.add(`<text ${attrs}>${esc(body)}</text>`);
   }
 
-  sectionLabel(x, y, no, title, size = 9) {
-    this.text(x, y, no, { size, weight: 700, fill: PAL.blue, ls: 1.5 });
-    this.text(x + (no.length + 3) * ch(size), y, title, { size, weight: 700, ls: 1.5, upper: true });
-  }
-
   line(x1, y1, x2, y2, o = {}) {
-    const { stroke = PAL.rule, w = 1 } = o;
+    const { stroke = PAL.border, w = 1 } = o;
     return this.add(
       `<line x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}" stroke="${stroke}" stroke-width="${w}"/>`
     );
   }
 
   rect(x, y, w, h, o = {}) {
-    const { stroke = PAL.rule, fill = 'none', sw = 1 } = o;
+    const { stroke = PAL.border, fill = PAL.card, sw = 1, rx = 10 } = o;
     return this.add(
-      `<rect x="${x}" y="${y}" width="${w}" height="${h}" fill="${fill}" ` +
+      `<rect x="${x}" y="${y}" width="${w}" height="${h}" rx="${rx}" fill="${fill}" ` +
       `stroke="${stroke}" stroke-width="${sw}"/>`
     );
   }
@@ -85,30 +88,14 @@ class Svg {
     return [
       `<svg xmlns="http://www.w3.org/2000/svg" width="${this.w}" height="${h}" `,
       `viewBox="0 0 ${this.w} ${h}" role="img">`,
-      `<rect width="${this.w}" height="${h}" fill="${PAL.paper}"/>`,
+      `<rect width="${this.w}" height="${h}" fill="${PAL.bg}"/>`,
       ...this.parts,
       `</svg>`,
     ].join('');
   }
 }
 
-/** one bar per pull request: filled when merged, outlined when not */
-function ticks(s, x, baseY, total, merged, o) {
-  const { w = 8, h = 16, gap = 7 } = o;
-  for (let i = 0; i < total; i += 1) {
-    const bx = x + i * (w + gap);
-    const filled = i < merged;
-    s.rect(bx, baseY - h, w, h, {
-      fill: filled ? PAL.blue : 'none',
-      stroke: filled ? PAL.blue : PAL.muted,
-    });
-  }
-  return x + total * (w + gap) - gap;
-}
-
-const countLabel = (r) => `${r.merged} of ${r.total} merged`;
 const nf = (n) => (n == null ? '—' : n.toLocaleString('en-US'));
-const scaleLabel = (r) => `${nf(r.stars)} stars · ${nf(r.forks)} forks`;
 
 /* ------------------------------------------------------------------ */
 /*  desktop                                                            */
@@ -116,86 +103,76 @@ const scaleLabel = (r) => `${nf(r.stars)} stars · ${nf(r.forks)} forks`;
 
 function desktop(data, s) {
   const W = 920;
-  const PAD = 44;
+  const PAD = 56;
   const RIGHT = W - PAD;
   const CONTENT = RIGHT - PAD;
 
   s.w = W;
 
-  s.line(PAD, 30, RIGHT, 30, { stroke: PAL.blue, w: 1.5 });
-  s.text(PAD, 48, 'FIG 000 / PROFILE SHEET', { size: 9, weight: 700, fill: PAL.blue, ls: 1.8 });
-  s.text(RIGHT, 48, 'github.com/MaYangle', { size: 9, fill: PAL.muted, ls: 1.4, anchor: 'end' });
-
-  s.text(PAD, 116, data.name, { size: 56, weight: 700, fill: PAL.blue, ls: 2.4 });
-  s.text(PAD, 148, data.role, { size: 19, weight: 700 });
-  s.text(PAD, 170, `${data.company} · ${data.location} · ${data.revised}`, {
-    size: 9, fill: PAL.muted, ls: 1.5, upper: true,
+  s.text(PAD, 82, data.name, { size: 44, weight: 700, font: SANS, ls: -0.5 });
+  s.text(PAD, 110, data.role, { size: 15, fill: PAL.muted, font: SANS });
+  s.text(PAD, 132, `${data.company} · ${data.location}`, {
+    size: 10, fill: PAL.muted, ls: 1.6, upper: true,
   });
-  s.line(PAD, 188, RIGHT, 188);
 
-  let y = 188;
+  let y = 176;
+  s.text(PAD, y, 'contributor to', { size: 10, fill: PAL.muted, ls: 2, upper: true });
 
-  /* ---- FIG 001: the record ---- */
-  s.sectionLabel(PAD, y + 24, 'FIG 001', 'as a contributor');
-  s.line(PAD, y + 34, RIGHT, y + 34);
+  /* ---- project cards: the numerals lead ---- */
+  const gap = 28;
+  const cardW = (CONTENT - gap) / 2;
+  const cardH = 196;
+  const cardY = y + 18;
 
-  let by = y + 60;
   data.record.forEach((r, i) => {
-    if (i) by += 26;
-    s.text(PAD, by, r.repo, { size: 14, weight: 700 });
-    s.text(RIGHT, by, scaleLabel(r), { size: 9, fill: PAL.muted, ls: 1.4, anchor: 'end', upper: true });
-    by += 19;
-    for (const line of wrapWords(r.note, 11, CONTENT)) {
-      s.text(PAD, by, line, { size: 11, fill: PAL.muted });
-      by += 16;
-    }
-    by += 10;
-    const baseY = by + 16;
-    ticks(s, PAD, baseY, r.total, r.merged, {});
-    s.text(RIGHT, baseY - 3, countLabel(r), {
-      size: 9, fill: PAL.muted, ls: 1.4, anchor: 'end', upper: true,
+    const x = PAD + i * (cardW + gap);
+    s.rect(x, cardY, cardW, cardH);
+
+    const inner = x + 22;
+    const innerRight = x + cardW - 22;
+
+    const nameLines = wrapWords(r.repo, 11.5, cardW - 44);
+    nameLines.slice(0, 2).forEach((line, j) => {
+      s.text(inner, cardY + 30 + j * 17, line, { size: 11.5, weight: 700, fill: PAL.ink });
     });
-    by = baseY + 8;
+
+    // stars: the largest element on the sheet
+    s.text(inner, cardY + 108, nf(r.stars), { size: 48, weight: 700, font: SANS, fill: PAL.gold, ls: -1 });
+    s.text(inner, cardY + 126, 'stars', { size: 9, fill: PAL.muted, ls: 1.6, upper: true });
+
+    // forks: same line, one step down in weight
+    s.text(innerRight, cardY + 108, nf(r.forks), {
+      size: 30, weight: 700, font: SANS, fill: PAL.teal, anchor: 'end', ls: -0.5,
+    });
+    s.text(innerRight, cardY + 126, 'forks', { size: 9, fill: PAL.muted, ls: 1.6, anchor: 'end', upper: true });
+
+    s.line(inner, cardY + 146, innerRight, cardY + 146, { stroke: PAL.border });
+    s.text(inner, cardY + 172, `${r.merged} of ${r.total} pull requests merged`, {
+      size: 10, fill: PAL.muted,
+    });
   });
 
-  y = by + 20;
+  y = cardY + cardH;
 
-  /* ---- FIG 002: what the merges contained ---- */
-  s.sectionLabel(PAD, y, 'FIG 002', 'what landed');
-  s.line(PAD, y + 10, RIGHT, y + 10);
+  /* ---- Kaggle: the role leads, the platform qualifies it ---- */
+  y += 44;
+  s.text(PAD, y, 'elsewhere', { size: 10, fill: PAL.muted, ls: 2, upper: true });
 
-  const colW = CONTENT / 2 + 20;
-  data.landed.forEach((item, i) => {
-    const col = i % 2;
-    const row = Math.floor(i / 2);
-    const x = PAD + col * colW;
-    const iy = y + 40 + row * 26;
-    s.line(x, iy - 4, x + 12, iy - 4, { stroke: PAL.blue, w: 2 });
-    s.text(x + 20, iy, item, { size: 11, fill: PAL.ink });
-  });
+  const kY = y + 18;
+  const kH = 108;
+  s.rect(PAD, kY, CONTENT, kH);
 
-  y += 40 + Math.ceil(data.landed.length / 2) * 26;
-
-  /* ---- FIG 003: elsewhere ---- */
-  y += 30;
-  s.sectionLabel(PAD, y, 'FIG 003', 'elsewhere');
-  s.line(PAD, y + 10, RIGHT, y + 10);
-
-  let cy = y + 40;
   for (const c of data.credentials) {
-    s.text(PAD, cy, c.label, { size: 14, weight: 700 });
-    s.text(RIGHT, cy, c.url, { size: 11, fill: PAL.muted, anchor: 'end' });
-    cy += 22;
+    s.text(PAD + 24, kY + 52, c.role, { size: 32, weight: 700, font: SANS, ls: -0.5 });
+    s.text(PAD + 24, kY + 76, c.label, { size: 10, fill: PAL.gold, ls: 1.6, upper: true });
+    s.text(PAD + CONTENT - 24, kY + 52, c.url, { size: 12, fill: PAL.muted, anchor: 'end' });
   }
-  y = cy + 14;
 
-  /* ---- footer ---- */
-  s.line(PAD, y, RIGHT, y);
-  s.text(PAD, y + 18, 'STACK', { size: 8.5, weight: 700, fill: PAL.blue, ls: 1.5 });
-  s.text(PAD + 46, y + 18, data.tooling.join(' · '), { size: 8.5, fill: PAL.muted, ls: 0.5 });
-  s.text(RIGHT, y + 18, data.revised, { size: 8.5, fill: PAL.muted, ls: 1.4, anchor: 'end', upper: true });
+  y = kY + kH + 44;
+  s.text(PAD, y, data.tooling.join(' · '), { size: 10, fill: PAL.muted, ls: 0.4 });
+  s.text(RIGHT, y, data.revised, { size: 10, fill: PAL.muted, ls: 1.4, anchor: 'end', upper: true });
 
-  s.h = y + 18 + 32;
+  s.h = y + 40;
 }
 
 /* ------------------------------------------------------------------ */
@@ -210,93 +187,70 @@ function mobile(data, s) {
 
   s.w = W;
 
-  s.line(PAD, 20, RIGHT, 20, { stroke: PAL.blue, w: 1.2 });
-  s.text(PAD, 34, 'FIG 000 / PROFILE', { size: 7, weight: 700, fill: PAL.blue, ls: 1.2 });
-  s.text(RIGHT, 34, 'MaYangle', { size: 7, fill: PAL.muted, ls: 1, anchor: 'end' });
-
-  s.text(PAD, 74, data.name, { size: 30, weight: 700, fill: PAL.blue, ls: 1.6 });
-  let y = 94;
-  for (const line of wrapWords(data.role, 12, CONTENT)) {
-    s.text(PAD, y, line, { size: 12, weight: 700 });
-    y += 16;
+  s.text(PAD, 52, data.name, { size: 28, weight: 700, font: SANS, ls: -0.4 });
+  let y = 74;
+  for (const line of wrapWords(data.role, 10, CONTENT)) {
+    s.text(PAD, y, line, { size: 10, fill: PAL.muted, font: SANS });
+    y += 14;
   }
   y += 2;
-  for (const line of wrapWords(`${data.company} · ${data.location} · ${data.revised}`, 7.5, CONTENT)) {
-    s.text(PAD, y, line, { size: 7.5, fill: PAL.muted, ls: 1.1, upper: true });
-    y += 11;
-  }
-  y += 8;
-  s.line(PAD, y, RIGHT, y);
+  s.text(PAD, y, `${data.company} · ${data.location}`, {
+    size: 7.5, fill: PAL.muted, ls: 1.2, upper: true,
+  });
 
-  /* FIG 001 */
-  y += 20;
-  s.sectionLabel(PAD, y, 'FIG 001', 'as a contributor', 8);
-  s.line(PAD, y + 9, RIGHT, y + 9);
+  y += 26;
+  s.text(PAD, y, 'contributor to', { size: 7.5, fill: PAL.muted, ls: 1.4, upper: true });
 
-  let by = y + 32;
-  data.record.forEach((r, i) => {
-    if (i) by += 20;
-    for (const line of wrapWords(r.repo, 9.5, CONTENT)) {
-      s.text(PAD, by, line, { size: 9.5, weight: 700 });
-      by += 13;
-    }
-    by += 2;
-    for (const line of wrapWords(r.note, 8.5, CONTENT)) {
-      s.text(PAD, by, line, { size: 8.5, fill: PAL.muted });
-      by += 12;
-    }
-    by += 7;
-    const baseY = by + 13;
-    ticks(s, PAD, baseY, r.total, r.merged, { w: 7, h: 13, gap: 6 });
-    s.text(PAD, baseY + 15, `${scaleLabel(r)} · ${countLabel(r)}`, {
-      size: 7.5, fill: PAL.muted, ls: 1.1, upper: true,
+  y += 12;
+  data.record.forEach((r) => {
+    const cardH = 150;
+    s.rect(PAD, y, CONTENT, cardH);
+
+    const inner = PAD + 18;
+    const innerRight = RIGHT - 18;
+
+    const nameLines = wrapWords(r.repo, 10, CONTENT - 36);
+    nameLines.slice(0, 2).forEach((line, j) => {
+      s.text(inner, y + 26 + j * 14, line, { size: 10, weight: 700 });
     });
-    by = baseY + 15;
+
+    s.text(inner, y + 84, nf(r.stars), { size: 36, weight: 700, font: SANS, fill: PAL.gold, ls: -0.8 });
+    s.text(inner, y + 99, 'stars', { size: 7, fill: PAL.muted, ls: 1.2, upper: true });
+
+    s.text(innerRight, y + 84, nf(r.forks), {
+      size: 24, weight: 700, font: SANS, fill: PAL.teal, anchor: 'end', ls: -0.4,
+    });
+    s.text(innerRight, y + 99, 'forks', { size: 7, fill: PAL.muted, ls: 1.2, anchor: 'end', upper: true });
+
+    s.line(inner, y + 114, innerRight, y + 114, { stroke: PAL.border });
+    s.text(inner, y + 134, `${r.merged} of ${r.total} PRs merged`, { size: 8.5, fill: PAL.muted });
+
+    y += cardH + 12;
   });
 
-  y = by + 4;
+  y += 10;
+  s.text(PAD, y, 'elsewhere', { size: 7.5, fill: PAL.muted, ls: 1.4, upper: true });
 
-  /* FIG 002 */
-  y += 22;
-  s.sectionLabel(PAD, y, 'FIG 002', 'what landed', 8);
-  s.line(PAD, y + 9, RIGHT, y + 9);
-
-  data.landed.forEach((item, i) => {
-    const iy = y + 30 + i * 18;
-    s.line(PAD, iy - 3, PAD + 10, iy - 3, { stroke: PAL.blue, w: 1.8 });
-    s.text(PAD + 17, iy, item, { size: 8.5, fill: PAL.ink });
-  });
-
-  y += 30 + data.landed.length * 18;
-
-  /* FIG 003 */
-  y += 20;
-  s.sectionLabel(PAD, y, 'FIG 003', 'elsewhere', 8);
-  s.line(PAD, y + 9, RIGHT, y + 9);
-  let cy = y + 30;
+  y += 12;
   for (const c of data.credentials) {
-    s.text(PAD, cy, c.label, { size: 10, weight: 700 });
-    s.text(RIGHT, cy, c.url, { size: 8, fill: PAL.muted, anchor: 'end' });
-    cy += 16;
+    const kH = 92;
+    s.rect(PAD, y, CONTENT, kH);
+    s.text(PAD + 18, y + 40, c.role, { size: 22, weight: 700, font: SANS, ls: -0.4 });
+    s.text(PAD + 18, y + 58, c.label, { size: 7.5, fill: PAL.gold, ls: 1.2, upper: true });
+    s.text(PAD + 18, y + 74, c.url, { size: 8.5, fill: PAL.muted });
+    y += kH + 12;
   }
-  y = cy + 10;
 
-  /* footer */
-  s.line(PAD, y, RIGHT, y);
-  s.text(PAD, y + 15, 'STACK', { size: 7.5, weight: 700, fill: PAL.blue, ls: 1.2 });
+  y += 10;
   const half = Math.ceil(data.tooling.length / 2);
-  const stackLines = [
-    data.tooling.slice(0, half).join(' · '),
-    data.tooling.slice(half).join(' · '),
-  ].filter(Boolean);
-  let ty = y + 27;
-  for (const line of stackLines) {
-    s.text(PAD, ty, line, { size: 7.5, fill: PAL.muted });
-    ty += 11;
+  for (const line of [data.tooling.slice(0, half), data.tooling.slice(half)]) {
+    s.text(PAD, y, line.join(' · '), { size: 7.5, fill: PAL.muted });
+    y += 12;
   }
-  s.text(PAD, ty + 6, data.revised, { size: 7.5, fill: PAL.muted, ls: 1.2, upper: true });
+  y += 2;
+  s.text(PAD, y, data.revised, { size: 7.5, fill: PAL.muted, ls: 1.2, upper: true });
 
-  s.h = ty + 6 + 18;
+  s.h = y + 26;
 }
 
 export function renderSheet(data) {
