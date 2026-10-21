@@ -13,6 +13,7 @@ const PAL = {
   muted: '#747472',
   rule: '#c8c8c4',
   blue: '#3553ff',
+  blueFill: '#c5cdfb',
 };
 
 const MONO = "ui-monospace, SFMono-Regular, Menlo, Consolas, 'DejaVu Sans Mono', monospace";
@@ -94,19 +95,26 @@ class Svg {
 }
 
 const nf = (n) => (n == null ? '—' : n.toLocaleString('en-US'));
-const countLabel = (r) => `${r.merged} of ${r.total} merged`;
 
-/** one bar per pull request: filled when merged, outlined when not. right-aligned */
-function ticks(s, rightX, baseY, total, merged, o) {
+/**
+ * one bar per pull request. solid = merged through the pull request,
+ * tinted = landed in a maintainer's follow-up, hollow = still open.
+ */
+function ticks(s, rightX, baseY, r, o = {}) {
   const { w = 8, h = 16, gap = 7 } = o;
-  const startX = rightX - (total * (w + gap) - gap);
-  for (let i = 0; i < total; i += 1) {
-    const filled = i < merged;
-    s.rect(startX + i * (w + gap), baseY - h, w, h, {
-      fill: filled ? PAL.blue : 'none',
-      stroke: filled ? PAL.blue : PAL.muted,
-    });
-  }
+  const unlanded = Math.max(0, r.total - r.merged - r.absorbed);
+  const seq = [
+    ...Array(r.merged).fill('merged'),
+    ...Array(r.absorbed).fill('absorbed'),
+    ...Array(unlanded).fill('open'),
+  ];
+  const startX = rightX - (seq.length * (w + gap) - gap);
+  seq.forEach((kind, i) => {
+    const x = startX + i * (w + gap);
+    if (kind === 'merged') s.rect(x, baseY - h, w, h, { fill: PAL.blue, stroke: PAL.blue });
+    else if (kind === 'absorbed') s.rect(x, baseY - h, w, h, { fill: PAL.blueFill, stroke: PAL.blue });
+    else s.rect(x, baseY - h, w, h, { fill: 'none', stroke: PAL.muted });
+  });
 }
 
 /* ------------------------------------------------------------------ */
@@ -140,27 +148,36 @@ function desktop(data, s) {
 
   let by = y + 62;
   data.record.forEach((r, i) => {
-    if (i) by += 40;
+    const lead = i === 0;            // the largest project carries the section
+    if (i) by += 46;
 
-    s.text(PAD, by, r.repo, { size: 14, weight: 700 });
-    by += 19;
-    for (const line of wrapWords(r.note, 11, CONTENT)) {
-      s.text(PAD, by, line, { size: 11, fill: PAL.muted });
-      by += 16;
+    const repoSize = lead ? 14 : 12.5;
+    const noteSize = lead ? 11 : 10;
+    const numSize = lead ? 40 : 20;
+    const forkX = PAD + (lead ? 200 : 110);
+    const labSize = lead ? 8.5 : 7.5;
+    const labDrop = lead ? 15 : 11;
+    const bar = lead ? { w: 8, h: 16, gap: 7 } : { w: 7, h: 11, gap: 6 };
+
+    s.text(PAD, by, r.repo, { size: repoSize, weight: 700 });
+    by += lead ? 19 : 17;
+    for (const line of wrapWords(r.note, noteSize, CONTENT)) {
+      s.text(PAD, by, line, { size: noteSize, fill: PAL.muted });
+      by += lead ? 16 : 15;
     }
 
-    const numBase = by + 52;
-    s.text(PAD, numBase, nf(r.stars), { size: 40, weight: 700, fill: PAL.blue });
-    s.text(PAD + 200, numBase, nf(r.forks), { size: 40, weight: 700 });
-    s.text(PAD, numBase + 15, 'stars', { size: 8.5, fill: PAL.muted, ls: 1.5, upper: true });
-    s.text(PAD + 200, numBase + 15, 'forks', { size: 8.5, fill: PAL.muted, ls: 1.5, upper: true });
+    const numBase = by + (lead ? 52 : 40);
+    s.text(PAD, numBase, nf(r.stars), { size: numSize, weight: 700, fill: PAL.blue });
+    s.text(forkX, numBase, nf(r.forks), { size: numSize, weight: 700 });
+    s.text(PAD, numBase + labDrop, 'stars', { size: labSize, fill: PAL.muted, ls: 1.5, upper: true });
+    s.text(forkX, numBase + labDrop, 'forks', { size: labSize, fill: PAL.muted, ls: 1.5, upper: true });
 
-    ticks(s, RIGHT, numBase, r.total, r.merged, {});
-    s.text(RIGHT, numBase + 15, countLabel(r), {
-      size: 9, fill: PAL.muted, ls: 1.4, anchor: 'end', upper: true,
+    ticks(s, RIGHT, numBase, r, bar);
+    s.text(RIGHT, numBase + labDrop, r.label, {
+      size: lead ? 9 : 8.5, fill: PAL.muted, ls: 1.4, anchor: 'end', upper: true,
     });
 
-    by = numBase + 15;
+    by = numBase + labDrop;
   });
 
   y = by + 40;
@@ -224,30 +241,39 @@ function mobile(data, s) {
 
   let by = y + 32;
   data.record.forEach((r, i) => {
-    if (i) by += 26;
+    const lead = i === 0;
+    if (i) by += 30;
 
-    for (const line of wrapWords(r.repo, 9.5, CONTENT)) {
-      s.text(PAD, by, line, { size: 9.5, weight: 700 });
-      by += 13;
+    const repoSize = lead ? 9.5 : 9;
+    const noteSize = lead ? 8.5 : 8;
+    const numSize = lead ? 24 : 16;
+    const forkX = PAD + (lead ? 112 : 76);
+    const labDrop = lead ? 11 : 9;
+    const bar = lead ? { w: 7, h: 13, gap: 6 } : { w: 6, h: 9, gap: 5 };
+
+    for (const line of wrapWords(r.repo, repoSize, CONTENT)) {
+      s.text(PAD, by, line, { size: repoSize, weight: 700 });
+      by += repoSize + 3.5;
     }
     by += 2;
-    for (const line of wrapWords(r.note, 8.5, CONTENT)) {
-      s.text(PAD, by, line, { size: 8.5, fill: PAL.muted });
-      by += 12;
+    for (const line of wrapWords(r.note, noteSize, CONTENT)) {
+      s.text(PAD, by, line, { size: noteSize, fill: PAL.muted });
+      by += noteSize + 3.5;
     }
 
-    const numBase = by + 30;
-    s.text(PAD, numBase, nf(r.stars), { size: 24, weight: 700, fill: PAL.blue });
-    s.text(PAD + 112, numBase, nf(r.forks), { size: 24, weight: 700 });
-    s.text(PAD, numBase + 11, 'stars', { size: 7, fill: PAL.muted, ls: 1.2, upper: true });
-    s.text(PAD + 112, numBase + 11, 'forks', { size: 7, fill: PAL.muted, ls: 1.2, upper: true });
+    const numBase = by + (lead ? 30 : 26);
+    s.text(PAD, numBase, nf(r.stars), { size: numSize, weight: 700, fill: PAL.blue });
+    s.text(forkX, numBase, nf(r.forks), { size: numSize, weight: 700 });
+    s.text(PAD, numBase + labDrop, 'stars', { size: 7, fill: PAL.muted, ls: 1.2, upper: true });
+    s.text(forkX, numBase + labDrop, 'forks', { size: 7, fill: PAL.muted, ls: 1.2, upper: true });
 
-    ticks(s, RIGHT, numBase, r.total, r.merged, { w: 7, h: 13, gap: 6 });
-    s.text(RIGHT, numBase + 11, countLabel(r), {
-      size: 7.5, fill: PAL.muted, ls: 1.1, anchor: 'end', upper: true,
+    ticks(s, RIGHT, numBase, r, bar);
+    // own line on mobile: the column is too narrow to sit beside the labels
+    s.text(RIGHT, numBase + labDrop + 12, r.label, {
+      size: 7, fill: PAL.muted, ls: 1.1, anchor: 'end', upper: true,
     });
 
-    by = numBase + 11;
+    by = numBase + labDrop + 12;
   });
 
   y = by + 24;

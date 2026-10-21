@@ -1,8 +1,11 @@
 /**
  * Collects everything the sheet prints.
  *
- * One source: GitHub's search API, for the pull requests this account has
- * landed in repositories it does not own, plus each project's own scale.
+ * GitHub's `is:merged` only counts pull requests closed by the merge button.
+ * When a maintainer rebuilds a contribution in their own pull request and
+ * credits it, the contributor's PR reads as "closed, not merged" while the
+ * work sits on the default branch. That distinction is recorded explicitly
+ * below, because it cannot be derived without reading prose.
  */
 
 const API = 'https://api.github.com';
@@ -11,12 +14,17 @@ const USER = 'MaYangle';
 
 const UPSTREAM = [
   {
-    repo: '19376357/Bilingual-Multimodal-Sentiment-Analysis',
-    note: 'training and inference reliability · bilingual docs · licensing',
+    repo: 'rohitg00/ai-engineering-from-scratch',
+    note: '12-locale README translations · i18n audit · lesson quizzes · research links',
+    // #531 was closed and rebuilt by the maintainer as #558, which credits it:
+    // "builds on Yangle Ma's original complete translations in #531".
+    absorbed: 1,
+    absorbedIn: 558,
   },
   {
-    repo: 'rohitg00/ai-engineering-from-scratch',
-    note: 'lesson quizzes · README i18n audit · research links',
+    repo: '19376357/Bilingual-Multimodal-Sentiment-Analysis',
+    note: 'training and inference reliability · bilingual docs · licensing',
+    absorbed: 0,
   },
 ];
 
@@ -50,7 +58,20 @@ async function prCounts(repo) {
   const total = await gh(q(''));
   if (total === null) return null;
   const merged = await gh(q('+is:merged'));
-  return { total: total.total_count, merged: merged ? merged.total_count : 0 };
+  const open = await gh(q('+is:open'));
+  return {
+    total: total.total_count,
+    merged: merged ? merged.total_count : 0,
+    open: open ? open.total_count : 0,
+  };
+}
+
+/** the sentence that sits under the ticks */
+function outcomeLabel(r) {
+  if (r.absorbed > 0 && r.absorbedIn) {
+    return `${r.absorbed} landed via #${r.absorbedIn} · ${r.open} open`;
+  }
+  return `${r.merged} of ${r.total} merged`;
 }
 
 export async function collect() {
@@ -64,9 +85,20 @@ export async function collect() {
       continue;
     }
     const meta = await repoMeta(u.repo);
-    record.push({ repo: u.repo, note: u.note, ...counts, ...meta });
+    record.push({
+      repo: u.repo,
+      note: u.note,
+      absorbed: u.absorbed || 0,
+      absorbedIn: u.absorbedIn || null,
+      ...counts,
+      ...meta,
+    });
   }
   if (!record.length) throw new Error('no upstream pull requests found; refusing to render an empty record');
+
+  // the largest project leads; the rest follow in descending order
+  record.sort((a, b) => (b.stars ?? -1) - (a.stars ?? -1));
+  for (const r of record) r.label = outcomeLabel(r);
 
   const now = new Date();
   const revised = `${now.getUTCDate()} ${MONTHS[now.getUTCMonth()]} ${now.getUTCFullYear()}`;
