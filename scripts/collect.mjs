@@ -51,6 +51,13 @@ async function gh(path) {
   return res.json();
 }
 
+/** stars and forks of the project itself, not of the contribution */
+async function repoMeta(repo) {
+  const r = await gh(`/repos/${repo}`);
+  if (!r) return { stars: null, forks: null };
+  return { stars: r.stargazers_count, forks: r.forks_count };
+}
+
 /** returns null when the repository is gone, so one deletion cannot break the sheet */
 async function prCounts(repo) {
   const q = (extra) =>
@@ -71,7 +78,8 @@ export async function collect() {
       console.warn(`skip ${u.repo}: no pull requests or repository unavailable`);
       continue;
     }
-    record.push({ repo: u.repo, note: u.note, ...counts });
+    const meta = await repoMeta(u.repo);
+    record.push({ repo: u.repo, note: u.note, ...counts, ...meta });
   }
   if (!record.length) throw new Error('no upstream pull requests found; refusing to render an empty record');
 
@@ -89,5 +97,12 @@ export async function collect() {
     landed: LANDED,
 
     tooling: ['Python', 'PyTorch', 'Hugging Face', 'WavLM', 'MacBERT', 'DINOv2', 'Whisper', 'pytest'],
+
+    /**
+     * Kaggle serves a JavaScript shell to non-browser clients, so its rank and
+     * medals cannot be read at build time without scraping something brittle.
+     * The tier is stated as identity and the profile link makes it checkable.
+     */
+    credentials: [{ label: 'Kaggle Expert', url: 'kaggle.com/yanglema' }],
   };
 }

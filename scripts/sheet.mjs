@@ -107,6 +107,8 @@ function ticks(s, x, baseY, total, merged, o) {
 }
 
 const countLabel = (r) => `${r.merged} of ${r.total} merged`;
+const nf = (n) => (n == null ? '—' : n.toLocaleString('en-US'));
+const scaleLabel = (r) => `${nf(r.stars)} stars · ${nf(r.forks)} forks`;
 
 /* ------------------------------------------------------------------ */
 /*  desktop                                                            */
@@ -134,13 +136,14 @@ function desktop(data, s) {
   let y = 188;
 
   /* ---- FIG 001: the record ---- */
-  s.sectionLabel(PAD, y + 24, 'FIG 001', 'upstream record');
+  s.sectionLabel(PAD, y + 24, 'FIG 001', 'as a contributor');
   s.line(PAD, y + 34, RIGHT, y + 34);
 
   let by = y + 60;
   data.record.forEach((r, i) => {
     if (i) by += 26;
     s.text(PAD, by, r.repo, { size: 14, weight: 700 });
+    s.text(RIGHT, by, scaleLabel(r), { size: 9, fill: PAL.muted, ls: 1.4, anchor: 'end', upper: true });
     by += 19;
     for (const line of wrapWords(r.note, 11, CONTENT)) {
       s.text(PAD, by, line, { size: 11, fill: PAL.muted });
@@ -172,6 +175,19 @@ function desktop(data, s) {
   });
 
   y += 40 + Math.ceil(data.landed.length / 2) * 26;
+
+  /* ---- FIG 003: elsewhere ---- */
+  y += 30;
+  s.sectionLabel(PAD, y, 'FIG 003', 'elsewhere');
+  s.line(PAD, y + 10, RIGHT, y + 10);
+
+  let cy = y + 40;
+  for (const c of data.credentials) {
+    s.text(PAD, cy, c.label, { size: 14, weight: 700 });
+    s.text(RIGHT, cy, c.url, { size: 11, fill: PAL.muted, anchor: 'end' });
+    cy += 22;
+  }
+  y = cy + 14;
 
   /* ---- footer ---- */
   s.line(PAD, y, RIGHT, y);
@@ -214,7 +230,7 @@ function mobile(data, s) {
 
   /* FIG 001 */
   y += 20;
-  s.sectionLabel(PAD, y, 'FIG 001', 'upstream record', 8);
+  s.sectionLabel(PAD, y, 'FIG 001', 'as a contributor', 8);
   s.line(PAD, y + 9, RIGHT, y + 9);
 
   let by = y + 32;
@@ -232,7 +248,9 @@ function mobile(data, s) {
     by += 7;
     const baseY = by + 13;
     ticks(s, PAD, baseY, r.total, r.merged, { w: 7, h: 13, gap: 6 });
-    s.text(PAD, baseY + 15, countLabel(r), { size: 7.5, fill: PAL.muted, ls: 1.1, upper: true });
+    s.text(PAD, baseY + 15, `${scaleLabel(r)} · ${countLabel(r)}`, {
+      size: 7.5, fill: PAL.muted, ls: 1.1, upper: true,
+    });
     by = baseY + 15;
   });
 
@@ -250,6 +268,18 @@ function mobile(data, s) {
   });
 
   y += 30 + data.landed.length * 18;
+
+  /* FIG 003 */
+  y += 20;
+  s.sectionLabel(PAD, y, 'FIG 003', 'elsewhere', 8);
+  s.line(PAD, y + 9, RIGHT, y + 9);
+  let cy = y + 30;
+  for (const c of data.credentials) {
+    s.text(PAD, cy, c.label, { size: 10, weight: 700 });
+    s.text(RIGHT, cy, c.url, { size: 8, fill: PAL.muted, anchor: 'end' });
+    cy += 16;
+  }
+  y = cy + 10;
 
   /* footer */
   s.line(PAD, y, RIGHT, y);
