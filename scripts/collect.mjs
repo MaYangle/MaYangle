@@ -2,8 +2,7 @@
  * Collects everything the sheet prints.
  *
  * One source: GitHub's search API, for the pull requests this account has
- * landed in repositories it does not own. Nothing else on the sheet is a
- * measurement, so nothing else is fetched.
+ * landed in repositories it does not own, plus each project's own scale.
  */
 
 const API = 'https://api.github.com';
@@ -11,8 +10,14 @@ const TOKEN = process.env.GITHUB_TOKEN || process.env.GH_TOKEN || '';
 const USER = 'MaYangle';
 
 const UPSTREAM = [
-  { repo: '19376357/Bilingual-Multimodal-Sentiment-Analysis' },
-  { repo: 'rohitg00/ai-engineering-from-scratch' },
+  {
+    repo: '19376357/Bilingual-Multimodal-Sentiment-Analysis',
+    note: 'training and inference reliability · bilingual docs · licensing',
+  },
+  {
+    repo: 'rohitg00/ai-engineering-from-scratch',
+    note: 'lesson quizzes · README i18n audit · research links',
+  },
 ];
 
 const MONTHS = ['JAN', 'FEB', 'MAR', 'APR', 'MAY', 'JUN', 'JUL', 'AUG', 'SEP', 'OCT', 'NOV', 'DEC'];
@@ -59,7 +64,7 @@ export async function collect() {
       continue;
     }
     const meta = await repoMeta(u.repo);
-    record.push({ repo: u.repo, ...counts, ...meta });
+    record.push({ repo: u.repo, note: u.note, ...counts, ...meta });
   }
   if (!record.length) throw new Error('no upstream pull requests found; refusing to render an empty record');
 
@@ -79,10 +84,10 @@ export async function collect() {
     /**
      * Kaggle serves a JavaScript shell to non-browser clients, so its rank and
      * medals cannot be read at build time without scraping something brittle.
-     * The tier is stated as identity and the profile link makes it checkable.
+     * The identity is stated and the profile link makes it checkable.
      */
     credentials: [
-      { role: 'Data Scientist', label: 'Kaggle Expert', url: 'kaggle.com/yanglema' },
+      { role: 'Data Scientist', tier: 'Kaggle Expert', url: 'kaggle.com/yanglema' },
     ],
   };
 }
